@@ -5,6 +5,7 @@ public class Gun : MonoBehaviour
     public GameObject bulletPrefab;
     public GameObject firePoint;
     public float bulletForce = 300f;
+    public int BulletDamage = 10;
 
     public void Shoot(Vector3 shootDirection)
     {
