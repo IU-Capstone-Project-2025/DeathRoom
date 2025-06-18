@@ -1,6 +1,8 @@
 ﻿using DeathRoom.GameServer;
+using DeathRoom.Data;
 
-var server = new GameServer();
+var dbContext = new GameDbContext();
+var server = new GameServer(dbContext);
 server.Start();
 
 Console.CancelKeyPress += (sender, e) =>

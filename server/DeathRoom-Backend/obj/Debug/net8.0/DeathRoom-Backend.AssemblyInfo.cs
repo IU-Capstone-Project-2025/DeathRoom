@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DeathRoom-Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9692ef546aa5ef062154229398efb8077fe1d39e")]
 [assembly: System.Reflection.AssemblyProductAttribute("DeathRoom-Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DeathRoom-Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+iOtWSuxnY0=",
+  "dgSpecHash": "aOIGMnJq684=",
   "success": true,
-  "projectFilePath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Data\\DeathRoom.Data.csproj",
+  "projectFilePath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sevan\\.nuget\\packages\\microsoft.entityframeworkcore\\9.0.1\\microsoft.entityframeworkcore.9.0.1.nupkg.sha512",
     "C:\\Users\\sevan\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\9.0.1\\microsoft.entityframeworkcore.abstractions.9.0.1.nupkg.sha512",
