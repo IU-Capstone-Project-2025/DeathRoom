@@ -272,7 +272,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 4513182584576590591, guid: 04d0eb40a4c837845b9387fecbe4777e, type: 3}
-  spawnPoint: {fileID: 187052270}
+  playerSpawnPoint: {fileID: 187052270}
+  botSpawnPoint: {fileID: 487392528}
+  botPrefab: {fileID: 3475453067992608140, guid: e9cd45ece396903498cad2abce7d0377, type: 3}
 --- !u!1 &173704017
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,7 +391,7 @@ GameObject:
   m_Component:
   - component: {fileID: 187052271}
   m_Layer: 0
-  m_Name: SpawnPoint
+  m_Name: PlayerSpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -405,6 +407,37 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &487392528
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 487392529}
+  m_Layer: 0
+  m_Name: BotSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &487392529
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 487392528}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 11.47, y: 5, z: 22.19}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -573,5 +606,6 @@ SceneRoots:
   - {fileID: 173704021}
   - {fileID: 141448507}
   - {fileID: 187052271}
+  - {fileID: 487392529}
   - {fileID: 145539016}
   - {fileID: 1228880949}

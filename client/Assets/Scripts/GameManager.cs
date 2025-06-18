@@ -5,10 +5,13 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public GameObject playerPrefab;
-    public GameObject spawnPoint;
+    public GameObject playerSpawnPoint;
+    public GameObject botSpawnPoint;
+    public GameObject botPrefab;
 
     public void Start() 
     {
-        Instantiate(playerPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation);
+        Instantiate(playerPrefab, playerSpawnPoint.transform.position, playerSpawnPoint.transform.rotation);
+        Instantiate(botPrefab, botSpawnPoint.transform.position, botSpawnPoint.transform.rotation);
     }
 }
