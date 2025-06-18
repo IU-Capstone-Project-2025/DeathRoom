@@ -15,6 +15,9 @@ namespace DeathRoom.GameServer
         private readonly ConcurrentDictionary<NetPeer, PlayerState> _players = new();
         private readonly GameDbContext _dbContext;
 
+        // Интервал бродкаста состояния мира (мс)
+        private const int BroadcastIntervalMs = 15;
+
         public GameServer(GameDbContext dbContext)
         {
             _netManager = new NetManager(this);
@@ -23,8 +26,18 @@ namespace DeathRoom.GameServer
 
         public void Start()
         {
-            _netManager.Start(9050);
-            Console.WriteLine("Server started on port 9050");
+            var portEnv = Environment.GetEnvironmentVariable("DEATHROOM_SERVER_PORT");
+            var port = int.TryParse(portEnv, out var parsedPort) ? parsedPort : 9050;
+
+            if (_netManager.Start(port))
+            {
+                Console.WriteLine($"Server started on port {port}");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to start server on port {port}");
+                return;
+            }
             
             var gameLoop = new Task(GameLoop, _cancellationTokenSource.Token);
             gameLoop.Start();
@@ -44,7 +57,7 @@ namespace DeathRoom.GameServer
                 var data = PacketProcessor.Pack(worldStatePacket);
                 _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
-                await Task.Delay(15);
+                await Task.Delay(BroadcastIntervalMs);
             }
         }
 
