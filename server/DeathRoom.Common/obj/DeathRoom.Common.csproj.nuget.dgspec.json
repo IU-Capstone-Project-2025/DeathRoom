@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Common\\DeathRoom.Common.csproj": {}
+    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Common\\DeathRoom.Common.csproj": {
+    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Common\\DeathRoom.Common.csproj",
+        "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj",
         "projectName": "DeathRoom.Common",
-        "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Common\\DeathRoom.Common.csproj",
+        "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj",
         "packagesPath": "C:\\Users\\sevan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Common\\obj\\",
+        "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -48,6 +48,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "MessagePack": {
+              "target": "Package",
+              "version": "[2.5.140, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

@@ -747,11 +747,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Data\\DeathRoom.Data.csproj",
+      "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
       "projectName": "DeathRoom.Data",
-      "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Data\\DeathRoom.Data.csproj",
+      "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
       "packagesPath": "C:\\Users\\sevan\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom-Backend\\DeathRoom.Data\\obj\\",
+      "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
