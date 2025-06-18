@@ -15,13 +15,25 @@ namespace DeathRoom.GameServer
         private readonly ConcurrentDictionary<NetPeer, PlayerState> _players = new();
         private readonly GameDbContext _dbContext;
 
-        // Интервал бродкаста состояния мира (мс)
-        private const int BroadcastIntervalMs = 15;
+        // Интервалы (мс), задаются переменными окружения DEATHROOM_BROADCAST_INTERVAL_MS и DEATHROOM_IDLE_INTERVAL_MS
+        private readonly int _broadcastIntervalMs = 15;
+        private readonly int _idleIntervalMs = 100; // период опроса, когда на сервере нет игроков
 
         public GameServer(GameDbContext dbContext)
         {
             _netManager = new NetManager(this);
             _dbContext = dbContext;
+
+            // читаем интервалы из переменных окружения (если заданы)
+            if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_BROADCAST_INTERVAL_MS"), out var bInt) && bInt > 0)
+            {
+                _broadcastIntervalMs = bInt;
+            }
+
+            if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_IDLE_INTERVAL_MS"), out var iInt) && iInt > 0)
+            {
+                _idleIntervalMs = iInt;
+            }
         }
 
         public void Start()
@@ -49,21 +61,40 @@ namespace DeathRoom.GameServer
             {
                 _netManager.PollEvents();
                 
-                // бродкаст пакетов
-                var worldStatePacket = new WorldStatePacket
+                if (!_players.IsEmpty)
                 {
-                    PlayerStates = _players.Values.ToList()
-                };
-                var data = PacketProcessor.Pack(worldStatePacket);
-                _netManager.SendToAll(data, DeliveryMethod.Unreliable);
+                    // бродкаст пакетов только при наличии игроков
+                    var worldStatePacket = new WorldStatePacket
+                    {
+                        PlayerStates = _players.Values.ToList()
+                    };
+                    var data = PacketProcessor.Pack(worldStatePacket);
+                    _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
-                await Task.Delay(BroadcastIntervalMs);
+                    await Task.Delay(_broadcastIntervalMs);
+                }
+                else
+                {
+                    // когда игроков нет — реже опрашиваем
+                    await Task.Delay(_idleIntervalMs);
+                }
             }
         }
 
         public void Stop()
         {
             _cancellationTokenSource.Cancel();
+
+            // мягко отключаем всех игроков
+            foreach (var peer in _players.Keys)
+            {
+                try
+                {
+                    peer.Disconnect();
+                }
+                catch { /* ignore */ }
+            }
+
             _netManager.Stop();
             Console.WriteLine("Server stopped.");
         }
