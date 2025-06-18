@@ -24,6 +24,10 @@ public class Player : MonoBehaviour
     public float slopeForce = 10f;
     public float slopeRayLength = 1.5f;
 
+    [Header("Player Stats")]
+    public int HP = 100;
+    public int Armor = 50;
+
     private Rigidbody rb;
     private float xRotation;
     private Vector3 moveDirection;
@@ -133,6 +137,10 @@ public class Player : MonoBehaviour
             other.gameObject.transform.position = gunSpawnPoint.transform.position;
             other.transform.SetParent(gunSpawnPoint.transform);
             currentGun = other.GetComponent<Gun>();
+        }
+        else if (other.CompareTag("Bullet"))
+        {
+            
         }
     }
 
