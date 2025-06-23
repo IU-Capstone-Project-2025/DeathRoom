@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom-Backend", "DeathRoom-Backend\DeathRoom-Backend.csproj", "{10853334-32B8-416B-87F1-A29ED2B2B2CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Common", "DeathRoom.Common\DeathRoom.Common.csproj", "{448F4ADE-C577-45CE-8455-F91274CFCE48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Data", "DeathRoom.Data\DeathRoom.Data.csproj", "{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{10853334-32B8-416B-87F1-A29ED2B2B2CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10853334-32B8-416B-87F1-A29ED2B2B2CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10853334-32B8-416B-87F1-A29ED2B2B2CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10853334-32B8-416B-87F1-A29ED2B2B2CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
