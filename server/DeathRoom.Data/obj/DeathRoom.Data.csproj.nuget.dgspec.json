@@ -4,14 +4,14 @@
     "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj": {}
   },
   "projects": {
-    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj": {
+    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
-        "projectName": "DeathRoom.Data",
-        "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
+        "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj",
+        "projectName": "DeathRoom.Common",
+        "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj",
         "packagesPath": "C:\\Users\\sevan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\obj\\",
+        "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -49,9 +49,102 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "LiteNetLib": {
+              "target": "Package",
+              "version": "[1.3.1, )"
+            },
+            "MessagePack": {
+              "target": "Package",
+              "version": "[2.5.140, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[9.0.4, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
+        "projectName": "DeathRoom.Data",
+        "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj",
+        "packagesPath": "C:\\Users\\sevan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\sevan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj": {
+                "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Common\\DeathRoom.Common.csproj"
+              },
+              "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj": {
+                "projectPath": "C:\\Users\\sevan\\Documents\\GitHub\\DeathRoom\\server\\DeathRoom.Data\\DeathRoom.Data.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "LiteNetLib": {
+              "target": "Package",
+              "version": "[1.3.1, )"
+            },
+            "MessagePack": {
+              "target": "Package",
+              "version": "[2.5.140, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.4, )"
             }
           },
           "imports": [
