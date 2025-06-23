@@ -5,6 +5,7 @@ using DeathRoom.Common.dto;
 using System.Collections.Concurrent;
 using DeathRoom.Common.network;
 using DeathRoom.Data;
+using DeathRoom.Data.Entities;
 
 namespace DeathRoom.GameServer
 {
@@ -137,15 +138,16 @@ namespace DeathRoom.GameServer
             {
                 if (_players.ContainsKey(peer)) return;
 
-                var player = _dbContext.Players.FirstOrDefault(p => p.Username == loginPacket.Username);
+                var player = _dbContext.Players.FirstOrDefault(p => p.Login == loginPacket.Username);
                 if (player == null)
                 {
                     // сюда бы еще айди но пока я думаю как лучше сделать
                     player = new Player
                     {
-                        Username = loginPacket.Username,
-                        Kills = 0,
-                        Deaths = 0,
+                        Login = loginPacket.Username,
+                        Rating = 0,
+                        HashedPassword = "",
+                        Nickname = "",
                         LastSeen = DateTime.UtcNow
                     };
                     _dbContext.Players.Add(player);
@@ -155,13 +157,13 @@ namespace DeathRoom.GameServer
                 var playerState = new PlayerState
                 {
                     Id = player.Id,
-                    Username = player.Username,
+                    Username = player.Login,
                     Position = new Vector3(), 
                     Rotation = new Vector3()
                 };
                 
                 _players.TryAdd(peer, playerState);
-                Console.WriteLine($"Player {player.Username} logged in from {peer.Port}");
+                Console.WriteLine($"Player {player.Login} logged in from {peer.Port}");
             }
             else if (packet is PlayerMovePacket movePacket)
             {

@@ -1,13 +1,19 @@
-﻿using DeathRoom.GameServer;
-using DeathRoom.Data;
+﻿using DeathRoom.Data;
+using DeathRoom_Backend;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-var dbContext = new GameDbContext();
-var server = new GameServer(dbContext);
-server.Start();
+Host.CreateDefaultBuilder(args)
+    .ConfigureServices((hostContext, services) =>
+    {
+        var connectionString = hostContext.Configuration.GetConnectionString("DefaultConnection");
 
-Console.CancelKeyPress += (sender, e) =>
-{
-    server.Stop();
-};
-
-AppDomain.CurrentDomain.ProcessExit += (s, e) => server.Stop();
+        services.AddDbContext<GameDbContext>(options =>
+            options.UseNpgsql(connectionString));
+        
+        services.AddHostedService<GameServer>();
+    })
+    .Build()
+    .Run();

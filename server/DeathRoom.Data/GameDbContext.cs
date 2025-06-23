@@ -9,11 +9,8 @@ public class GameDbContext : DbContext
     public DbSet<Match> Matches { get; set; }
     public DbSet<MatchPlayer> MatchPlayers { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public GameDbContext(DbContextOptions<GameDbContext> options) : base(options)
     {
-        const string connectionString = "Host=localhost;Port=5432;Database=deathroom;Username=postgres;Password=aboba";
-        optionsBuilder
-            .UseNpgsql(connectionString);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
