@@ -13,5 +13,7 @@ namespace DeathRoom.Common.dto
         public Vector3 Position { get; set; }
         [Key(3)]
         public Vector3 Rotation { get; set; }
+        [Key(4)]
+        public int HealthPoint { get; set; }
     }
 } 
