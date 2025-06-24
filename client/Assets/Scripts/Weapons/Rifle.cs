@@ -11,8 +11,6 @@ public class Rifle : Gun
     public GameObject[] shootHoles;
     bool canShoot = true;
 
-
-
     public override void Shoot()
     {
         base.Shoot();
