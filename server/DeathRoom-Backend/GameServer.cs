@@ -10,6 +10,9 @@ namespace DeathRoom.GameServer
 {
     public class GameServer : INetEventListener
     {
+		private const float CYLINDER_RELATIVE_HEIGHT = 2;
+		private Vector3 CYLINDER_SHIFT = new Vector3(0, 0, CYLINDER_RELATIVE_HEIGHT);
+
         private readonly NetManager _netManager;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         private readonly ConcurrentDictionary<NetPeer, PlayerState> _players = new();
@@ -18,6 +21,8 @@ namespace DeathRoom.GameServer
         // Интервалы (мс), задаются переменными окружения DEATHROOM_BROADCAST_INTERVAL_MS и DEATHROOM_IDLE_INTERVAL_MS
         private readonly int _broadcastIntervalMs = 15;
         private readonly int _idleIntervalMs = 100; // период опроса, когда на сервере нет игроков
+
+		private float angleCos(Vector3 first, Vector3 second) { return (first*second)/(!first*!second); }
 
         public GameServer(GameDbContext dbContext)
         {
@@ -128,6 +133,11 @@ namespace DeathRoom.GameServer
             Console.WriteLine($"Network error: {socketError}");
         }
 
+		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer,PlayerState> playerHit, int damage) {
+			Console.WriteLine($"Player {shooter.Username} dealed {damage} damage to {playerHit.Value.Username}.");
+			playerHit.Value.HealthPoint = playerHit.Value.HealthPoint - damage;
+		}
+
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
         {
             var data = reader.GetRemainingBytes();
@@ -176,7 +186,41 @@ namespace DeathRoom.GameServer
                 if (_players.TryGetValue(peer, out var playerState))
                 {
                     Console.WriteLine($"Player {playerState.Username} shot in direction {shootPacket.Direction.X}, {shootPacket.Direction.Y}, {shootPacket.Direction.Z}");
-                    // TODO: написать регистрацию хитов
+					Vector3 shooterPos = playerState.Position;
+					Vector3 shootDir = playerState.Rotation;
+					Vector3 shootProj = shootDir.projection(ProjectionCode.xz);
+					foreach(var other in _players) {
+						if(other.Key == peer) { continue;
+						} else {
+							Vector3 radius = other.Value.Position - shooterPos;
+							// Maybe add some optimizations later
+							// Checking xz projection
+							Vector3 radProj = radius.projection(ProjectionCode.xz);
+							bool projectionHits = !radProj/Math.Sqrt(!radProj*!radProj-1)<=angleCos(radProj, shootProj);
+							if(!projectionHits) { // shot missed
+								continue;
+							}
+							// Checking bottom sphere
+							Vector3 botRadius = radius - CYLINDER_SHIFT;
+							if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) { // Succesful hit
+								OnHitRegistred(playerState, other, 10);
+								break;
+							}
+							// Checking top sphere
+							Vector3 topRadius = radius + CYLINDER_SHIFT;
+							if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) { // Succesful hit
+								OnHitRegistred(playerState, other, 20);
+								break;
+							}
+							// Checking cylinder
+							float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
+							if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
+								OnHitRegistred(playerState, other, 10);
+								break;
+							} // Succesful hit
+							// If nothing is triggered, then it is misshot
+						}
+					}
                 }
             }
         }
