@@ -13,6 +13,8 @@ namespace DeathRoom.GameServer
     {
 		private const float CYLINDER_RELATIVE_HEIGHT = 2;
 		private Vector3 CYLINDER_SHIFT = new Vector3(0, 0, CYLINDER_RELATIVE_HEIGHT);
+        private const int MAX_SNAPSHOTS = 64;
+        private long _serverTick = 0;
 
         private readonly NetManager _netManager;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -65,6 +67,7 @@ namespace DeathRoom.GameServer
         {
             while (!_cancellationTokenSource.IsCancellationRequested)
             {
+                _serverTick++;
                 _netManager.PollEvents();
                 
                 if (!_players.IsEmpty)
@@ -181,48 +184,72 @@ namespace DeathRoom.GameServer
                 {
                     playerState.Position = movePacket.Position;
                     playerState.Rotation = movePacket.Rotation;
+
+                    var snapshot = new PlayerSnapshot
+                    {
+                        ServerTick = _serverTick,
+                        Position = movePacket.Position,
+                        Rotation = movePacket.Rotation
+                    };
+                    
+                    playerState.Snapshots.Enqueue(snapshot);
+                    
+                    if (playerState.Snapshots.Count > MAX_SNAPSHOTS)
+                    {
+                        playerState.Snapshots.Dequeue();
+                    }
                 }
             }
             else if (packet is PlayerShootPacket shootPacket)
             {
-                if (_players.TryGetValue(peer, out var playerState))
+                if (_players.TryGetValue(peer, out var shooterState))
                 {
+                    Console.WriteLine($"Player {shooterState.Username} shot at tick {shootPacket.ClientTick}. Server tick is {_serverTick}.");
+                    
+                    // TODO: Implement actual lag compensation and hit detection
+                    // 1. Найти позицию игрока основываясь shootPacket.ClientTick
+                    // 2. Для каждого игрока найти их позиции на тот тик
+                    // 3. проверить хит с по их позициям на одинаковых тиках
+                    
+                    
+                    //ЭТО ПОКА НЕ ТРОГАТЬ
+                    /*                if (_players.TryGetValue(peer, out var playerState))
                     Console.WriteLine($"Player {playerState.Username} shot in direction {shootPacket.Direction.X}, {shootPacket.Direction.Y}, {shootPacket.Direction.Z}");
-					Vector3 shooterPos = playerState.Position;
-					Vector3 shootDir = playerState.Rotation;
-					Vector3 shootProj = shootDir.projection(ProjectionCode.xz);
-					foreach(var other in _players) {
-						if(other.Key == peer) { continue;
-						} else {
-							Vector3 radius = other.Value.Position - shooterPos;
-							// Maybe add some optimizations later
-							// Checking xz projection
-							Vector3 radProj = radius.projection(ProjectionCode.xz);
-							bool projectionHits = !radProj/Math.Sqrt(!radProj*!radProj-1)<=angleCos(radProj, shootProj);
-							if(!projectionHits) { // shot missed
-								continue;
-							}
-							// Checking bottom sphere
-							Vector3 botRadius = radius - CYLINDER_SHIFT;
-							if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) { // Succesful hit
-								OnHitRegistred(playerState, other, 10);
-								break;
-							}
-							// Checking top sphere
-							Vector3 topRadius = radius + CYLINDER_SHIFT;
-							if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) { // Succesful hit
-								OnHitRegistred(playerState, other, 20);
-								break;
-							}
-							// Checking cylinder
-							float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
-							if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
-								OnHitRegistred(playerState, other, 10);
-								break;
-							} // Succesful hit
-							// If nothing is triggered, then it is misshot
-						}
-					}
+                    Vector3 shooterPos = playerState.Position;
+                    Vector3 shootDir = playerState.Rotation;
+                    Vector3 shootProj = shootDir.projection(ProjectionCode.xz);
+                    foreach(var other in _players) {
+                        if(other.Key == peer) { continue;
+                        } else {
+                            Vector3 radius = other.Value.Position - shooterPos;
+                            // Maybe add some optimizations later
+                            // Checking xz projection
+                            Vector3 radProj = radius.projection(ProjectionCode.xz);
+                            bool projectionHits = !radProj/Math.Sqrt(!radProj*!radProj-1)<=angleCos(radProj, shootProj);
+                            if(!projectionHits) { // shot missed
+                                continue;
+                            }
+                            // Checking bottom sphere
+                            Vector3 botRadius = radius - CYLINDER_SHIFT;
+                            if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) { // Succesful hit
+                                OnHitRegistred(playerState, other, 10);
+                                break;
+                            }
+                            // Checking top sphere
+                            Vector3 topRadius = radius + CYLINDER_SHIFT;
+                            if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) { // Succesful hit
+                                OnHitRegistred(playerState, other, 20);
+                                break;
+                            }
+                            // Checking cylinder
+                            float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
+                            if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
+                                OnHitRegistred(playerState, other, 10);
+                                break;
+                            } // Succesful hit
+                            // If nothing is triggered, then it is misshot
+                        }
+                    }*/
                 }
             }
         }

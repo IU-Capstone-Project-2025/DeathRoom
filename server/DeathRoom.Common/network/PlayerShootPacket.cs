@@ -7,6 +7,6 @@ namespace DeathRoom.Common.network
     public class PlayerShootPacket : IPacket
     {
         [Key(0)]
-        public Vector3 Direction { get; set; }
+        public long ClientTick { get; set; }
     }
 } 

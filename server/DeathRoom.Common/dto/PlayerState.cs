@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MessagePack;
 
 namespace DeathRoom.Common.dto
@@ -8,12 +9,14 @@ namespace DeathRoom.Common.dto
         [Key(0)]
         public int Id { get; set; }
         [Key(1)]
-        public required string Username { get; set; }
+        public string Username { get; set; }
         [Key(2)]
         public Vector3 Position { get; set; }
         [Key(3)]
         public Vector3 Rotation { get; set; }
         [Key(4)]
         public int HealthPoint { get; set; }
+        [IgnoreMember]
+        public Queue<PlayerSnapshot> Snapshots { get; } = new Queue<PlayerSnapshot>();
     }
 } 
