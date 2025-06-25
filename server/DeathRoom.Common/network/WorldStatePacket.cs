@@ -9,5 +9,8 @@ namespace DeathRoom.Common.network
     {
         [Key(0)]
         public List<PlayerState> PlayerStates { get; set; } = new();
+
+        [Key(1)]
+        public long ServerTick { get; set; }
     }
 } 

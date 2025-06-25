@@ -1,13 +1,28 @@
-﻿using DeathRoom.GameServer;
 using DeathRoom.Data;
+using DeathRoom.GameServer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 
-var dbContext = new GameDbContext();
-var server = new GameServer(dbContext);
-server.Start();
+var host = Host.CreateDefaultBuilder(args)
+    .ConfigureServices((context, services) =>
+    {
+        var connectionString = context.Configuration.GetConnectionString("DefaultConnection")!
+            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-Console.CancelKeyPress += (sender, e) =>
+        services.AddDbContext<GameDbContext>(options => options.UseNpgsql(connectionString));
+
+        services.AddScoped<GameServer>();
+        services.AddHostedService<ServerRunner>();
+    })
+    .Build();
+
+// Автоматическое применение миграций при старте
+using (var scope = host.Services.CreateScope())
 {
-    server.Stop();
-};
+    var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+    db.Database.Migrate();
+}
 
-AppDomain.CurrentDomain.ProcessExit += (s, e) => server.Stop();
+await host.RunAsync(); 

@@ -11,5 +11,8 @@ namespace DeathRoom.Common.network
         
         [Key(1)]
         public Vector3 Rotation { get; set; }
+
+        [Key(2)]
+        public long ClientTick { get; set; }
     }
 } 
