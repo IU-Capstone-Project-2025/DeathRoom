@@ -16,6 +16,8 @@ namespace DeathRoom.Common.dto
         public Vector3 Rotation { get; set; }
         [Key(4)]
         public int HealthPoint { get; set; }
+        [Key(5)]
+        public int MaxHealthPoint { get; set; } = 100;
         [IgnoreMember]
         public Queue<PlayerSnapshot> Snapshots { get; } = new Queue<PlayerSnapshot>();
 
