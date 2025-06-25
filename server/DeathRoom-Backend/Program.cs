@@ -8,21 +8,24 @@ using Microsoft.Extensions.Configuration;
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        var connectionString = context.Configuration.GetConnectionString("DefaultConnection")!
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        // Временно отключаем базу данных для тестирования
+        // var connectionString = context.Configuration.GetConnectionString("DefaultConnection")!
+        //     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        // services.AddDbContext<GameDbContext>(options => options.UseNpgsql(connectionString));
 
-        services.AddDbContext<GameDbContext>(options => options.UseNpgsql(connectionString));
+        // Добавляем GameDbContext как фиктивную службу или используем in-memory базу
+        services.AddDbContext<GameDbContext>(options => options.UseInMemoryDatabase("TempDb"));
 
         services.AddScoped<GameServer>();
         services.AddHostedService<ServerRunner>();
     })
     .Build();
 
-// Автоматическое применение миграций при старте
-using (var scope = host.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
-    db.Database.Migrate();
-}
+// Временно отключаем миграции
+// using (var scope = host.Services.CreateScope())
+// {
+//     var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+//     db.Database.Migrate();
+// }
 
 await host.RunAsync(); 
