@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Menu.unity
     guid: d6e98c42b5ecac04a930af03430b587e
+  - enabled: 1
+    path: Assets/Scenes/PVP Arena 1.unity
+    guid: b4ecfb86da8cca14e9a077fcc26d58bb
   m_configObjects: {}
