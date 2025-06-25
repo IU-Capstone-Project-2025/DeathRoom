@@ -159,9 +159,19 @@ namespace DeathRoom.GameServer
             Console.WriteLine($"Network error: {socketError}");
         }
 
-		private void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer,PlayerState> playerHit, int damage) {
+		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer, PlayerState> playerHit, int damage) {
 			Console.WriteLine($"Player {shooter.Username} dealed {damage} damage to {playerHit.Value.Username}.");
-			playerHit.Value.HealthPoint = playerHit.Value.HealthPoint - damage;
+			playerHit.Value.HealthPoint -= damage;
+			if (playerHit.Value.HealthPoint <= 0)
+			{
+				Console.WriteLine($"Player {playerHit.Value.Username} died!");
+				// Disconnect and remove player
+				if (_players.TryRemove(playerHit.Key, out var _))
+				{
+					_inMemoryPlayers.Remove(playerHit.Value.Id);
+					try { playerHit.Key.Disconnect(); } catch { /* ignore */ }
+				}
+			}
 		}
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
@@ -179,7 +189,9 @@ namespace DeathRoom.GameServer
                     Id = _nextPlayerId++,
                     Username = loginPacket.Username,
                     Position = new Vector3(),
-                    Rotation = new Vector3()
+                    Rotation = new Vector3(),
+                    HealthPoint = 100,
+                    MaxHealthPoint = 100
                 };
                 _inMemoryPlayers[playerState.Id] = playerState;
                 _players.TryAdd(peer, playerState);
