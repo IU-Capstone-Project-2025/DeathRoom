@@ -13,7 +13,7 @@ public class GameDbContextTests
     public void Player_can_be_added_and_retrieved()
     {
         var options = new DbContextOptionsBuilder<GameDbContext>()
-            .UseInMemoryDatabase("test-db")
+            // .UseInMemoryDatabase("test-db")
             .Options;
 
         using (var ctx = new GameDbContext(options))

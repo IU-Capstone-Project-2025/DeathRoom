@@ -9,7 +9,7 @@ namespace DeathRoom.Common.dto
         [Key(0)]
         public int Id { get; set; }
         [Key(1)]
-        public string Username { get; set; }
+        public required string Username { get; set; }
         [Key(2)]
         public Vector3 Position { get; set; }
         [Key(3)]

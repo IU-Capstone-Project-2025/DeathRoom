@@ -302,7 +302,7 @@ namespace DeathRoom.GameServer
 
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            request.Accept();
+            request.AcceptIfKey("DeathRoomSecret");
         }
 
         private WorldStatePacket InterpolateWorldState(long tick, (long Tick, WorldStatePacket State) before, (long Tick, WorldStatePacket State) after)
