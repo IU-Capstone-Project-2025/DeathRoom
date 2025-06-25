@@ -18,5 +18,17 @@ namespace DeathRoom.Common.dto
         public int HealthPoint { get; set; }
         [IgnoreMember]
         public Queue<PlayerSnapshot> Snapshots { get; } = new Queue<PlayerSnapshot>();
+
+        public PlayerState Clone()
+        {
+            return new PlayerState
+            {
+                Id = this.Id,
+                Username = this.Username,
+                Position = new Vector3(this.Position.X, this.Position.Y, this.Position.Z),
+                Rotation = new Vector3(this.Rotation.X, this.Rotation.Y, this.Rotation.Z),
+                HealthPoint = this.HealthPoint
+            };
+        }
     }
 } 

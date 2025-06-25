@@ -21,9 +21,16 @@ namespace DeathRoom.GameServer
         private readonly ConcurrentDictionary<NetPeer, PlayerState> _players = new();
         private readonly GameDbContext _dbContext;
 
-        // Интервалы (мс), задаются переменными окружения DEATHROOM_BROADCAST_INTERVAL_MS и DEATHROOM_IDLE_INTERVAL_MS
         private readonly int _broadcastIntervalMs = 15;
-        private readonly int _idleIntervalMs = 100; // период опроса, когда на сервере нет игроков
+        private readonly int _idleIntervalMs = 100;
+
+        private readonly int _worldStateHistoryLength = 20;
+        private readonly int _worldStateSaveInterval = 10;
+        private readonly Queue<(long Tick, WorldStatePacket State)> _worldStateHistory = new();
+
+        // --- In-memory сессии и игроки ---
+        private readonly Dictionary<int, PlayerState> _inMemoryPlayers = new();
+        private int _nextPlayerId = 1;
 
 		private float angleCos(Vector3 first, Vector3 second) { return (first*second)/(!first*!second); }
 
@@ -32,7 +39,6 @@ namespace DeathRoom.GameServer
             _netManager = new NetManager(this);
             _dbContext = dbContext;
 
-            // читаем интервалы из переменных окружения (если заданы)
             if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_BROADCAST_INTERVAL_MS"), out var bInt) && bInt > 0)
             {
                 _broadcastIntervalMs = bInt;
@@ -41,6 +47,15 @@ namespace DeathRoom.GameServer
             if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_IDLE_INTERVAL_MS"), out var iInt) && iInt > 0)
             {
                 _idleIntervalMs = iInt;
+            }
+
+            if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_WORLDSTATE_HISTORY_LENGTH"), out var hLen) && hLen > 0)
+            {
+                _worldStateHistoryLength = hLen;
+            }
+            if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_WORLDSTATE_SAVE_INTERVAL"), out var sInt) && sInt > 0)
+            {
+                _worldStateSaveInterval = sInt;
             }
         }
 
@@ -72,11 +87,17 @@ namespace DeathRoom.GameServer
                 
                 if (!_players.IsEmpty)
                 {
-                    // бродкаст пакетов только при наличии игроков
                     var worldStatePacket = new WorldStatePacket
                     {
-                        PlayerStates = _players.Values.ToList()
+                        PlayerStates = _players.Values.Select(p => p.Clone()).ToList(),
+                        ServerTick = _serverTick
                     };
+                    if (_serverTick % _worldStateSaveInterval == 0)
+                    {
+                        _worldStateHistory.Enqueue((_serverTick, worldStatePacket));
+                        if (_worldStateHistory.Count > _worldStateHistoryLength)
+                            _worldStateHistory.Dequeue();
+                    }
                     var data = PacketProcessor.Pack(worldStatePacket);
                     _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
@@ -84,7 +105,6 @@ namespace DeathRoom.GameServer
                 }
                 else
                 {
-                    // когда игроков нет — реже опрашиваем
                     await Task.Delay(_idleIntervalMs);
                 }
             }
@@ -94,7 +114,6 @@ namespace DeathRoom.GameServer
         {
             _cancellationTokenSource.Cancel();
 
-            // мягко отключаем всех игроков
             foreach (var peer in _players.Keys)
             {
                 try
@@ -118,13 +137,16 @@ namespace DeathRoom.GameServer
             if (_players.TryRemove(peer, out var playerState))
             {
                 Console.WriteLine($"Player {playerState.Username} disconnected. Reason: {disconnectInfo.Reason}");
-                // сохраняем последние данные об игроке
+                _inMemoryPlayers.Remove(playerState.Id);
+                // --- Старый код с БД закомментирован ---
+                /*
                 var player = _dbContext.Players.Find(playerState.Id);
                 if (player != null)
                 {
                     player.LastSeen = DateTime.UtcNow;
                     _dbContext.SaveChanges();
                 }
+                */
             }
             else
             {
@@ -151,10 +173,23 @@ namespace DeathRoom.GameServer
             {
                 if (_players.ContainsKey(peer)) return;
 
+                // --- In-memory регистрация игрока ---
+                var playerState = new PlayerState
+                {
+                    Id = _nextPlayerId++,
+                    Username = loginPacket.Username,
+                    Position = new Vector3(),
+                    Rotation = new Vector3()
+                };
+                _inMemoryPlayers[playerState.Id] = playerState;
+                _players.TryAdd(peer, playerState);
+                Console.WriteLine($"Player {playerState.Username} logged in from {peer.Port}");
+
+                // --- Старый код с БД закомментирован ---
+                /*
                 var player = _dbContext.Players.FirstOrDefault(p => p.Login == loginPacket.Username);
                 if (player == null)
                 {
-                    // сюда бы еще айди но пока я думаю как лучше сделать
                     player = new Player
                     {
                         Login = loginPacket.Username,
@@ -166,17 +201,7 @@ namespace DeathRoom.GameServer
                     _dbContext.Players.Add(player);
                     _dbContext.SaveChanges();
                 }
-
-                var playerState = new PlayerState
-                {
-                    Id = player.Id,
-                    Username = player.Login,
-                    Position = new Vector3(), 
-                    Rotation = new Vector3()
-                };
-                
-                _players.TryAdd(peer, playerState);
-                Console.WriteLine($"Player {player.Login} logged in from {peer.Port}");
+                */
             }
             else if (packet is PlayerMovePacket movePacket)
             {
@@ -200,56 +225,57 @@ namespace DeathRoom.GameServer
                     }
                 }
             }
-            else if (packet is PlayerShootPacket shootPacket)
+            else if (packet is PlayerHitPacket hitPacket)
             {
                 if (_players.TryGetValue(peer, out var shooterState))
                 {
-                    Console.WriteLine($"Player {shooterState.Username} shot at tick {shootPacket.ClientTick}. Server tick is {_serverTick}.");
-                    
-                    // TODO: Implement actual lag compensation and hit detection
-                    // 1. Найти позицию игрока основываясь shootPacket.ClientTick
-                    // 2. Для каждого игрока найти их позиции на тот тик
-                    // 3. проверить хит с по их позициям на одинаковых тиках
-                    
-                    
-                    //ЭТО ПОКА НЕ ТРОГАТЬ
-                    /*                if (_players.TryGetValue(peer, out var playerState))
-                    Console.WriteLine($"Player {playerState.Username} shot in direction {shootPacket.Direction.X}, {shootPacket.Direction.Y}, {shootPacket.Direction.Z}");
-                    Vector3 shooterPos = playerState.Position;
-                    Vector3 shootDir = playerState.Rotation;
+                    Console.WriteLine($"[HIT] Player {shooterState.Username} claims hit on {hitPacket.TargetId} at tick {hitPacket.ClientTick}");
+                    var worldStateAtShot = GetWorldStateAtTick(hitPacket.ClientTick);
+                    if (worldStateAtShot == null)
+                    {
+                        Console.WriteLine($"[LagComp] Нет состояния мира на тик {hitPacket.ClientTick}");
+                        return;
+                    }
+                    var shooter = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == shooterState.Id);
+                    var target = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == hitPacket.TargetId);
+                    if (shooter == null || target == null)
+                    {
+                        Console.WriteLine($"[LagComp] Не найден стрелявший или цель в состоянии мира на тик {hitPacket.ClientTick}");
+                        return;
+                    }
+                    // Проверка попадания (raycast/углы)
+                    Vector3 shooterPos = shooter.Position;
+                    Vector3 shootDir = hitPacket.Direction;
                     Vector3 shootProj = shootDir.projection(ProjectionCode.xz);
-                    foreach(var other in _players) {
-                        if(other.Key == peer) { continue;
-                        } else {
-                            Vector3 radius = other.Value.Position - shooterPos;
-                            // Maybe add some optimizations later
-                            // Checking xz projection
-                            Vector3 radProj = radius.projection(ProjectionCode.xz);
-                            bool projectionHits = !radProj/Math.Sqrt(!radProj*!radProj-1)<=angleCos(radProj, shootProj);
-                            if(!projectionHits) { // shot missed
-                                continue;
-                            }
-                            // Checking bottom sphere
-                            Vector3 botRadius = radius - CYLINDER_SHIFT;
-                            if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) { // Succesful hit
-                                OnHitRegistred(playerState, other, 10);
-                                break;
-                            }
-                            // Checking top sphere
-                            Vector3 topRadius = radius + CYLINDER_SHIFT;
-                            if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) { // Succesful hit
-                                OnHitRegistred(playerState, other, 20);
-                                break;
-                            }
-                            // Checking cylinder
-                            float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
-                            if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
-                                OnHitRegistred(playerState, other, 10);
-                                break;
-                            } // Succesful hit
-                            // If nothing is triggered, then it is misshot
-                        }
-                    }*/
+                    Vector3 radius = target.Position - shooterPos;
+                    Vector3 radProj = radius.projection(ProjectionCode.xz);
+                    bool projectionHits = !radProj/Math.Sqrt(!radProj*!radProj-1)<=angleCos(radProj, shootProj);
+                    if(!projectionHits) return;
+                    // Checking bottom sphere
+                    Vector3 botRadius = radius - CYLINDER_SHIFT;
+                    if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) {
+                        var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
+                        if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
+                            OnHitRegistred(shooterState, hitPeer, 10);
+                        return;
+                    }
+                    // Checking top sphere
+                    Vector3 topRadius = radius + CYLINDER_SHIFT;
+                    if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) {
+                        var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
+                        if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
+                            OnHitRegistred(shooterState, hitPeer, 20);
+                        return;
+                    }
+                    // Checking cylinder
+                    float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
+                    if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
+                        var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
+                        if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
+                            OnHitRegistred(shooterState, hitPeer, 10);
+                        return;
+                    }
+                    // Если ничего не сработало — промах
                 }
             }
         }
@@ -265,6 +291,52 @@ namespace DeathRoom.GameServer
         public void OnConnectionRequest(ConnectionRequest request)
         {
             request.Accept();
+        }
+
+        private WorldStatePacket InterpolateWorldState(long tick, (long Tick, WorldStatePacket State) before, (long Tick, WorldStatePacket State) after)
+        {
+            var result = new WorldStatePacket();
+            float t = (float)(tick - before.Tick) / (after.Tick - before.Tick);
+            foreach (var beforePlayer in before.State.PlayerStates)
+            {
+                var afterPlayer = after.State.PlayerStates.FirstOrDefault(p => p.Id == beforePlayer.Id);
+                if (afterPlayer != null)
+                {
+                    var interpPlayer = beforePlayer.Clone();
+                    interpPlayer.Position = InterpolateVector3(beforePlayer.Position, afterPlayer.Position, t);
+                    interpPlayer.Rotation = InterpolateVector3(beforePlayer.Rotation, afterPlayer.Rotation, t);
+                    interpPlayer.HealthPoint = (int)(beforePlayer.HealthPoint * (1 - t) + afterPlayer.HealthPoint * t);
+                    result.PlayerStates.Add(interpPlayer);
+                }
+            }
+            return result;
+        }
+
+        private Vector3 InterpolateVector3(Vector3 a, Vector3 b, float t)
+        {
+            return new Vector3(
+                a.X + (b.X - a.X) * t,
+                a.Y + (b.Y - a.Y) * t,
+                a.Z + (b.Z - a.Z) * t
+            );
+        }
+
+        public WorldStatePacket GetWorldStateAtTick(long tick)
+        {
+            if (_worldStateHistory.Count == 0) return null;
+            var arr = _worldStateHistory.ToArray();
+            for (int i = 0; i < arr.Length - 1; i++)
+            {
+                if (arr[i].Tick <= tick && tick <= arr[i + 1].Tick)
+                {
+                    if (arr[i].Tick == tick) return arr[i].State;
+                    if (arr[i + 1].Tick == tick) return arr[i + 1].State;
+                    return InterpolateWorldState(tick, arr[i], arr[i + 1]);
+                }
+            }
+            // если тик меньше самого раннего — возвращаем первый, если больше — последний
+            if (tick < arr[0].Tick) return arr[0].State;
+            return arr[^1].State;
         }
     }
 } 
