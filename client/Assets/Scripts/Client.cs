@@ -15,7 +15,7 @@ public class Client : MonoBehaviour {
 
 		netManager = new NetManager(netListener);
 		netManager.Start();
-		netManager.Connect("10.91.57.163", 9050);
+		// netManager.Connect("10.91.57.163", 9050);
 	}
 
 	void FixedUpdate() {
