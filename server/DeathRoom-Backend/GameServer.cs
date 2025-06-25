@@ -134,7 +134,7 @@ namespace DeathRoom.GameServer
             Console.WriteLine($"Network error: {socketError}");
         }
 
-		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer,PlayerState> playerHit, int damage) {
+		private void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer,PlayerState> playerHit, int damage) {
 			Console.WriteLine($"Player {shooter.Username} dealed {damage} damage to {playerHit.Value.Username}.");
 			playerHit.Value.HealthPoint = playerHit.Value.HealthPoint - damage;
 		}
