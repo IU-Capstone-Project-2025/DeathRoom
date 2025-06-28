@@ -22,7 +22,6 @@ public class MultiplayerManager : MonoBehaviour {
             return;
         }
         
-        // Устанавливаем имя игрока
         if (string.IsNullOrEmpty(client.playerName)) {
             client.playerName = defaultPlayerName + Random.Range(1000, 9999);
         }
@@ -67,7 +66,6 @@ public class MultiplayerManager : MonoBehaviour {
     void UpdateUI() {
         if (client == null) return;
         
-        // Проверяем статус подключения
         bool isConnected = client.isConnected;
         
         if (isConnected && connectingPanel.activeSelf) {
@@ -76,7 +74,6 @@ public class MultiplayerManager : MonoBehaviour {
             ShowConnectingPanel();
         }
         
-        // Обновляем счетчик игроков
         connectedPlayers = client.networkPlayers.Count + (client.localPlayer != null ? 1 : 0);
         
         if (playersCountText != null) {
