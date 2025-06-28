@@ -59,7 +59,7 @@ namespace DeathRoom.GameServer
             }
         }
 
-        public void Start()
+        public void StartEntry()
         {
             var portEnv = Environment.GetEnvironmentVariable("DEATHROOM_SERVER_PORT");
             var port = int.TryParse(portEnv, out var parsedPort) ? parsedPort : 9050;

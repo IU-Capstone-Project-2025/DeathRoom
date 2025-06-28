@@ -14,6 +14,10 @@ namespace DeathRoom.Network
         {
             Players = new Dictionary<int, PlayerState>();
         }
+        
+        [Key(1)]
+        public long ServerTick;
+
     }
 
     [MessagePackObject]
@@ -21,14 +25,17 @@ namespace DeathRoom.Network
     {
         [Key(0)]
         public int PlayerId { get; set; }
-
+        
         [Key(1)]
-        public Vector3Serializable Position { get; set; }
+        public string Username { get; set; }
 
         [Key(2)]
-        public Vector3Serializable Rotation { get; set; }
+        public Vector3Serializable Position { get; set; }
 
         [Key(3)]
+        public Vector3Serializable Rotation { get; set; }
+
+        [Key(4)]
         public float Health { get; set; }
     }
 

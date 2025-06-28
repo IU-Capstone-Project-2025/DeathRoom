@@ -1,3 +1,4 @@
+using DeathRoom.Network;
 using UnityEngine;
 
 public class NetworkPlayer : MonoBehaviour {
@@ -55,7 +56,7 @@ public class NetworkPlayer : MonoBehaviour {
     public void Initialize(PlayerState playerState) {
         currentState = playerState;
         Username = playerState.Username;
-        PlayerId = playerState.Id;
+        PlayerId = playerState.PlayerId;
         
         // Сразу устанавливаем позицию без интерполяции
         var pos = new Vector3(playerState.Position.X, playerState.Position.Y, playerState.Position.Z);
@@ -127,7 +128,7 @@ public class NetworkPlayer : MonoBehaviour {
         
         // Здоровье игрока для анимации смерти
         if (currentState != null) {
-            bool isDead = currentState.HealthPoint <= 0;
+            bool isDead = currentState.Health <= 0;
             animator.SetBool("Dead", isDead);
         }
     }

@@ -1,9 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System.Net;
+using DeathRoom.Common.network;
+using DeathRoom.Network;
+using MessagePack;
+using UnityEditor.PackageManager;
 
 public class Client : MonoBehaviour {
     [Header("Network Settings")]
@@ -22,14 +24,14 @@ public class Client : MonoBehaviour {
     private EventBasedNetListener netListener;
     private NetPeer serverPeer;
     
-    private GameObject localPlayer;
+    public GameObject localPlayer;
     private PlayerMovement localPlayerMovement;
-    private Dictionary<int, NetworkPlayer> networkPlayers = new Dictionary<int, NetworkPlayer>();
+    public Dictionary<int, NetworkPlayer> networkPlayers = new Dictionary<int, NetworkPlayer>();
     
     private float sendRate = 20f; // 20 updates per second
     private float nextSendTime = 0f;
     
-    private bool isConnected = false;
+    public bool isConnected = false;
     private long lastServerTick = 0;
 
     void Start() {
@@ -49,7 +51,7 @@ public class Client : MonoBehaviour {
         netManager.Start();
     }
 
-    void ConnectToServer() {
+    public void ConnectToServer() {
         Debug.Log($"Connecting to server {serverAddress}:{serverPort}...");
         serverPeer = netManager.Connect(serverAddress, serverPort, "DeathRoomSecret");
     }
@@ -85,7 +87,7 @@ public class Client : MonoBehaviour {
         ProcessPacket(data);
     }
 
-    void OnNetworkError(IPEndPoint endPoint, SocketErrorCode socketErrorCode) {
+    void OnNetworkError(IPEndPoint endPoint, Error socketErrorCode) {
         Debug.LogError($"Network error: {socketErrorCode}");
     }
 
@@ -111,7 +113,7 @@ public class Client : MonoBehaviour {
             var worldState = MessagePackSerializer.Deserialize<WorldStatePacket>(data);
             lastServerTick = worldState.ServerTick;
             
-            foreach (var playerState in worldState.PlayerStates) {
+            foreach (var playerState in worldState.Players.Values) {
                 UpdateNetworkPlayer(playerState);
             }
             
@@ -119,8 +121,8 @@ public class Client : MonoBehaviour {
             var playersToRemove = new List<int>();
             foreach (var kvp in networkPlayers) {
                 bool found = false;
-                foreach (var playerState in worldState.PlayerStates) {
-                    if (playerState.Id == kvp.Key) {
+                foreach (var playerState in worldState.Players.Values) {
+                    if (playerState.PlayerId == kvp.Key) {
                         found = true;
                         break;
                     }
@@ -146,10 +148,10 @@ public class Client : MonoBehaviour {
             return;
         }
         
-        if (!networkPlayers.ContainsKey(playerState.Id)) {
+        if (!networkPlayers.ContainsKey(playerState.PlayerId)) {
             CreateNetworkPlayer(playerState);
         } else {
-            var networkPlayer = networkPlayers[playerState.Id];
+            var networkPlayer = networkPlayers[playerState.PlayerId];
             if (networkPlayer != null) {
                 networkPlayer.UpdateState(playerState);
             }
@@ -174,9 +176,9 @@ public class Client : MonoBehaviour {
         }
         
         networkPlayer.Initialize(playerState);
-        networkPlayers[playerState.Id] = networkPlayer;
+        networkPlayers[playerState.PlayerId] = networkPlayer;
         
-        Debug.Log($"Created network player: {playerState.Username} (ID: {playerState.Id})");
+        Debug.Log($"Created network player: {playerState.Username} (ID: {playerState.PlayerId})");
     }
 
     void RemoveNetworkPlayer(int playerId) {
@@ -244,15 +246,15 @@ public class Client : MonoBehaviour {
         if (localPlayerMovement == null) return;
         
         var movePacket = new PlayerMovePacket {
-            Position = new DeathRoom.Common.dto.Vector3 {
-                X = localPlayer.transform.position.x,
-                Y = localPlayer.transform.position.y,
-                Z = localPlayer.transform.position.z
+            Position = new Vector3 {
+                x = localPlayer.transform.position.x,
+                y = localPlayer.transform.position.y,
+                z = localPlayer.transform.position.z
             },
-            Rotation = new DeathRoom.Common.dto.Vector3 {
-                X = localPlayer.transform.eulerAngles.x,
-                Y = localPlayer.transform.eulerAngles.y,
-                Z = localPlayer.transform.eulerAngles.z
+            Rotation = new Vector3 {
+                x = localPlayer.transform.eulerAngles.x,
+                y = localPlayer.transform.eulerAngles.y,
+                z = localPlayer.transform.eulerAngles.z
             }
         };
         
@@ -263,10 +265,10 @@ public class Client : MonoBehaviour {
         if (!isConnected) return;
         
         var shootPacket = new PlayerShootPacket {
-            Direction = new DeathRoom.Common.dto.Vector3 {
-                X = direction.x,
-                Y = direction.y,
-                Z = direction.z
+            Direction = new Vector3 {
+                x = direction.x,
+                y = direction.y,
+                z = direction.z
             }
         };
         
@@ -277,10 +279,10 @@ public class Client : MonoBehaviour {
             var hitPacket = new PlayerHitPacket {
                 TargetId = targetId,
                 ClientTick = lastServerTick,
-                Direction = new DeathRoom.Common.dto.Vector3 {
-                    X = direction.x,
-                    Y = direction.y,
-                    Z = direction.z
+                Direction = new Vector3 {
+                    x = direction.x,
+                    y = direction.y,
+                    z = direction.z
                 }
             };
             
@@ -299,8 +301,8 @@ public class Client : MonoBehaviour {
         }
     }
 
-    Vector3 UnityVector3(DeathRoom.Common.dto.Vector3 v) {
-        return new Vector3(v.X, v.Y, v.Z);
+    Vector3 UnityVector3(Vector3 v) {
+        return new Vector3(v.x , v.y, v.z);
     }
 
     void FixedUpdate() {

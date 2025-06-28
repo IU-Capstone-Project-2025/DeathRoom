@@ -1,3 +1,5 @@
+using DeathRoom.Common.network;
+using DeathRoom.Network;
 using MessagePack;
 
 [Union(0, typeof(LoginPacket))]

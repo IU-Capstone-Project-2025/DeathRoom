@@ -10,9 +10,28 @@
     <list default="true" id="d5108191-2cff-4434-8711-b2ffe1911e82" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DeathRoom/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DeathRoom/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/Assembly-CSharp-Editor.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assembly-CSharp-Editor.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assembly-CSharp-firstpass.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assembly-CSharp-firstpass.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/Assembly-CSharp.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assembly-CSharp.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Plugins/MessagePack.3.1.4.nupkg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Plugins/MessagePack.3.1.4.nupkg.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Plugins/MessagePack.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Plugins/MessagePack/MessagePackInitializer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Plugins/MessagePack/MessagePackInitializer.cs.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Client.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/Client.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Network/IPacket.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/Network/IPacket.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Network/MessagePackInitializer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Network/MessagePackInitializer.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Network/PlayerHitPacket.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/Network/PlayerHitPacket.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Network/WorldStatePacket.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/Network/WorldStatePacket.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/NetworkPlayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/NetworkPlayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/Packages/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/client/ProjectSettings/ProjectSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/client.sln" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom-Backend/GameServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom-Backend/GameServer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom-Backend/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom-Backend/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom-Backend/ServerRunner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom-Backend/ServerRunner.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,9 +54,11 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c4970c9b34a945f3810790108550d07ccd30/83/3bcb55a4/IHostBuilder.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a77b231cea33ff338c41dc7869d6c493d4dae137ff51e342173efa61d933/Task.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/acc3e6e5f85e7174c16f6fd86bfc988df4815a736791e6f3d736ed79b8436e/CancellationTokenSource.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d5e26b7cbc3c8ffaa5eb6b56961c2ddefd21293d38d4a648eeb54d2d127492de/Environment.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/client/Assets/Scripts/Client.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/sevan/Documents/GitHub/DeathRoom/server/DeathRoom-Backend/GameServer.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/sevan/Documents/GitHub/DeathRoom/server/DeathRoom-Backend/GameServer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/server/DeathRoom.Common/dto/PlayerState.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/server/DeathRoom.Data/GameDbContext.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -74,6 +95,9 @@
       <updated>1750780182347</updated>
       <workItem from="1750780183911" duration="4061000" />
       <workItem from="1750877749310" duration="4626000" />
+      <workItem from="1750887804839" duration="641000" />
+      <workItem from="1751034794375" duration="7556000" />
+      <workItem from="1751104818377" duration="6274000" />
     </task>
     <servers />
   </component>
