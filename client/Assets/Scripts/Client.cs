@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System.Net;
 using System.Net.Sockets;
 using MessagePack;
@@ -50,7 +49,7 @@ public class Client : MonoBehaviour
         netListener.PeerConnectedEvent += OnConnected;
         netListener.PeerDisconnectedEvent += OnDisconnected;
         netListener.NetworkReceiveEvent += OnNetworkReceive;
-        netListener.NetworkErrorEvent += OnNetworkError; // теперь с правильной сигнатурой
+        netListener.NetworkErrorEvent += OnNetworkError; 
 
         netManager = new NetManager(netListener);
         netManager.Start();

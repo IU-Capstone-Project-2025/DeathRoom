@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
         int spawnCount = Mathf.Min(playerPrefabs.Count, spawnPoints.Count);
         if (spawnCount == 0)
         {
-            Debug.LogWarning("Недостаточно префабов игроков или точек спавна.");
+            Debug.LogWarning(" С‚СѓС‚Р° РѕС€РёР±РєР°");
             yield break;
         }
 
