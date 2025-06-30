@@ -159,10 +159,9 @@ namespace DeathRoom.GameServer
             Console.WriteLine($"Network error: {socketError}");
         }
 
-		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer, PlayerState> playerHit, int damage) {
+		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer, PlayerState> playerHit, int damage, long tick) {
 			Console.WriteLine($"Player {shooter.Username} dealed {damage} damage to {playerHit.Value.Username}.");
-			playerHit.Value.HealthPoint -= damage;
-			if (playerHit.Value.HealthPoint <= 0)
+			if (playerHit.Value.TakeDamage(damage, tick))
 			{
 				Console.WriteLine($"Player {playerHit.Value.Username} died!");
 				// Disconnect and remove player
@@ -250,6 +249,7 @@ namespace DeathRoom.GameServer
                     }
                     var shooter = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == shooterState.Id);
                     var target = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == hitPacket.TargetId);
+					var currTick = hitPacket.ClientTick;
                     if (shooter == null || target == null)
                     {
                         Console.WriteLine($"[LagComp] Не найден стрелявший или цель в состоянии мира на тик {hitPacket.ClientTick}");
@@ -268,7 +268,7 @@ namespace DeathRoom.GameServer
                     if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) {
                         var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
                         if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
-                            OnHitRegistred(shooterState, hitPeer, 10);
+                            OnHitRegistred(shooterState, hitPeer, 10, currTick);
                         return;
                     }
                     // Checking top sphere
@@ -276,20 +276,25 @@ namespace DeathRoom.GameServer
                     if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) {
                         var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
                         if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
-                            OnHitRegistred(shooterState, hitPeer, 20);
+                            OnHitRegistred(shooterState, hitPeer, 20, currTick);
                         return;
                     }
                     // Checking cylinder
                     float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
-                    if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
+                    if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection && yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
                         var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
                         if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
-                            OnHitRegistred(shooterState, hitPeer, 10);
+                            OnHitRegistred(shooterState, hitPeer, 10, currTick);
                         return;
                     }
                     // Если ничего не сработало — промах
                 }
-            }
+            } else if (packet is PickUpArmorPacket pickArmorPacket) {
+                if (_players.TryGetValue(peer, out var playerState)) {
+					playerState.ObtainArmor(pickArmorPacket.ClientTick + (long)(200*60));
+					// TODO: send packet with armor expiration tick
+				}
+			}
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
