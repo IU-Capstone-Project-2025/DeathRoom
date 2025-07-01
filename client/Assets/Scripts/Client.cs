@@ -218,7 +218,7 @@ public class Client : MonoBehaviour
             Position = localPlayer.transform.position,
             Rotation = localPlayer.transform.eulerAngles
         };
-        SendPacket<PlayerMovePacket>(pkt);
+        SendPacket(pkt);
     }
 
     public void SendShoot(Vector3 direction, int targetId = -1)
@@ -226,7 +226,7 @@ public class Client : MonoBehaviour
         if (!isConnected) return;
 
         var sp = new PlayerShootPacket { Direction = direction };
-        SendPacket<PlayerShootPacket>(sp);
+        SendPacket(sp);
 
         if (targetId > 0)
         {
@@ -236,17 +236,21 @@ public class Client : MonoBehaviour
                 ClientTick = lastServerTick,
                 Direction = direction
             };
-            SendPacket<PlayerHitPacket>(hp);
+            SendPacket(hp);
         }
     }
 
-    void SendPacket<T>(T packet) where T : class
+    void SendPacket<T>(T packet) where T : IPacket
     {
-        if (!isConnected || serverPeer == null) return;
+        if (!isConnected || serverPeer == null) {
+			Debug.LogError($"Server connection lost.");
+			return;
+		}
 
         try
         {
-            var data = MessagePackSerializer.Serialize<T>(packet);
+            var data = MessagePackSerializer.Serialize<IPacket>(packet);
+			Debug.Log($"Serialized object: {MessagePackSerializer.ConvertToJson(data)}");
             serverPeer.Send(data, DeliveryMethod.ReliableOrdered);
         }
         catch (Exception e)

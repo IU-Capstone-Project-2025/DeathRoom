@@ -33,7 +33,7 @@ namespace DeathRoom.Common.network
         [Key(4)]
         public int Health { get; set; }
 
-        [Key(4)]
+        [Key(5)]
         public int MaxHealtPoint { get; set; }
     }
 
