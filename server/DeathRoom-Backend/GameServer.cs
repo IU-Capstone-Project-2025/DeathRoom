@@ -1,4 +1,5 @@
 using LiteNetLib;
+using MessagePack;
 using System.Net;
 using System.Net.Sockets;
 using DeathRoom.Common.dto;
@@ -98,7 +99,7 @@ namespace DeathRoom.GameServer
                         if (_worldStateHistory.Count > _worldStateHistoryLength)
                             _worldStateHistory.Dequeue();
                     }
-                    var data = PacketProcessor.Pack(worldStatePacket);
+                    var data = MessagePackSerializer.Serialize(worldStatePacket);
                     _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
                     await Task.Delay(_broadcastIntervalMs);
@@ -177,7 +178,7 @@ namespace DeathRoom.GameServer
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
         {
             var data = reader.GetRemainingBytes();
-            var (type, packet) = PacketProcessor.Unpack(data);
+			var packet = MessagePackSerializer.Deserialize<IPacket>(data);
 
             if (packet is LoginPacket loginPacket)
             {

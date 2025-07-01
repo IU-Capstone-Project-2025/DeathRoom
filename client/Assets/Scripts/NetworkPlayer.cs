@@ -1,4 +1,4 @@
-using DeathRoom.Network;
+using DeathRoom.Common.network;
 using UnityEngine;
 
 public class NetworkPlayer : MonoBehaviour {

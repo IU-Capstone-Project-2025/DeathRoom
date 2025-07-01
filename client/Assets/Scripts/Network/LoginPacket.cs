@@ -1,6 +1,6 @@
 using MessagePack;
 
-namespace DeathRoom.Network
+namespace DeathRoom.Common.network
 {
     [MessagePackObject]
     public class LoginPacket : IPacket

@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using MessagePack;
 using DeathRoom.Common.network;
-using DeathRoom.Network;
 
 public class Client : MonoBehaviour
 {
@@ -125,48 +124,26 @@ public class Client : MonoBehaviour
 
     void ProcessPacket(byte[] data)
     {
-        if (data.Length == 0) return;
+		var packet = MessagePackSerializer.Deserialize<IPacket>(data);
 
-        var packetType = (PacketType)data[0];
-        var packetData = new byte[data.Length - 1];
-        Buffer.BlockCopy(data, 1, packetData, 0, packetData.Length);
+		switch (packet) {
+			case WorldStatePacket worldState:
+				List<int> presentPlayers = new List<int>();
+				foreach (var ps in worldState.PlayerStates) {
+					UpdateNetworkPlayer(ps);
+					presentPlayers.Add(ps.PlayerId);
+				}
+				var toRemove = new List<int>();
+				foreach (var kvp in networkPlayers) {
+					if (!presentPlayers.Contains(kvp.Key)) toRemove.Add(kvp.Key);
+				}
+				toRemove.ForEach(RemoveNetworkPlayer);
+				break;
 
-        switch (packetType)
-        {
-            case PacketType.WorldState:
-                ProcessWorldStatePacket(packetData);
-                break;
-            default:
-                Debug.Log($"Unknown packet type: {packetType}");
-                break;
-        }
-    }
-
-    void ProcessWorldStatePacket(byte[] data)
-    {
-        try
-        {
-            var worldState = MessagePackSerializer.Deserialize<WorldStatePacket>(data);
-            lastServerTick = worldState.ServerTick;
-
-            foreach (var ps in worldState.Players.Values)
-            {
-                UpdateNetworkPlayer(ps);
-            }
-
-            var toRemove = new List<int>();
-            foreach (var kvp in networkPlayers)
-            {
-                if (!worldState.Players.ContainsKey(kvp.Key)) toRemove.Add(kvp.Key);
-            }
-
-            toRemove.ForEach(RemoveNetworkPlayer);
-
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error processing WorldState: {e}");
-        }
+			case null:
+                Debug.Log($"Unknown packet type.");
+				break;
+		}
     }
 
     void UpdateNetworkPlayer(PlayerState ps)
@@ -211,8 +188,8 @@ public class Client : MonoBehaviour
 
     void SendLoginPacket()
     {
-        var lp = new LoginPacket { Username = playerName };
-        SendPacket(PacketType.Login, lp);
+        var lp = new LoginPacket { Username = playerName, Password = "secret" };
+        SendPacket<LoginPacket>(lp);
         SpawnLocalPlayer();
     }
 
@@ -241,7 +218,7 @@ public class Client : MonoBehaviour
             Position = localPlayer.transform.position,
             Rotation = localPlayer.transform.eulerAngles
         };
-        SendPacket(PacketType.PlayerMove, pkt);
+        SendPacket<PlayerMovePacket>(pkt);
     }
 
     public void SendShoot(Vector3 direction, int targetId = -1)
@@ -249,7 +226,7 @@ public class Client : MonoBehaviour
         if (!isConnected) return;
 
         var sp = new PlayerShootPacket { Direction = direction };
-        SendPacket(PacketType.PlayerShoot, sp);
+        SendPacket<PlayerShootPacket>(sp);
 
         if (targetId > 0)
         {
@@ -259,25 +236,22 @@ public class Client : MonoBehaviour
                 ClientTick = lastServerTick,
                 Direction = direction
             };
-            SendPacket(PacketType.PlayerHit, hp);
+            SendPacket<PlayerHitPacket>(hp);
         }
     }
 
-    void SendPacket<T>(PacketType type, T packet) where T : class
+    void SendPacket<T>(T packet) where T : class
     {
         if (!isConnected || serverPeer == null) return;
 
         try
         {
-            var body = MessagePackSerializer.Serialize(packet);
-            var data = new byte[1 + body.Length];
-            data[0] = (byte)type;
-            Buffer.BlockCopy(body, 0, data, 1, body.Length);
+            var data = MessagePackSerializer.Serialize<T>(packet);
             serverPeer.Send(data, DeliveryMethod.ReliableOrdered);
         }
         catch (Exception e)
         {
-            Debug.LogError($"Error sending {type}: {e}");
+            Debug.LogError($"Error sending {typeof(T)}: {e}");
         }
     }
 

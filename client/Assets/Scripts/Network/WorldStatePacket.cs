@@ -2,18 +2,13 @@ using MessagePack;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace DeathRoom.Network
+namespace DeathRoom.Common.network
 {
     [MessagePackObject]
     public class WorldStatePacket : IPacket
     {
         [Key(0)]
-        public Dictionary<int, PlayerState> Players { get; set; }
-
-        public WorldStatePacket()
-        {
-            Players = new Dictionary<int, PlayerState>();
-        }
+        public List<PlayerState> PlayerStates{ get; set; }
         
         [Key(1)]
         public long ServerTick;
@@ -36,7 +31,10 @@ namespace DeathRoom.Network
         public Vector3Serializable Rotation { get; set; }
 
         [Key(4)]
-        public float Health { get; set; }
+        public int Health { get; set; }
+
+        [Key(4)]
+        public int MaxHealtPoint { get; set; }
     }
 
     [MessagePackObject]
