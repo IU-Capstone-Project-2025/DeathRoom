@@ -1,12 +1,12 @@
-name: Build and Deploy Server
+name: Production Build and Deploy Server
 
 on:
   push:
-    branches: [ dev, main, deploy ]
-    paths: [ 'server/**', '.github/workflows/server-deploy.yml' ]
+    branches: [ main ]
+    paths: [ 'server/**', '.github/workflows/**' ]
   pull_request:
-    branches: [ dev, main, deploy ]
-    paths: [ 'server/**' , '.github/workflows/server-deploy.yml' ]
+    branches: [ main ]
+    paths: [ 'server/**' , '.github/workflows/**' ]
 
 env:
   REGISTRY: ghcr.io
@@ -38,7 +38,7 @@ jobs:
         tags: |
           type=ref,event=branch
           type=ref,event=pr
-          type=sha,prefix={{branch}}-
+          type=sha,prefix=sha{{branch}}-
           latest
 
     - name: Build and push Docker image
@@ -61,10 +61,10 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
-          cd /opt/deathroom || exit 1
+          cd /opt/deathroom_prod || exit 1
           git pull 
           cd server
           docker compose pull
-          docker compose -f docker-compose.yml up -d --remove-orphans
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
           
           docker image prune -f
