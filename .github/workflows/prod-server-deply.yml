@@ -1,12 +1,9 @@
 name: Production Build and Deploy Server
 
 on:
-  push:
-    branches: [ main ]
-    paths: [ 'server/**', '.github/workflows/**' ]
   pull_request:
     branches: [ main ]
-    paths: [ 'server/**' , '.github/workflows/**' ]
+    types: [closed]
 
 env:
   REGISTRY: ghcr.io

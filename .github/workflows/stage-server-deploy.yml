@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: [ dev ]
     paths: [ 'server/**' , '.github/workflows/**' ]
+    types: [closed]
 
 env:
   REGISTRY: ghcr.io
