@@ -23,7 +23,9 @@ public class MultiplayerManager : MonoBehaviour {
         }
         
         if (string.IsNullOrEmpty(client.playerName)) {
-            client.playerName = defaultPlayerName + Random.Range(1000, 9999);
+            // Создаем уникальное имя для каждого клиента
+            string timestamp = System.DateTime.Now.Ticks.ToString();
+            client.playerName = defaultPlayerName + "_" + timestamp.Substring(timestamp.Length - 6);
         }
         
         ShowConnectingPanel();
