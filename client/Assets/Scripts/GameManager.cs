@@ -13,6 +13,15 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Проверяем, есть ли Client компонент (сетевая игра)
+        var client = FindObjectOfType<Client>();
+        if (client != null)
+        {
+            // В сетевой игре GameManager не должен спавнить игроков
+            Debug.Log("Network mode detected - GameManager will not spawn players");
+            return;
+        }
+        
         StartCoroutine(SpawnPlayersAfterDelay());
     }
 
