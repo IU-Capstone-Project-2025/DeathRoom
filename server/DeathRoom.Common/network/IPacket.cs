@@ -2,11 +2,11 @@ using MessagePack;
 
 namespace DeathRoom.Common.network
 {
-    [Union(0, typeof(PlayerMovePacket))]
-    [Union(1, typeof(WorldStatePacket))]
-    [Union(2, typeof(LoginPacket))]
+    [Union(0, typeof(LoginPacket))]
+    [Union(1, typeof(PlayerMovePacket))]
+    [Union(2, typeof(WorldStatePacket))]
     [Union(3, typeof(PlayerShootPacket))]
-    // Add other packet types here with unique integer keys
+    [Union(4, typeof(PlayerHitPacket))]
     public interface IPacket
     {
     }

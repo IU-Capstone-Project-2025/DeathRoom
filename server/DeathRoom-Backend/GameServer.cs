@@ -1,4 +1,5 @@
 using LiteNetLib;
+using MessagePack;
 using System.Net;
 using System.Net.Sockets;
 using DeathRoom.Common.dto;
@@ -57,9 +58,15 @@ namespace DeathRoom.GameServer
             {
                 _worldStateSaveInterval = sInt;
             }
+
+            var resolver = MessagePack.Resolvers.CompositeResolver.Create(
+                MessagePack.Resolvers.StandardResolver.Instance
+            );
+            var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+            MessagePackSerializer.DefaultOptions = options;
         }
 
-        public void Start()
+        public void StartEntry()
         {
             var portEnv = Environment.GetEnvironmentVariable("DEATHROOM_SERVER_PORT");
             var port = int.TryParse(portEnv, out var parsedPort) ? parsedPort : 9050;
@@ -98,7 +105,7 @@ namespace DeathRoom.GameServer
                         if (_worldStateHistory.Count > _worldStateHistoryLength)
                             _worldStateHistory.Dequeue();
                     }
-                    var data = PacketProcessor.Pack(worldStatePacket);
+                    var data = MessagePackSerializer.Serialize<IPacket>(worldStatePacket);
                     _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
                     await Task.Delay(_broadcastIntervalMs);
@@ -176,7 +183,7 @@ namespace DeathRoom.GameServer
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
         {
             var data = reader.GetRemainingBytes();
-            var (type, packet) = PacketProcessor.Unpack(data);
+			var packet = MessagePackSerializer.Deserialize<IPacket>(data);
 
             if (packet is LoginPacket loginPacket)
             {
@@ -307,7 +314,7 @@ namespace DeathRoom.GameServer
 
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            request.Accept();
+            request.AcceptIfKey("DeathRoomSecret");
         }
 
         private WorldStatePacket InterpolateWorldState(long tick, (long Tick, WorldStatePacket State) before, (long Tick, WorldStatePacket State) after)

@@ -9,11 +9,16 @@
   <component name="ChangeListManager">
     <list default="true" id="d5108191-2cff-4434-8711-b2ffe1911e82" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.DeathRoom/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.DeathRoom/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/DeathRoom-Backend/GameServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom-Backend/GameServer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/DeathRoom.Common/dto/PlayerState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom.Common/dto/PlayerState.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/DeathRoom.Common/network/PlayerMovePacket.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom.Common/network/PlayerMovePacket.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/DeathRoom.Common/network/PlayerShootPacket.cs" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom.Common/network/PlayerShootPacket.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/server.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/server/server.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assembly-CSharp-Editor.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assembly-CSharp-Editor.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assembly-CSharp.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assembly-CSharp.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/Client.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/Client.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/Assets/Scripts/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/client/Assets/Scripts/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/client.sln" beforeDir="false" afterPath="$PROJECT_DIR$/client/client.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom-Backend/DeathRoom-Backend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom-Backend/DeathRoom-Backend.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom.Common/DeathRoom.Common.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom.Common/DeathRoom.Common.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom.Data/DeathRoom.Data.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom.Data/DeathRoom.Data.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/DeathRoom.Tests/DeathRoom.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/server/DeathRoom.Tests/DeathRoom.Tests.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/server.csproj" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,44 +28,53 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Linktur"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Linktur&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/IU-Capstone-Project-2025/DeathRoom.git",
-    "accountId": "a3f8da66-54e7-4545-8c03-94a729566615"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/IU-Capstone-Project-2025/DeathRoom.git&quot;,
+    &quot;accountId&quot;: &quot;a3f8da66-54e7-4545-8c03-94a729566615&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c4970c9b34a945f3810790108550d07ccd30/83/3bcb55a4/IHostBuilder.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/a77b231cea33ff338c41dc7869d6c493d4dae137ff51e342173efa61d933/Task.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/acc3e6e5f85e7174c16f6fd86bfc988df4815a736791e6f3d736ed79b8436e/CancellationTokenSource.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/d5e26b7cbc3c8ffaa5eb6b56961c2ddefd21293d38d4a648eeb54d2d127492de/Environment.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/client/Assets/Scripts/Client.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/server/DeathRoom-Backend/GameServer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/server/DeathRoom.Common/dto/PlayerState.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/server/DeathRoom.Common/network/WorldStatePacket.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/server/DeathRoom.Data/GameDbContext.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/server/obj/Debug/net8.0/server.AssemblyInfo.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="false" />
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="Toolset" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2yxdVI4jYvbGt7kiInLhy6xzlDP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "tick",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Client/Server-connection&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -70,12 +84,18 @@
       <option name="presentableId" value="Default" />
       <updated>1750780182347</updated>
       <workItem from="1750780183911" duration="4061000" />
+      <workItem from="1750877749310" duration="4626000" />
+      <workItem from="1750887804839" duration="641000" />
+      <workItem from="1751034794375" duration="7556000" />
+      <workItem from="1751104818377" duration="6274000" />
+      <workItem from="1751199832292" duration="729000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="false" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="LOCAL_CHANGES_DETAILS_PREVIEW_SHOWN" value="false" />
