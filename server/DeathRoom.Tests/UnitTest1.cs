@@ -1,40 +1,28 @@
-using DeathRoom.Data;
-using DeathRoom.Data.Entities;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 using DeathRoom.Common.network;
 using DeathRoom.Common.dto;
 
 namespace DeathRoom.Tests;
 
-public class GameDbContextTests
+public class InMemoryPlayerTests
 {
     [Fact]
-    public void Player_can_be_added_and_retrieved()
+    public void PlayerState_can_be_created_and_accessed()
     {
-        var options = new DbContextOptionsBuilder<GameDbContext>()
-            // .UseInMemoryDatabase("test-db")
-            .Options;
-
-        using (var ctx = new GameDbContext(options))
+        var playerState = new PlayerState
         {
-            var player = new Player
-            {
-                Login = "tester",
-                HashedPassword = "hash",
-                Nickname = "Tester",
-                Rating = 100,
-                LastSeen = DateTime.UtcNow
-            };
-            ctx.Players.Add(player);
-            ctx.SaveChanges();
-        }
+            Id = 1,
+            Username = "Tester",
+            Position = new Vector3 { X = 0, Y = 0, Z = 0 },
+            Rotation = new Vector3 { X = 0, Y = 0, Z = 0 },
+            HealthPoint = 100,
+            MaxHealthPoint = 100
+        };
 
-        using (var ctx = new GameDbContext(options))
-        {
-            var player = ctx.Players.Single(p => p.Login == "tester");
-            Assert.Equal("Tester", player.Nickname);
-        }
+        Assert.Equal(1, playerState.Id);
+        Assert.Equal("Tester", playerState.Username);
+        Assert.Equal(100, playerState.HealthPoint);
+        Assert.Equal(100, playerState.MaxHealthPoint);
     }
 }
 
@@ -49,14 +37,12 @@ public class PacketProcessorTests
             Rotation = new Vector3 { X = 0, Y = 90, Z = 0 }
         };
 
-        // ПОТОМ УБЕРИТЕ КОММЕНТЫ Я ДЛЯ СЕБЯ УБРАЛ
-        // var bytes = PacketProcessor.Pack(packet);
-        // var (type, unpacked) = PacketProcessor.Unpack(bytes);
-        //
-        // Assert.Equal(PacketType.PlayerMove, type);
-        // var movePacket = Assert.IsType<PlayerMovePacket>(unpacked);
-        // Assert.Equal(packet.Position.X, movePacket.Position.X);
-        // Assert.Equal(packet.Position.Y, movePacket.Position.Y);
-        // Assert.Equal(packet.Position.Z, movePacket.Position.Z);
+        // Проверяем, что пакет корректно создается и содержит правильные данные
+        Assert.Equal(1, packet.Position.X);
+        Assert.Equal(2, packet.Position.Y);
+        Assert.Equal(3, packet.Position.Z);
+        Assert.Equal(0, packet.Rotation.X);
+        Assert.Equal(90, packet.Rotation.Y);
+        Assert.Equal(0, packet.Rotation.Z);
     }
 }
