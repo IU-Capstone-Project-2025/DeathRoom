@@ -74,7 +74,7 @@ public class NetworkPlayer : MonoBehaviour {
         targetRotation = rot;
         lastPosition = pos;
         
-        Debug.Log($"NetworkPlayer initialized: {Username} at {pos}");
+        Debug.Log($"NetworkPlayer initialized: {Username} (ID: {PlayerId}) at {pos}");
     }
     
     public void UpdateState(PlayerState newState) {
@@ -90,11 +90,16 @@ public class NetworkPlayer : MonoBehaviour {
         );
         
         float distance = Vector3.Distance(transform.position, newPosition);
+        
+        // Добавляем логирование для отладки
+        Debug.Log($"NetworkPlayer {Username} (ID: {PlayerId}) update: pos {newPosition}, distance {distance:F2}");
+        
         if (distance > maxDistance) {
             transform.position = newPosition;
             transform.rotation = newRotation;
             targetPosition = newPosition;
             targetRotation = newRotation;
+            Debug.Log($"NetworkPlayer {Username} teleported due to large distance: {distance:F2}");
         } else {
             targetPosition = newPosition;
             targetRotation = newRotation;
