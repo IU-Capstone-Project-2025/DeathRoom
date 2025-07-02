@@ -5,8 +5,6 @@ using System.Net.Sockets;
 using DeathRoom.Common.dto;
 using System.Collections.Concurrent;
 using DeathRoom.Common.network;
-using DeathRoom.Data;
-using DeathRoom.Data.Entities;
 
 namespace DeathRoom.GameServer
 {
@@ -20,7 +18,6 @@ namespace DeathRoom.GameServer
         private readonly NetManager _netManager;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
         private readonly ConcurrentDictionary<NetPeer, PlayerState> _players = new();
-        private readonly GameDbContext _dbContext;
 
         private readonly int _broadcastIntervalMs = 15;
         private readonly int _idleIntervalMs = 100;
@@ -35,10 +32,9 @@ namespace DeathRoom.GameServer
 
 		private float angleCos(Vector3 first, Vector3 second) { return (first*second)/(!first*!second); }
 
-        public GameServer(GameDbContext dbContext)
+        public GameServer()
         {
             _netManager = new NetManager(this);
-            _dbContext = dbContext;
 
             if (int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_BROADCAST_INTERVAL_MS"), out var bInt) && bInt > 0)
             {
@@ -345,7 +341,7 @@ namespace DeathRoom.GameServer
             );
         }
 
-        public WorldStatePacket GetWorldStateAtTick(long tick)
+        public WorldStatePacket? GetWorldStateAtTick(long tick)
         {
             if (_worldStateHistory.Count == 0) return null;
             var arr = _worldStateHistory.ToArray();
