@@ -62,7 +62,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
           cd /opt/deathroom || exit 1
-                    
+          git pull 
           cd server
           docker compose pull
           docker compose -f docker-compose.yml up -d --remove-orphans
