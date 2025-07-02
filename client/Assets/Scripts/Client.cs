@@ -27,7 +27,6 @@ public class Client : MonoBehaviour
     private NetPeer serverPeer;
 
     public GameObject localPlayer;
-    private PlayerMovement localPlayerMovement;
     public Dictionary<int, NetworkPlayer> networkPlayers = new Dictionary<int, NetworkPlayer>();
 
     private float sendRate = 20f; // 20 updates per second
@@ -133,8 +132,6 @@ public class Client : MonoBehaviour
     {
         try
         {
-            Debug.Log($"Received data length: {data.Length}");
-            Debug.Log($"Raw data hex: {BitConverter.ToString(data)}");
             var packet = MessagePackSerializer.Deserialize<IPacket>(data, MessagePackSerializer.DefaultOptions);
             
             switch (packet)
@@ -168,7 +165,7 @@ public class Client : MonoBehaviour
 
     void UpdateNetworkPlayer(PlayerState ps)
     {
-        if (localPlayerMovement != null && ps.Username == playerName) return;
+        if (ps.Username == playerName) return;
 
         if (!networkPlayers.ContainsKey(ps.Id))
         {
@@ -223,15 +220,12 @@ public class Client : MonoBehaviour
         }
         Vector3 spawn = GetRandomSpawnPoint();
         localPlayer = Instantiate(localPlayerPrefab, spawn, Quaternion.identity);
-        localPlayerMovement = localPlayer.GetComponent<PlayerMovement>();
-        if (localPlayerMovement == null)
-            Debug.LogError("Local prefab lacks PlayerMovement!");
         Debug.Log($"Spawned local player {playerName}");
     }
 
     void SendPlayerMovement()
     {
-        if (localPlayerMovement == null) return;
+        if (localPlayer == null) return;
 
         var pkt = new PlayerMovePacket
         {

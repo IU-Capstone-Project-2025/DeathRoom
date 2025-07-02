@@ -531,8 +531,7 @@ MonoBehaviour:
     type: 3}
   spawnPoints:
   - {fileID: 412151086}
-  localPlayer: {fileID: 8647007826477569418, guid: e80a889cc67959541beebb43b9aa4bf9,
-    type: 3}
+  localPlayer: {fileID: 0}
   isConnected: 0
 --- !u!114 &145539019
 MonoBehaviour:
