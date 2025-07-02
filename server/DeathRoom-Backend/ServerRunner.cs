@@ -8,7 +8,7 @@ namespace DeathRoom.GameServer;
 public class ServerRunner : IHostedService
 {
     private readonly IServiceProvider _provider;
-    private IServiceScope? _scope;
+    private IServiceScope _scope;
     private GameServer? _gameServer;
 
     public ServerRunner(IServiceProvider provider)
@@ -20,7 +20,7 @@ public class ServerRunner : IHostedService
     {
         _scope = _provider.CreateScope();
         _gameServer = _scope.ServiceProvider.GetRequiredService<GameServer>();
-        _gameServer.Start();
+        _gameServer.StartEntry();
         return Task.CompletedTask;
     }
 

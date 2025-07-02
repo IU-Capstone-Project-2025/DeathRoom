@@ -97,7 +97,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // Измененная логика спринта
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero)
         {
             if (crouch)
@@ -223,4 +223,10 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(duration);
         isReload = false;
     }
+
+    public void LaunchUpward(float force)
+    {
+        gravity = force;
+    }
+
 }

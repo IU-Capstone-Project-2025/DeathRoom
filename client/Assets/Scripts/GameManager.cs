@@ -13,6 +13,15 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё Client РєРѕРјРїРѕРЅРµРЅС‚ (СЃРµС‚РµРІР°СЏ РёРіСЂР°)
+        var client = FindObjectOfType<Client>();
+        if (client != null)
+        {
+            // Р’ СЃРµС‚РµРІРѕР№ РёРіСЂРµ GameManager РЅРµ РґРѕР»Р¶РµРЅ СЃРїР°РІРЅРёС‚СЊ РёРіСЂРѕРєРѕРІ
+            Debug.Log("Network mode detected - GameManager will not spawn players");
+            return;
+        }
+        
         StartCoroutine(SpawnPlayersAfterDelay());
     }
 
@@ -38,7 +47,7 @@ public class GameManager : MonoBehaviour
         int spawnCount = Mathf.Min(playerPrefabs.Count, spawnPoints.Count);
         if (spawnCount == 0)
         {
-            Debug.LogWarning("Недостаточно префабов игроков или точек спавна.");
+            Debug.LogWarning(".");
             yield break;
         }
 

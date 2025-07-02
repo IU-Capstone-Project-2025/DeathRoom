@@ -1,4 +1,5 @@
 using LiteNetLib;
+using MessagePack;
 using System.Net;
 using System.Net.Sockets;
 using DeathRoom.Common.dto;
@@ -57,9 +58,15 @@ namespace DeathRoom.GameServer
             {
                 _worldStateSaveInterval = sInt;
             }
+
+            var resolver = MessagePack.Resolvers.CompositeResolver.Create(
+                MessagePack.Resolvers.StandardResolver.Instance
+            );
+            var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+            MessagePackSerializer.DefaultOptions = options;
         }
 
-        public void Start()
+        public void StartEntry()
         {
             var portEnv = Environment.GetEnvironmentVariable("DEATHROOM_SERVER_PORT");
             var port = int.TryParse(portEnv, out var parsedPort) ? parsedPort : 9050;
@@ -98,7 +105,7 @@ namespace DeathRoom.GameServer
                         if (_worldStateHistory.Count > _worldStateHistoryLength)
                             _worldStateHistory.Dequeue();
                     }
-                    var data = PacketProcessor.Pack(worldStatePacket);
+                    var data = MessagePackSerializer.Serialize<IPacket>(worldStatePacket);
                     _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
                     await Task.Delay(_broadcastIntervalMs);
@@ -159,10 +166,9 @@ namespace DeathRoom.GameServer
             Console.WriteLine($"Network error: {socketError}");
         }
 
-		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer, PlayerState> playerHit, int damage) {
+		public void OnHitRegistred(PlayerState shooter, KeyValuePair<NetPeer, PlayerState> playerHit, int damage, long tick) {
 			Console.WriteLine($"Player {shooter.Username} dealed {damage} damage to {playerHit.Value.Username}.");
-			playerHit.Value.HealthPoint -= damage;
-			if (playerHit.Value.HealthPoint <= 0)
+			if (playerHit.Value.TakeDamage(damage, tick))
 			{
 				Console.WriteLine($"Player {playerHit.Value.Username} died!");
 				// Disconnect and remove player
@@ -177,7 +183,7 @@ namespace DeathRoom.GameServer
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)
         {
             var data = reader.GetRemainingBytes();
-            var (type, packet) = PacketProcessor.Unpack(data);
+			var packet = MessagePackSerializer.Deserialize<IPacket>(data);
 
             if (packet is LoginPacket loginPacket)
             {
@@ -250,6 +256,7 @@ namespace DeathRoom.GameServer
                     }
                     var shooter = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == shooterState.Id);
                     var target = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == hitPacket.TargetId);
+					var currTick = hitPacket.ClientTick;
                     if (shooter == null || target == null)
                     {
                         Console.WriteLine($"[LagComp] Не найден стрелявший или цель в состоянии мира на тик {hitPacket.ClientTick}");
@@ -268,7 +275,7 @@ namespace DeathRoom.GameServer
                     if(!botRadius/Math.Sqrt(!botRadius*!botRadius-1)<=angleCos(botRadius, shootDir)) {
                         var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
                         if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
-                            OnHitRegistred(shooterState, hitPeer, 10);
+                            OnHitRegistred(shooterState, hitPeer, 10, currTick);
                         return;
                     }
                     // Checking top sphere
@@ -276,20 +283,25 @@ namespace DeathRoom.GameServer
                     if(!topRadius/Math.Sqrt(!topRadius*!topRadius-1)<=angleCos(topRadius, shootDir)) {
                         var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
                         if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
-                            OnHitRegistred(shooterState, hitPeer, 20);
+                            OnHitRegistred(shooterState, hitPeer, 20, currTick);
                         return;
                     }
                     // Checking cylinder
                     float yIntersection = shootDir.Y * !radProj/(radius.X*shootDir.X + radius.Z*shootDir.Z);
-                    if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection || yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
+                    if(radius.Y - CYLINDER_RELATIVE_HEIGHT <= yIntersection && yIntersection <= radius.Y + CYLINDER_RELATIVE_HEIGHT) {
                         var hitPeer = _players.FirstOrDefault(p => p.Value.Id == target.Id);
                         if (!hitPeer.Equals(default(KeyValuePair<NetPeer, PlayerState>)))
-                            OnHitRegistred(shooterState, hitPeer, 10);
+                            OnHitRegistred(shooterState, hitPeer, 10, currTick);
                         return;
                     }
                     // Если ничего не сработало — промах
                 }
-            }
+            } else if (packet is PickUpArmorPacket pickArmorPacket) {
+                if (_players.TryGetValue(peer, out var playerState)) {
+					playerState.ObtainArmor(pickArmorPacket.ClientTick + (long)(200*60));
+					// TODO: send packet with armor expiration tick
+				}
+			}
         }
 
         public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
@@ -302,7 +314,7 @@ namespace DeathRoom.GameServer
 
         public void OnConnectionRequest(ConnectionRequest request)
         {
-            request.Accept();
+            request.AcceptIfKey("DeathRoomSecret");
         }
 
         private WorldStatePacket InterpolateWorldState(long tick, (long Tick, WorldStatePacket State) before, (long Tick, WorldStatePacket State) after)

@@ -1,0 +1,9 @@
+services:
+  deathroom-server:
+    image: ghcr.io/iu-capstone-project-2025/deathroom/server:latest
+    container_name: deathroom-server
+    ports:
+      - "9050:9050"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    restart: unless-stopped
