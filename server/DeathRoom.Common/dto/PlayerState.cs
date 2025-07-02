@@ -46,8 +46,13 @@ namespace DeathRoom.Common.dto
 			} else if ( this.ArmorPoint > 0) {
 				damage -= this.ArmorPoint;
 				this.ArmorPoint = 0;
-			} else { this.HealthPoint -= damage; }
-			if (this.HealthPoint <= 0) { return true; }
+			}
+			
+			this.HealthPoint -= damage;
+			if (this.HealthPoint <= 0) { 
+				this.HealthPoint = 0; // Не даём здоровью стать отрицательным
+				return true; 
+			}
 			return false;
 		}
 
