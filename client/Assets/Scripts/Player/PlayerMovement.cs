@@ -223,4 +223,10 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(duration);
         isReload = false;
     }
+
+    public void LaunchUpward(float force)
+    {
+        gravity = force;
+    }
+
 }
