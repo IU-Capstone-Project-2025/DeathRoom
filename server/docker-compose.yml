@@ -1,6 +1,6 @@
 services:
   deathroom-server:
-    image: ghcr.io/${GITHUB_REPOSITORY,,}/server:latest
+    image: ghcr.io/iu-capstone-project-2025/deathroom/server:latest
     container_name: deathroom-server
     ports:
       - "9050:9050"

@@ -62,9 +62,9 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         script: |
           cd /opt/deathroom || exit 1
-          
-          docker pull ghcr.io/${{ github.repository }}/server:latest
-          
-          docker-compose -f docker-compose.prod.yml up -d
+                    
+          cd server
+          docker compose pull
+          docker compose -f docker-compose.yml up -d --remove-orphans
           
           docker image prune -f
