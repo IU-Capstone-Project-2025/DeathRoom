@@ -97,7 +97,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // Измененная логика спринта
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero)
         {
             if (crouch)
