@@ -105,7 +105,7 @@ namespace DeathRoom.GameServer
                         if (_worldStateHistory.Count > _worldStateHistoryLength)
                             _worldStateHistory.Dequeue();
                     }
-                    var data = MessagePackSerializer.Serialize(worldStatePacket);
+                    var data = MessagePackSerializer.Serialize<IPacket>(worldStatePacket);
                     _netManager.SendToAll(data, DeliveryMethod.Unreliable);
 
                     await Task.Delay(_broadcastIntervalMs);
