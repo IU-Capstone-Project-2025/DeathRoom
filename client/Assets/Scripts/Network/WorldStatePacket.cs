@@ -1,5 +1,6 @@
 using MessagePack;
 using System.Collections.Generic;
+using DeathRoom.Common.dto;
 using UnityEngine;
 
 namespace DeathRoom.Common.network
@@ -19,7 +20,7 @@ namespace DeathRoom.Common.network
     public class PlayerState
     {
         [Key(0)]
-        public int PlayerId { get; set; }
+        public int Id { get; set; }
         
         [Key(1)]
         public string Username { get; set; }
@@ -31,44 +32,10 @@ namespace DeathRoom.Common.network
         public Vector3Serializable Rotation { get; set; }
 
         [Key(4)]
-        public int Health { get; set; }
+        public int HealthPoint { get; set; }
 
         [Key(5)]
-        public int MaxHealtPoint { get; set; }
+        public int MaxHealthPoint { get; set; }
     }
-
-    [MessagePackObject]
-    public struct Vector3Serializable
-    {
-        [Key(0)]
-        public float X { get; set; }
-
-        [Key(1)]
-        public float Y { get; set; }
-
-        [Key(2)]
-        public float Z { get; set; }
-
-        public Vector3Serializable(Vector3 vector)
-        {
-            X = vector.x;
-            Y = vector.y;
-            Z = vector.z;
-        }
-
-        public Vector3 ToVector3()
-        {
-            return new Vector3(X, Y, Z);
-        }
-
-        public static implicit operator Vector3Serializable(Vector3 vector)
-        {
-            return new Vector3Serializable(vector);
-        }
-
-        public static implicit operator Vector3(Vector3Serializable serializable)
-        {
-            return serializable.ToVector3();
-        }
-    }
+    
 } 

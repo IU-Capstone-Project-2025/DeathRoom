@@ -4,6 +4,7 @@ using UnityEngine;
 using LiteNetLib;
 using System.Net;
 using System.Net.Sockets;
+using DeathRoom.Common.dto;
 using MessagePack;
 using DeathRoom.Common.network;
 
@@ -37,6 +38,12 @@ public class Client : MonoBehaviour
 
     void Start()
     {
+        var resolver = MessagePack.Resolvers.CompositeResolver.Create(
+            MessagePack.Resolvers.StandardResolver.Instance
+        );
+        var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+        MessagePackSerializer.DefaultOptions = options;
+        
         InitializeNetwork();
         ConnectToServer();
     }
@@ -124,39 +131,52 @@ public class Client : MonoBehaviour
 
     void ProcessPacket(byte[] data)
     {
-		var packet = MessagePackSerializer.Deserialize<IPacket>(data);
+        try
+        {
+            Debug.Log($"Received data length: {data.Length}");
+            Debug.Log($"Raw data hex: {BitConverter.ToString(data)}");
+            var packet = MessagePackSerializer.Deserialize<IPacket>(data, MessagePackSerializer.DefaultOptions);
+            
+            switch (packet)
+            {
+                case WorldStatePacket worldState:
+                    Debug.Log($"Processing WorldStatePacket with {worldState.PlayerStates?.Count} players");
+                    List<int> presentPlayers = new List<int>();
+                    foreach (var ps in worldState.PlayerStates)
+                    {
+                        UpdateNetworkPlayer(ps);
+                        presentPlayers.Add(ps.Id);
+                    }
+                    var toRemove = new List<int>();
+                    foreach (var kvp in networkPlayers)
+                    {
+                        if (!presentPlayers.Contains(kvp.Key)) toRemove.Add(kvp.Key);
+                    }
+                    toRemove.ForEach(RemoveNetworkPlayer);
+                    break;
 
-		switch (packet) {
-			case WorldStatePacket worldState:
-				List<int> presentPlayers = new List<int>();
-				foreach (var ps in worldState.PlayerStates) {
-					UpdateNetworkPlayer(ps);
-					presentPlayers.Add(ps.PlayerId);
-				}
-				var toRemove = new List<int>();
-				foreach (var kvp in networkPlayers) {
-					if (!presentPlayers.Contains(kvp.Key)) toRemove.Add(kvp.Key);
-				}
-				toRemove.ForEach(RemoveNetworkPlayer);
-				break;
-
-			case null:
-                Debug.Log($"Unknown packet type.");
-				break;
-		}
+                case null:
+                    Debug.LogError("Unknown packet type");
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error processing packet: {e}");
+        }
     }
 
     void UpdateNetworkPlayer(PlayerState ps)
     {
         if (localPlayerMovement != null && ps.Username == playerName) return;
 
-        if (!networkPlayers.ContainsKey(ps.PlayerId))
+        if (!networkPlayers.ContainsKey(ps.Id))
         {
             CreateNetworkPlayer(ps);
         }
         else
         {
-            networkPlayers[ps.PlayerId]?.UpdateState(ps);
+            networkPlayers[ps.Id]?.UpdateState(ps);
         }
     }
 
@@ -172,8 +192,8 @@ public class Client : MonoBehaviour
         GameObject go = Instantiate(networkPlayerPrefab, spawnPos, Quaternion.identity);
         var nw = go.GetComponent<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
         nw.Initialize(ps);
-        networkPlayers[ps.PlayerId] = nw;
-        Debug.Log($"Created network player {ps.Username} (ID {ps.PlayerId})");
+        networkPlayers[ps.Id] = nw;
+        Debug.Log($"Created network player {ps.Username} (ID {ps.Id})");
     }
 
     void RemoveNetworkPlayer(int id)
@@ -215,8 +235,9 @@ public class Client : MonoBehaviour
 
         var pkt = new PlayerMovePacket
         {
-            Position = localPlayer.transform.position,
-            Rotation = localPlayer.transform.eulerAngles
+            Position = new Vector3Serializable(localPlayer.transform.position),
+            Rotation = new Vector3Serializable(localPlayer.transform.eulerAngles),
+            ClientTick = lastServerTick
         };
         SendPacket(pkt);
     }
@@ -225,7 +246,10 @@ public class Client : MonoBehaviour
     {
         if (!isConnected) return;
 
-        var sp = new PlayerShootPacket { Direction = direction };
+        var sp = new PlayerShootPacket { 
+            Direction = new Vector3Serializable(direction),
+            ClientTick = lastServerTick 
+        };
         SendPacket(sp);
 
         if (targetId > 0)
@@ -234,7 +258,7 @@ public class Client : MonoBehaviour
             {
                 TargetId = targetId,
                 ClientTick = lastServerTick,
-                Direction = direction
+                Direction = new Vector3Serializable(direction)
             };
             SendPacket(hp);
         }
@@ -242,20 +266,22 @@ public class Client : MonoBehaviour
 
     void SendPacket<T>(T packet) where T : IPacket
     {
-        if (!isConnected || serverPeer == null) {
-			Debug.LogError($"Server connection lost.");
-			return;
-		}
+        if (!isConnected || serverPeer == null)
+        {
+            Debug.LogError($"Server connection lost.");
+            return;
+        }
 
         try
         {
-            var data = MessagePackSerializer.Serialize<IPacket>(packet);
-			Debug.Log($"Serialized object: {MessagePackSerializer.ConvertToJson(data)}");
+            var data = MessagePackSerializer.Serialize<IPacket>(packet, MessagePackSerializer.DefaultOptions);
+            Debug.Log($"Sending packet type: {packet.GetType().Name}, size: {data.Length}");
             serverPeer.Send(data, DeliveryMethod.ReliableOrdered);
         }
         catch (Exception e)
         {
             Debug.LogError($"Error sending {typeof(T)}: {e}");
+            Debug.LogError($"Stack trace: {e.StackTrace}");
         }
     }
 

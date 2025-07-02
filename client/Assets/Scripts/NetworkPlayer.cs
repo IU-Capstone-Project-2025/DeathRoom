@@ -1,4 +1,5 @@
 using DeathRoom.Common.network;
+using DeathRoom.Common.dto;
 using UnityEngine;
 
 public class NetworkPlayer : MonoBehaviour {
@@ -56,11 +57,15 @@ public class NetworkPlayer : MonoBehaviour {
     public void Initialize(PlayerState playerState) {
         currentState = playerState;
         Username = playerState.Username;
-        PlayerId = playerState.PlayerId;
+        PlayerId = playerState.Id;
         
-        // Сразу устанавливаем позицию без интерполяции
-        var pos = new Vector3(playerState.Position.X, playerState.Position.Y, playerState.Position.Z);
-        var rot = Quaternion.Euler(playerState.Rotation.X, playerState.Rotation.Y, playerState.Rotation.Z);
+      
+        var pos = playerState.Position.ToUnityVector3();
+        var rot = Quaternion.Euler(
+            playerState.Rotation.X,
+            playerState.Rotation.Y,
+            playerState.Rotation.Z
+        );
         
         transform.position = pos;
         transform.rotation = rot;
@@ -76,25 +81,25 @@ public class NetworkPlayer : MonoBehaviour {
         if (newState == null) return;
         
         currentState = newState;
+
+        Vector3 newPosition = newState.Position.ToUnityVector3();
+        Quaternion newRotation = Quaternion.Euler(
+            newState.Rotation.X,
+            newState.Rotation.Y,
+            newState.Rotation.Z
+        );
         
-        Vector3 newPosition = new Vector3(newState.Position.X, newState.Position.Y, newState.Position.Z);
-        Quaternion newRotation = Quaternion.Euler(newState.Rotation.X, newState.Rotation.Y, newState.Rotation.Z);
-        
-        // Проверяем, нужно ли телепортировать игрока (слишком большая дистанция)
         float distance = Vector3.Distance(transform.position, newPosition);
         if (distance > maxDistance) {
-            // Телепортируем сразу
             transform.position = newPosition;
             transform.rotation = newRotation;
             targetPosition = newPosition;
             targetRotation = newRotation;
         } else {
-            // Плавная интерполяция
             targetPosition = newPosition;
             targetRotation = newRotation;
         }
         
-        // Обновляем анимацию
         UpdateAnimation();
     }
     
@@ -128,7 +133,7 @@ public class NetworkPlayer : MonoBehaviour {
         
         // Здоровье игрока для анимации смерти
         if (currentState != null) {
-            bool isDead = currentState.Health <= 0;
+            bool isDead = currentState.HealthPoint <= 0;
             animator.SetBool("Dead", isDead);
         }
     }

@@ -1,3 +1,4 @@
+using DeathRoom.Common.dto;
 using MessagePack;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace DeathRoom.Common.network
     public class PlayerShootPacket : IPacket
     {
         [Key(0)]
-        public Vector3Serializable Position { get; set; }
+        public long ClientTick { get; set; }
 
         [Key(1)]
         public Vector3Serializable Direction { get; set; }

@@ -1,3 +1,4 @@
+using DeathRoom.Common.dto;
 using MessagePack;
 using UnityEngine;
 
@@ -11,5 +12,8 @@ namespace DeathRoom.Common.network
 
         [Key(1)]
         public Vector3Serializable Rotation { get; set; }
+        
+        [Key(2)]
+        public long ClientTick { get; set; }
     }
 } 

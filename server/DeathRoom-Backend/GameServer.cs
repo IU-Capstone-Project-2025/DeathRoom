@@ -58,6 +58,12 @@ namespace DeathRoom.GameServer
             {
                 _worldStateSaveInterval = sInt;
             }
+
+            var resolver = MessagePack.Resolvers.CompositeResolver.Create(
+                MessagePack.Resolvers.StandardResolver.Instance
+            );
+            var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
+            MessagePackSerializer.DefaultOptions = options;
         }
 
         public void StartEntry()

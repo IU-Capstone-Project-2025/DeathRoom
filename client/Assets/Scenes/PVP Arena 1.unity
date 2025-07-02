@@ -465,7 +465,7 @@ Transform:
   m_GameObject: {fileID: 145539015}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.79205745, y: 2.1304135, z: 2.6405659}
+  m_LocalPosition: {x: 2, y: 2.1304135, z: 2.6405659}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -525,11 +525,12 @@ MonoBehaviour:
   serverAddress: localhost
   serverPort: 9050
   playerName: Player
-  localPlayerPrefab: {fileID: 8647007826477569418, guid: 1767d81102f39404caf39c3f15b54889,
+  localPlayerPrefab: {fileID: 8647007826477569418, guid: e80a889cc67959541beebb43b9aa4bf9,
     type: 3}
   networkPlayerPrefab: {fileID: 8647007826477569418, guid: e80a889cc67959541beebb43b9aa4bf9,
     type: 3}
-  spawnPoints: []
+  spawnPoints:
+  - {fileID: 412151086}
   localPlayer: {fileID: 8647007826477569418, guid: e80a889cc67959541beebb43b9aa4bf9,
     type: 3}
   isConnected: 0
@@ -5456,7 +5457,6 @@ GameObject:
   - component: {fileID: 1887802308}
   - component: {fileID: 1887802307}
   - component: {fileID: 1887802306}
-  - component: {fileID: 1887802310}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -5582,26 +5582,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
---- !u!114 &1887802310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1887802305}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ebbdd4fc3168564f9d101aadab17c41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serverAddress: localhost
-  serverPort: 9050
-  playerName: Player
-  localPlayerPrefab: {fileID: 0}
-  networkPlayerPrefab: {fileID: 0}
-  spawnPoints: []
-  localPlayer: {fileID: 0}
-  isConnected: 0
 --- !u!1 &1900078409
 GameObject:
   m_ObjectHideFlags: 0
