@@ -33,8 +33,8 @@ public class PacketProcessorTests
     {
         var packet = new PlayerMovePacket
         {
-            Position = new Vector3 { X = 1, Y = 2, Z = 3 },
-            Rotation = new Vector3 { X = 0, Y = 90, Z = 0 }
+            Position = new Vector3Serializable { X = 1, Y = 2, Z = 3 },
+            Rotation = new Vector3Serializable { X = 0, Y = 90, Z = 0 }
         };
 
         // Проверяем, что пакет корректно создается и содержит правильные данные

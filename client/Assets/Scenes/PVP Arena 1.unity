@@ -447,8 +447,8 @@ GameObject:
   m_Component:
   - component: {fileID: 145539016}
   - component: {fileID: 145539017}
+  - component: {fileID: 145539018}
   - component: {fileID: 145539019}
-  - component: {fileID: 145539020}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -478,7 +478,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 145539015}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b6373075572ca74f97410ca22efa9d9, type: 3}
   m_Name: 
@@ -509,24 +509,7 @@ MonoBehaviour:
   spawnDelay: 3
   countDownText: {fileID: 811000152}
   camToTurnOff: {fileID: 1887802308}
---- !u!114 &145539019
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 145539015}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f8093e1577f75845af5a1eb99a30ffa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  connectingPanel: {fileID: 0}
-  gameUI: {fileID: 0}
-  statusText: {fileID: 0}
-  playersCountText: {fileID: 0}
-  defaultPlayerName: Player
---- !u!114 &145539020
+--- !u!114 &145539018
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -547,9 +530,20 @@ MonoBehaviour:
     type: 3}
   spawnPoints:
   - {fileID: 369769488}
-  - {fileID: 1082449784}
   localPlayer: {fileID: 0}
   isConnected: 0
+--- !u!114 &145539019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 145539015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef1f94a28d54b6845b3c480341fac9d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &166482534
 GameObject:
   m_ObjectHideFlags: 0
@@ -5493,7 +5487,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1887802306
 MonoBehaviour:
   m_ObjectHideFlags: 0

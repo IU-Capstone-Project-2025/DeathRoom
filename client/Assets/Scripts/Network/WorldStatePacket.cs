@@ -1,7 +1,6 @@
 using MessagePack;
 using System.Collections.Generic;
 using DeathRoom.Common.dto;
-using UnityEngine;
 
 namespace DeathRoom.Common.network
 {
@@ -9,10 +8,10 @@ namespace DeathRoom.Common.network
     public class WorldStatePacket : IPacket
     {
         [Key(0)]
-        public List<PlayerState> PlayerStates{ get; set; }
+        public List<PlayerState> PlayerStates { get; set; } = new List<PlayerState>();
         
         [Key(1)]
-        public long ServerTick;
+        public long ServerTick { get; set; }
 
     }
 
@@ -23,7 +22,7 @@ namespace DeathRoom.Common.network
         public int Id { get; set; }
         
         [Key(1)]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Key(2)]
         public Vector3Serializable Position { get; set; }

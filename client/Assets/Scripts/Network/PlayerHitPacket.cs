@@ -1,5 +1,6 @@
 using MessagePack;
 using UnityEngine;
+using DeathRoom.Common.dto;
 
 namespace DeathRoom.Common.network
 {
@@ -13,6 +14,6 @@ namespace DeathRoom.Common.network
         public long ClientTick { get; set; }
         
         [Key(2)]
-        public Vector3 Direction { get; set; }
+        public Vector3Serializable Direction { get; set; }
     }
 }

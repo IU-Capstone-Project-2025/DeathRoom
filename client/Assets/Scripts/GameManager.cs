@@ -22,45 +22,51 @@ public class GameManager : MonoBehaviour
             return;
         }
         
-        StartCoroutine(SpawnPlayersAfterDelay());
-    }
-
-    private IEnumerator SpawnPlayersAfterDelay()
-    {
-        float remainingTime = spawnDelay;
-        while (remainingTime > 0)
-        {
-            countDownText.text = Mathf.CeilToInt(remainingTime).ToString();
-            yield return new WaitForSeconds(1f);
-            remainingTime -= 1f;
-        }
-
-        countDownText.text = "GO!";
-        yield return new WaitForSeconds(0.5f);
-        countDownText.text = "";
-
         if (camToTurnOff != null)
         {
             camToTurnOff.enabled = false;
         }
 
-        int spawnCount = Mathf.Min(playerPrefabs.Count, spawnPoints.Count);
-        if (spawnCount == 0)
-        {
-            Debug.LogWarning(".");
-            yield break;
-        }
-
-        List<GameObject> shuffledSpawnPoints = new List<GameObject>(spawnPoints);
-        Shuffle(shuffledSpawnPoints);
-
-        for (int i = 0; i < spawnCount; i++)
-        {
-            GameObject prefab = playerPrefabs[i];
-            GameObject spawnPoint = shuffledSpawnPoints[i];
-            Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation);
-        }
+        
+        // StartCoroutine(SpawnPlayersAfterDelay());
     }
+
+    // private IEnumerator SpawnPlayersAfterDelay()
+    // {
+    //     float remainingTime = spawnDelay;
+    //     while (remainingTime > 0)
+    //     {
+    //         countDownText.text = Mathf.CeilToInt(remainingTime).ToString();
+    //         yield return new WaitForSeconds(1f);
+    //         remainingTime -= 1f;
+    //     }
+    //
+    //     countDownText.text = "GO!";
+    //     yield return new WaitForSeconds(0.5f);
+    //     countDownText.text = "";
+    //
+    //     if (camToTurnOff != null)
+    //     {
+    //         camToTurnOff.enabled = false;
+    //     }
+    //
+    //     int spawnCount = Mathf.Min(playerPrefabs.Count, spawnPoints.Count);
+    //     if (spawnCount == 0)
+    //     {
+    //         Debug.LogWarning(".");
+    //         yield break;
+    //     }
+    //
+    //     List<GameObject> shuffledSpawnPoints = new List<GameObject>(spawnPoints);
+    //     Shuffle(shuffledSpawnPoints);
+    //
+    //     for (int i = 0; i < spawnCount; i++)
+    //     {
+    //         GameObject prefab = playerPrefabs[i];
+    //         GameObject spawnPoint = shuffledSpawnPoints[i];
+    //         // Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation);
+    //     }
+    // }
 
     private void Shuffle(List<GameObject> list)
     {
