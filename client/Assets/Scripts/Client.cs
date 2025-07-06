@@ -10,8 +10,8 @@ using DeathRoom.Common.network;
 
 public class Client : MonoBehaviour
 {
+    private string serverAddress = "77.233.222.200";
     [Header("Network Settings")]
-    public string serverAddress = "77.233.222.200";
     public int serverPort = 9050;
     public string playerName = "Player";
 
@@ -260,6 +260,8 @@ public class Client : MonoBehaviour
             Rotation = new Vector3Serializable(localPlayer.transform.eulerAngles),
             ClientTick = lastServerTick
         };
+        
+        Debug.Log($"packet: send player movement coordinates: {pkt.Position.X}, {pkt.Position.Y}, {pkt.Position.Z}");
         SendPacket(pkt);
     }
 

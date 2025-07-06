@@ -87,7 +87,7 @@ public class NetworkDebugger : MonoBehaviour
         }
         
         Debug.Log("=== Connection Test ===");
-        Debug.Log($"Server Address: {client.serverAddress}");
+        // Debug.Log($"Server Address: {client.serverAddress}");
         Debug.Log($"Server Port: {client.serverPort}");
         Debug.Log($"Player Name: {client.playerName}");
         Debug.Log($"Is Connected: {client.isConnected}");
