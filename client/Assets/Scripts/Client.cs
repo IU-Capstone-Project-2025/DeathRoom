@@ -136,7 +136,7 @@ public class Client : MonoBehaviour
 
     void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus) netManager?.Stop();
+		return;
     }
 
     void ProcessPacket(byte[] data)
