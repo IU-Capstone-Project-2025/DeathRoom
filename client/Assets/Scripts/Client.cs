@@ -25,16 +25,18 @@ public class Client : MonoBehaviour
     private NetManager netManager;
     private EventBasedNetListener netListener;
     private NetPeer serverPeer;
-
-    public GameObject localPlayer;
+    
     public Dictionary<int, NetworkPlayer> networkPlayers = new Dictionary<int, NetworkPlayer>();
+    public GameObject localPlayer;
 
-    private float sendRate = 20f; // 20 updates per second
+
+    private float sendRate = 20f;
     private float nextSendTime = 0f;
 
     public bool isConnected = false;
     private long lastServerTick = 0;
     private int localPlayerId = -1;
+    
 
     void Start()
     {
@@ -124,11 +126,6 @@ public class Client : MonoBehaviour
         }
     }
 
-    void FixedUpdate()
-    {
-        netManager?.PollEvents();
-    }
-
     void OnDestroy()
     {
         netManager?.Stop();
@@ -206,12 +203,6 @@ public class Client : MonoBehaviour
 
     void CreateNetworkPlayer(PlayerState ps)
     {
-        if (networkPlayerPrefab == null)
-        {
-            Debug.LogError("No networkPlayerPrefab assigned!");
-            return;
-        }
-
         Vector3 spawnPos = ps.Position != Vector3.zero ? UnityVector3(ps.Position) : GetRandomSpawnPoint();
         GameObject go = Instantiate(networkPlayerPrefab, spawnPos, Quaternion.identity);
         var nw = go.GetComponent<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
@@ -240,11 +231,6 @@ public class Client : MonoBehaviour
     void SpawnLocalPlayer()
     {
         if (localPlayer != null) return;
-        if (localPlayerPrefab == null)
-        {
-            Debug.LogError("No localPlayerPrefab assigned!");
-            return;
-        }
         Vector3 spawn = GetRandomSpawnPoint();
         localPlayer = Instantiate(localPlayerPrefab, spawn, Quaternion.identity);
         Debug.Log($"Spawned local player {playerName}");
@@ -256,8 +242,8 @@ public class Client : MonoBehaviour
 
         var pkt = new PlayerMovePacket
         {
-            Position = new Vector3Serializable(localPlayer.transform.position),
-            Rotation = new Vector3Serializable(localPlayer.transform.eulerAngles),
+            Position = new Vector3Serializable(localPlayer.transform.Find("Player").position),
+            Rotation = new Vector3Serializable(localPlayer.transform.Find("Player").eulerAngles),
             ClientTick = lastServerTick
         };
         
@@ -314,10 +300,5 @@ public class Client : MonoBehaviour
         if (spawnPoints != null && spawnPoints.Length > 0)
             return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].position;
         return Vector3.zero;
-    }
-
-    private int GetLocalPlayerId()
-    {
-        return localPlayerId;
     }
 }
