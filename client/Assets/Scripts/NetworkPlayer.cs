@@ -107,23 +107,42 @@ public class NetworkPlayer : MonoBehaviour {
         
         UpdateAnimation();
     }
-    
-    void Update() {
-        // Интерполяция позиции и поворота
-        if (Vector3.Distance(transform.position, targetPosition) > 0.01f) {
+
+    void Update()
+    {
+        // Интерполяция позиции
+        if (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        {
             transform.position = Vector3.Lerp(transform.position, targetPosition, interpolationSpeed * Time.deltaTime);
         }
-        
-        if (Quaternion.Angle(transform.rotation, targetRotation) > 1f) {
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, interpolationSpeed * Time.deltaTime);
+
+        // Интерполяция поворота — безопасная
+        if (QuaternionIsValid(transform.rotation) && QuaternionIsValid(targetRotation))
+        {
+            if (Quaternion.Angle(transform.rotation, targetRotation) > 1f)
+            {
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, interpolationSpeed * Time.deltaTime);
+            }
         }
-        
+        else
+        {
+            Debug.LogWarning($"Invalid quaternion detected for {Username}. Skipping rotation interpolation.");
+        }
+
         // Проверяем движение
         float velocity = Vector3.Distance(lastPosition, transform.position) / Time.deltaTime;
         isMoving = velocity > 0.1f;
         lastPosition = transform.position;
     }
-    
+
+    // Проверка на валидность кватерниона
+    private bool QuaternionIsValid(Quaternion q)
+    {
+        return !(float.IsNaN(q.x) || float.IsNaN(q.y) || float.IsNaN(q.z) || float.IsNaN(q.w)) &&
+               q != Quaternion.identity && q != new Quaternion(0, 0, 0, 0);
+    }
+
+
     void UpdateAnimation() {
         if (animator == null) return;
         
