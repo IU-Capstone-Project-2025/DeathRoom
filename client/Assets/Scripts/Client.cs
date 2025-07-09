@@ -47,7 +47,6 @@ public class Client : MonoBehaviour
         MessagePackSerializer.DefaultOptions = options;
         
         InitializeNetwork();
-        ConnectToServer();
     }
 
     void InitializeNetwork()
