@@ -1174,7 +1174,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interpolationSpeed: 10
-  maxDistance: 1
+  maxDistance: 1e+31
   animator: {fileID: 3679203958512744203}
 --- !u!1 &2840126438575145371
 GameObject:
