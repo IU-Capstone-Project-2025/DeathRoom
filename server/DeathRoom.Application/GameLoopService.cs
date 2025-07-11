@@ -38,27 +38,26 @@ public class GameLoopService
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogDebug($"[DEBUG] CancellationToken: {cancellationToken.IsCancellationRequested}");
                 _serverTick++;
-                var players = _playerSessionService.GetAllPlayers().ToList();
+            var players = _playerSessionService.GetAllPlayers().ToList();
                 _logger.LogTrace("[TICK] Tick {Tick}, игроков: {Count}", _serverTick, players.Count);
-                if (players.Any())
+            if (players.Any())
+            {
+                var worldState = new WorldState
                 {
-                    var worldState = new WorldState
-                    {
-                        PlayerStates = players.Select(p => p.Clone()).ToList(),
-                        ServerTick = _serverTick
-                    };
-                    _worldStateService.SaveWorldState(_serverTick, worldState);
-                    await _broadcastWorldState(worldState);
+                    PlayerStates = players.Select(p => p.Clone()).ToList(),
+                    ServerTick = _serverTick
+                };
+                _worldStateService.SaveWorldState(_serverTick, worldState);
+                await _broadcastWorldState(worldState);
                     _logger.LogDebug($"[DEBUG] Broadcast world state, tick {_serverTick}");
-                    await Task.Delay(_broadcastIntervalMs, cancellationToken);
-                }
-                else
-                {
-                    await Task.Delay(_idleIntervalMs, cancellationToken);
-                }
+                await Task.Delay(_broadcastIntervalMs, cancellationToken);
             }
+            else
+            {
+                await Task.Delay(_idleIntervalMs, cancellationToken);
+            }
+        }
         }
         catch (TaskCanceledException)
         {
