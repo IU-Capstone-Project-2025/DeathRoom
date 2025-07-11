@@ -110,10 +110,14 @@ namespace DeathRoom.GameServer;
                 _packetHandlerService.HandlePacket(peer, data);
                         }
 
-    public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType) { }
+    public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
+    {
+        _logger.LogInformation($"[UNCONNECTED] Получен пакет от {remoteEndPoint}, тип: {messageType}, размер: {reader.AvailableBytes}");
+    }
     public void OnNetworkLatencyUpdate(NetPeer peer, int latency) { }
         public void OnConnectionRequest(ConnectionRequest request)
         {
+            _logger.LogInformation($"[CONNECT] Попытка подключения от {request.RemoteEndPoint}, key: {request}");
             request.AcceptIfKey("DeathRoomSecret");
     }
 } 
