@@ -10,8 +10,8 @@ using DeathRoom.Common.network;
 
 public class Client : MonoBehaviour
 {
+    private string serverAddress = "77.233.222.200";
     [Header("Network Settings")]
-    public string serverAddress = "localhost";
     public int serverPort = 9050;
     public string playerName = "Player";
 
@@ -34,6 +34,7 @@ public class Client : MonoBehaviour
 
     public bool isConnected = false;
     private long lastServerTick = 0;
+    private int localPlayerId = -1;
 
     void Start()
     {
@@ -66,6 +67,15 @@ public class Client : MonoBehaviour
         serverPeer = netManager.Connect(serverAddress, serverPort, "DeathRoomSecret");
     }
 
+    public void Disconnect()
+    {
+        if (serverPeer != null && isConnected)
+        {
+            Debug.Log("Manually disconnecting from server...");
+            serverPeer.Disconnect();
+        }
+    }
+
     void OnConnected(NetPeer peer)
     {
         Debug.Log($"Connected to server: {peer}");
@@ -77,6 +87,7 @@ public class Client : MonoBehaviour
     {
         Debug.Log($"Disconnected. Reason: {disconnectInfo.Reason}");
         isConnected = false;
+        localPlayerId = -1;
 
         if (localPlayer != null)
         {
@@ -125,7 +136,7 @@ public class Client : MonoBehaviour
 
     void OnApplicationPause(bool pauseStatus)
     {
-        if (pauseStatus) netManager?.Stop();
+		return;
     }
 
     void ProcessPacket(byte[] data)
@@ -138,12 +149,23 @@ public class Client : MonoBehaviour
             {
                 case WorldStatePacket worldState:
                     Debug.Log($"Processing WorldStatePacket with {worldState.PlayerStates?.Count} players");
+                    Debug.Log($"My player name: {playerName}, My ID: {localPlayerId}");
+                    
                     List<int> presentPlayers = new List<int>();
                     foreach (var ps in worldState.PlayerStates)
                     {
+                        Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z}");
+                        
+                        if (ps.Username == playerName && localPlayerId == -1)
+                        {
+                            localPlayerId = ps.Id;
+                            Debug.Log($"Set local player ID to: {localPlayerId}");
+                        }
+                        
                         UpdateNetworkPlayer(ps);
                         presentPlayers.Add(ps.Id);
                     }
+                    
                     var toRemove = new List<int>();
                     foreach (var kvp in networkPlayers)
                     {
@@ -160,12 +182,17 @@ public class Client : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError($"Error processing packet: {e}");
+            Debug.LogError($"Stack trace: {e.StackTrace}");
         }
     }
 
     void UpdateNetworkPlayer(PlayerState ps)
     {
-        if (ps.Username == playerName) return;
+        if (ps.Id == localPlayerId && localPlayerId != -1) 
+        {
+            Debug.Log($"Skipping local player {ps.Username} (ID: {ps.Id})");
+            return;
+        }
 
         if (!networkPlayers.ContainsKey(ps.Id))
         {
@@ -233,6 +260,8 @@ public class Client : MonoBehaviour
             Rotation = new Vector3Serializable(localPlayer.transform.eulerAngles),
             ClientTick = lastServerTick
         };
+        
+        Debug.Log($"packet: send player movement coordinates: {pkt.Position.X}, {pkt.Position.Y}, {pkt.Position.Z}");
         SendPacket(pkt);
     }
 
@@ -285,5 +314,10 @@ public class Client : MonoBehaviour
         if (spawnPoints != null && spawnPoints.Length > 0)
             return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].position;
         return Vector3.zero;
+    }
+
+    private int GetLocalPlayerId()
+    {
+        return localPlayerId;
     }
 }
