@@ -50,6 +50,7 @@ public class PacketHandlerService
         if (peer == null) throw new ArgumentNullException(nameof(peer));
         if (data == null) throw new ArgumentNullException(nameof(data));
         var packet = MessagePack.MessagePackSerializer.Deserialize<IPacket>(data);
+        _logger.LogInformation("[PACKET] Получен пакет: {PacketType} от {Peer}", packet?.GetType().Name ?? "Unknown", peer?.ToString() ?? "null");
         if (packet == null)
         {
             await (_onError?.Invoke(peer?.ToString() ?? string.Empty, "Packet deserialization failed") ?? Task.CompletedTask);
