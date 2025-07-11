@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using DeathRoom.Common.Network;
 using DeathRoom.Application;
+using Microsoft.Extensions.Logging;
 
 namespace DeathRoom.GameServer;
 
@@ -15,14 +16,17 @@ namespace DeathRoom.GameServer;
     private readonly GameLoopService _gameLoopService;
     private readonly PacketHandlerService _packetHandlerService;
     private Task? _gameLoopTask;
+    private readonly ILogger<GameServer> _logger;
 
     public GameServer(
         PlayerSessionService playerSessionService,
         WorldStateService worldStateService,
         GameLoopService gameLoopService,
-        PacketHandlerService packetHandlerService)
+        PacketHandlerService packetHandlerService,
+        ILogger<GameServer> logger)
     {
-        Console.WriteLine("[GameServer] Конструктор вызван");
+        _logger = logger;
+        _logger.LogInformation("Конструктор вызван");
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
         _gameLoopService = gameLoopService;
@@ -63,29 +67,29 @@ namespace DeathRoom.GameServer;
 
     public Task Start(CancellationToken cancellationToken)
     {
-        Console.WriteLine("[GameServer] Start: запуск NetManager и игрового цикла");
+        _logger.LogInformation("Start: запуск NetManager и игрового цикла");
         bool started = _netManager.Start(9050);
-        Console.WriteLine($"[GameServer] NetManager.Start(9050) вернул: {started}");
+        _logger.LogInformation($"NetManager.Start(9050) вернул: {started}");
         if (started)
-            Console.WriteLine("[GameServer] NetManager успешно стартовал и слушает порт 9050");
+            _logger.LogInformation("NetManager успешно стартовал и слушает порт 9050");
         else
-            Console.WriteLine("[GameServer] ОШИБКА: NetManager не смог стартовать порт 9050! Возможно, порт занят или нет прав.");
-        Console.WriteLine("[GameServer] Запуск игрового цикла...");
+            _logger.LogError("ОШИБКА: NetManager не смог стартовать порт 9050! Возможно, порт занят или нет прав.");
+        _logger.LogInformation("Запуск игрового цикла...");
         _gameLoopTask = _gameLoopService.RunAsync(cancellationToken);
-        Console.WriteLine("[GameServer] GameLoopService.RunAsync вызван");
+        _logger.LogInformation("GameLoopService.RunAsync вызван");
         return _gameLoopTask;
     }
 
         public void Stop()
         {
-        Console.WriteLine("[GameServer] Stop: остановка NetManager");
+        _logger.LogInformation("Stop: остановка NetManager");
         _netManager.Stop();
-        Console.WriteLine("[GameServer] Stop: NetManager остановлен");
+        _logger.LogInformation("Stop: NetManager остановлен");
         }
 
         public void OnPeerConnected(NetPeer peer)
         {
-            Console.WriteLine($"Peer connected: {peer.Port}. Waiting for login.");
+            _logger.LogInformation($"Peer connected: {peer.Port}. Waiting for login.");
         }
 
         public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
@@ -97,7 +101,7 @@ namespace DeathRoom.GameServer;
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
         {
-            Console.WriteLine($"Network error: {socketError}");
+            _logger.LogError($"Network error: {socketError}");
 		}
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channel, DeliveryMethod deliveryMethod)

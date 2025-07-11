@@ -1,5 +1,6 @@
 using DeathRoom.Domain;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace DeathRoom.Application;
 
@@ -10,6 +11,7 @@ public class GameLoopService
     private readonly Func<WorldState, Task> _broadcastWorldState;
     private readonly int _broadcastIntervalMs;
     private readonly int _idleIntervalMs;
+    private readonly ILogger<GameLoopService> _logger;
     private long _serverTick = 0;
 
     public GameLoopService(
@@ -17,26 +19,29 @@ public class GameLoopService
         WorldStateService worldStateService,
         Func<WorldState, Task> broadcastWorldState,
         int broadcastIntervalMs,
-        int idleIntervalMs)
+        int idleIntervalMs,
+        ILogger<GameLoopService> logger)
     {
-        Console.WriteLine("[GameLoopService] Конструктор вызван");
+        _logger = logger;
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
         _broadcastWorldState = broadcastWorldState;
         _broadcastIntervalMs = broadcastIntervalMs;
         _idleIntervalMs = idleIntervalMs;
+        _logger.LogInformation("[INFO] Конструктор вызван");
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine("[GameLoopService] RunAsync: старт игрового цикла");
+        _logger.LogInformation("[INFO] RunAsync: старт игрового цикла");
         try
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                _logger.LogDebug($"[DEBUG] CancellationToken: {cancellationToken.IsCancellationRequested}");
                 _serverTick++;
                 var players = _playerSessionService.GetAllPlayers().ToList();
-                Console.WriteLine($"[GameLoopService] Tick {_serverTick}, игроков: {players.Count}");
+                _logger.LogInformation($"[INFO] Tick {_serverTick}, игроков: {players.Count}");
                 if (players.Any())
                 {
                     var worldState = new WorldState
@@ -46,7 +51,7 @@ public class GameLoopService
                     };
                     _worldStateService.SaveWorldState(_serverTick, worldState);
                     await _broadcastWorldState(worldState);
-                    Console.WriteLine($"[GameLoopService] Broadcast world state, tick {_serverTick}");
+                    _logger.LogDebug($"[DEBUG] Broadcast world state, tick {_serverTick}");
                     await Task.Delay(_broadcastIntervalMs, cancellationToken);
                 }
                 else
@@ -57,13 +62,13 @@ public class GameLoopService
         }
         catch (TaskCanceledException)
         {
-            Console.WriteLine("[GameLoopService] RunAsync: TaskCanceledException — игровой цикл завершён");
+            _logger.LogWarning("[WARN] RunAsync: TaskCanceledException — игровой цикл завершён");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[GameLoopService] RunAsync: Exception: {ex}");
+            _logger.LogError($"[ERROR] RunAsync: Exception: {ex}");
         }
-        Console.WriteLine("[GameLoopService] RunAsync: завершение игрового цикла");
+        _logger.LogInformation("[INFO] RunAsync: завершение игрового цикла");
     }
 
     public long GetCurrentTick() => _serverTick;

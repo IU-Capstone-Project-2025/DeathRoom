@@ -6,8 +6,22 @@ using LiteNetLib;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureLogging(logging =>
+    {
+        logging.ClearProviders();
+        logging.AddSimpleConsole(options =>
+        {
+            options.SingleLine = true;
+            options.TimestampFormat = "HH:mm:ss ";
+            options.IncludeScopes = false;
+            options.ColorBehavior = Microsoft.Extensions.Logging.Console.LoggerColorBehavior.Enabled;
+            // Формат: [LEVEL] сообщение
+            options.UseUtcTimestamp = false;
+        });
+    })
     .ConfigureServices((context, services) =>
     {
         int broadcastIntervalMs = int.TryParse(Environment.GetEnvironmentVariable("DEATHROOM_BROADCAST_INTERVAL_MS"), out var bInt) && bInt > 0 ? bInt : 15;
@@ -21,7 +35,15 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<HitPhysicsService>();
 
         // NetManager и GameServer будут связаны через фабрику
-        services.AddSingleton<GameServer>();
+        services.AddSingleton<GameServer>(sp =>
+        {
+            var playerSession = sp.GetRequiredService<PlayerSessionService>();
+            var worldState = sp.GetRequiredService<WorldStateService>();
+            var gameLoop = sp.GetRequiredService<GameLoopService>();
+            var packetHandler = sp.GetRequiredService<PacketHandlerService>();
+            var logger = sp.GetRequiredService<ILogger<GameServer>>();
+            return new GameServer(playerSession, worldState, gameLoop, packetHandler, logger);
+        });
         // Удаляю регистрацию NetManager
         // services.AddSingleton<NetManager>(sp => sp.GetRequiredService<GameServer>().NetManager);
 
@@ -30,13 +52,14 @@ var builder = Host.CreateDefaultBuilder(args)
         {
             var playerSession = sp.GetRequiredService<PlayerSessionService>();
             var worldState = sp.GetRequiredService<WorldStateService>();
-            // var netManager = sp.GetRequiredService<NetManager>(); // Удалено
+            var logger = sp.GetRequiredService<ILogger<GameLoopService>>();
             return new GameLoopService(
                 playerSession,
                 worldState,
                 ws => Task.CompletedTask, // Временно заглушка, реальный делегат будет установлен в GameServer
                 broadcastIntervalMs,
-                idleIntervalMs
+                idleIntervalMs,
+                logger
             );
         });
         services.AddSingleton<PacketHandlerService>(sp =>
@@ -45,7 +68,7 @@ var builder = Host.CreateDefaultBuilder(args)
             var worldState = sp.GetRequiredService<WorldStateService>();
             var hitRegistration = sp.GetRequiredService<HitRegistrationService>();
             var hitPhysics = sp.GetRequiredService<HitPhysicsService>();
-            // var netManager = sp.GetRequiredService<NetManager>(); // Удалено
+            var logger = sp.GetRequiredService<ILogger<PacketHandlerService>>();
             return new PacketHandlerService(
                 playerSession,
                 worldState,
@@ -61,10 +84,11 @@ var builder = Host.CreateDefaultBuilder(args)
                     }
                     return Task.CompletedTask;
                 },
-                (username, type) => { Console.WriteLine($"Player {username} logged in. Type: {type}"); return Task.CompletedTask; },
-                (peer, type) => { Console.WriteLine($"Unknown packet from {peer}: {type}"); return Task.CompletedTask; },
-                (peer, error) => { Console.WriteLine($"Error from {peer}: {error}"); return Task.CompletedTask; },
-                () => sp.GetRequiredService<GameLoopService>().GetCurrentTick()
+                (username, type) => { logger.LogInformation($"Player {username} logged in. Type: {type}"); return Task.CompletedTask; },
+                (peer, type) => { logger.LogWarning($"Unknown packet from {peer}: {type}"); return Task.CompletedTask; },
+                (peer, error) => { logger.LogError($"Error from {peer}: {error}"); return Task.CompletedTask; },
+                () => sp.GetRequiredService<GameLoopService>().GetCurrentTick(),
+                logger
             );
         });
         services.AddHostedService<ServerRunner>();

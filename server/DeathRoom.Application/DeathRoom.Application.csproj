@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DeathRoom.Domain\DeathRoom.Domain.csproj" />
     <ProjectReference Include="..\DeathRoom.Common\DeathRoom.Common.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

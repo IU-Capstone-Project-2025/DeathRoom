@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace DeathRoom.GameServer;
 
@@ -13,47 +14,49 @@ public class ServerRunner : IHostedService
     private GameServer? _gameServer;
     private Task? _gameLoopTask;
     private CancellationTokenSource? _cts;
+    private readonly ILogger<ServerRunner> _logger;
 
-    public ServerRunner(IServiceProvider provider)
+    public ServerRunner(IServiceProvider provider, ILogger<ServerRunner> logger)
     {
-        Console.WriteLine("[ServerRunner] Конструктор вызван");
+        _logger = logger;
+        _logger.LogInformation("Конструктор вызван");
         _provider = provider;
     }
 
     ~ServerRunner()
     {
-        Console.WriteLine("[ServerRunner] Деструктор вызван");
+        _logger.LogInformation("Деструктор вызван");
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine("[ServerRunner] StartAsync: запуск сервера");
+        _logger.LogInformation("StartAsync: запуск сервера");
         _scope = _provider.CreateScope();
         try
         {
             _gameServer = _scope.ServiceProvider.GetRequiredService<GameServer>();
-            Console.WriteLine("[ServerRunner] GameServer получен из DI");
+            _logger.LogInformation("GameServer получен из DI");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ServerRunner] ОШИБКА при получении GameServer из DI: {ex}");
+            _logger.LogError($"ОШИБКА при получении GameServer из DI: {ex}");
             throw;
         }
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _gameLoopTask = _gameServer.Start(_cts.Token);
-        Console.WriteLine("[ServerRunner] GameLoopTask запущен");
+        _logger.LogInformation("GameLoopTask запущен");
         return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine("[ServerRunner] StopAsync: начало остановки сервера");
+        _logger.LogInformation("StopAsync: начало остановки сервера");
         _cts?.Cancel();
         _gameServer?.Stop();
         if (_gameLoopTask != null)
             await _gameLoopTask;
-        Console.WriteLine("[ServerRunner] StopAsync: игровой цикл завершён, освобождаю ресурсы");
+        _logger.LogInformation("StopAsync: игровой цикл завершён, освобождаю ресурсы");
         _scope?.Dispose();
-        Console.WriteLine("[ServerRunner] StopAsync: завершено");
+        _logger.LogInformation("StopAsync: завершено");
     }
 } 

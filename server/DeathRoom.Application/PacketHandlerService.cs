@@ -3,6 +3,7 @@ using DeathRoom.Common.Network;
 using DeathRoom.Common.Dto;
 using DomainPlayerState = DeathRoom.Domain.PlayerState;
 using DtoPlayerState = DeathRoom.Common.Dto.PlayerState;
+using Microsoft.Extensions.Logging;
 
 namespace DeathRoom.Application;
 
@@ -17,6 +18,7 @@ public class PacketHandlerService
     private readonly Func<string, string, Task> _onUnknownPacket;
     private readonly Func<string, string, Task> _onError;
     private readonly Func<long> _getCurrentTick;
+    private readonly ILogger<PacketHandlerService> _logger;
 
     public PacketHandlerService(
         PlayerSessionService playerSessionService,
@@ -27,9 +29,11 @@ public class PacketHandlerService
         Func<string, string, Task> onPlayerLogin,
         Func<string, string, Task> onUnknownPacket,
         Func<string, string, Task> onError,
-        Func<long> getCurrentTick)
+        Func<long> getCurrentTick,
+        ILogger<PacketHandlerService> logger)
     {
-        Console.WriteLine("[PacketHandlerService] Конструктор вызван");
+        _logger = logger;
+        _logger.LogInformation("Конструктор вызван");
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
         _hitRegistrationService = hitRegistrationService;
