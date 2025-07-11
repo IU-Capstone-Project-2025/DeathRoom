@@ -1,6 +1,6 @@
 using MessagePack;
 
-namespace DeathRoom.Common.network
+namespace DeathRoom.Common.Network
 {
     [Union(0, typeof(LoginPacket))]
     [Union(1, typeof(PlayerMovePacket))]

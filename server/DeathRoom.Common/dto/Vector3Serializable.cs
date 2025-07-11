@@ -1,6 +1,6 @@
 using MessagePack;
 
-namespace DeathRoom.Common.dto
+namespace DeathRoom.Common.Dto
 {
 	public enum ProjectionCode {
 		xy,

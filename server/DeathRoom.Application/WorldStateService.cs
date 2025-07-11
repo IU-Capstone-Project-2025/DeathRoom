@@ -8,6 +8,11 @@ public class WorldStateService
     private readonly int _worldStateSaveInterval;
     private readonly Queue<(long Tick, WorldState State)> _worldStateHistory = new();
 
+    public WorldStateService()
+    {
+        Console.WriteLine("[WorldStateService] Конструктор вызван");
+    }
+
     public WorldStateService(int historyLength, int saveInterval)
     {
         _worldStateHistoryLength = historyLength;

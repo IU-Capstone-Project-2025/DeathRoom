@@ -9,9 +9,10 @@ namespace DeathRoom.GameServer;
 public class ServerRunner : IHostedService
 {
     private readonly IServiceProvider _provider;
-    private IServiceScope _scope;
+    private IServiceScope? _scope;
     private GameServer? _gameServer;
     private Task? _gameLoopTask;
+    private CancellationTokenSource? _cts;
 
     public ServerRunner(IServiceProvider provider)
     {
@@ -28,14 +29,26 @@ public class ServerRunner : IHostedService
     {
         Console.WriteLine("[ServerRunner] StartAsync: запуск сервера");
         _scope = _provider.CreateScope();
-        _gameServer = _scope.ServiceProvider.GetRequiredService<GameServer>();
-        _gameLoopTask = _gameServer.Start(cancellationToken);
+        try
+        {
+            _gameServer = _scope.ServiceProvider.GetRequiredService<GameServer>();
+            Console.WriteLine("[ServerRunner] GameServer получен из DI");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ServerRunner] ОШИБКА при получении GameServer из DI: {ex}");
+            throw;
+        }
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _gameLoopTask = _gameServer.Start(_cts.Token);
+        Console.WriteLine("[ServerRunner] GameLoopTask запущен");
         return Task.CompletedTask;
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         Console.WriteLine("[ServerRunner] StopAsync: начало остановки сервера");
+        _cts?.Cancel();
         _gameServer?.Stop();
         if (_gameLoopTask != null)
             await _gameLoopTask;

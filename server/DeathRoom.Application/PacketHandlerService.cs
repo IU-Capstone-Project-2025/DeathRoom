@@ -1,9 +1,8 @@
 using DeathRoom.Domain;
-using DeathRoom.Common.network;
-using DeathRoom.Common.dto;
-using LiteNetLib;
+using DeathRoom.Common.Network;
+using DeathRoom.Common.Dto;
 using DomainPlayerState = DeathRoom.Domain.PlayerState;
-using DtoPlayerState = DeathRoom.Common.dto.PlayerState;
+using DtoPlayerState = DeathRoom.Common.Dto.PlayerState;
 
 namespace DeathRoom.Application;
 
@@ -30,6 +29,7 @@ public class PacketHandlerService
         Func<string, string, Task> onError,
         Func<long> getCurrentTick)
     {
+        Console.WriteLine("[PacketHandlerService] Конструктор вызван");
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
         _hitRegistrationService = hitRegistrationService;
@@ -41,18 +41,29 @@ public class PacketHandlerService
         _getCurrentTick = getCurrentTick;
     }
 
-    public void HandlePacket(object peer, IPacket packet)
+    public async Task HandlePacket(object peer, byte[] data)
     {
+        if (peer == null) throw new ArgumentNullException(nameof(peer));
+        if (data == null) throw new ArgumentNullException(nameof(data));
+        var packet = MessagePack.MessagePackSerializer.Deserialize<IPacket>(data);
+        if (packet == null)
+        {
+            await (_onError?.Invoke(peer?.ToString() ?? string.Empty, "Packet deserialization failed") ?? Task.CompletedTask);
+            return;
+        }
         if (packet is LoginPacket loginPacket)
         {
             var playerState = _playerSessionService.RegisterPlayer(loginPacket.Username);
-            _playerSessionService.TryAddSession(peer, playerState);
-            _playerSessionService.RegisterPeer(playerState.Id, peer);
-            _onPlayerLogin?.Invoke(loginPacket.Username, "Login");
+            if (playerState != null)
+            {
+                _playerSessionService.TryAddSession(peer, playerState);
+                _playerSessionService.RegisterPeer(playerState.Id, peer);
+                await (_onPlayerLogin?.Invoke(loginPacket.Username ?? string.Empty, "Login") ?? Task.CompletedTask);
+            }
         }
         else if (packet is PlayerMovePacket movePacket)
         {
-            if (_playerSessionService.TryGetSession(peer, out DomainPlayerState playerState))
+            if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? playerState) && playerState != null)
             {
                 playerState.Position = new DeathRoom.Domain.Vector3(movePacket.Position.X, movePacket.Position.Y, movePacket.Position.Z);
                 playerState.Rotation = new DeathRoom.Domain.Vector3(movePacket.Rotation.X, movePacket.Rotation.Y, movePacket.Rotation.Z);
@@ -69,7 +80,7 @@ public class PacketHandlerService
         }
         else if (packet is PlayerHitPacket hitPacket)
         {
-            if (_playerSessionService.TryGetSession(peer, out DomainPlayerState shooterState))
+            if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? shooterState) && shooterState != null)
             {
                 var worldStateAtShot = _worldStateService.GetWorldStateAtTick(hitPacket.ClientTick);
                 if (worldStateAtShot == null) return;
@@ -82,14 +93,17 @@ public class PacketHandlerService
                 var targetPos = new DeathRoom.Domain.Vector3(target.Position.X, target.Position.Y, target.Position.Z);
                 if (_hitPhysicsService.IsHit(shooterPos, shootDir, targetPos))
                 {
-                    if (_playerSessionService.TryGetSession(peer, out DomainPlayerState liveTarget))
+                    if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? liveTarget) && liveTarget != null)
                     {
-                        bool died = _hitRegistrationService.RegisterHit(liveTarget, 10, currTick); // пример: 10 урона
+                        bool died = _hitRegistrationService.RegisterHit(liveTarget, 10, currTick);
                         if (died)
                         {
                             var targetPeer = _playerSessionService.GetPeerById(target.Id);
-                            if (targetPeer is LiteNetLib.NetPeer netPeer)
-                                netPeer.Disconnect();
+                            if (targetPeer != null && targetPeer.GetType().Name == "NetPeer")
+                            {
+                                var disconnectMethod = targetPeer.GetType().GetMethod("Disconnect");
+                                disconnectMethod?.Invoke(targetPeer, null);
+                            }
                         }
                     }
                 }
@@ -97,14 +111,14 @@ public class PacketHandlerService
         }
         else if (packet is PickUpArmorPacket pickArmorPacket)
         {
-            if (_playerSessionService.TryGetSession(peer, out DomainPlayerState playerState))
+            if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? playerState) && playerState != null)
             {
                 _hitRegistrationService.GiveArmor(playerState, pickArmorPacket.ClientTick + (long)(200 * 60));
             }
         }
         else
         {
-            _onUnknownPacket?.Invoke(peer.ToString(), packet.GetType().Name);
+            await (_onUnknownPacket?.Invoke(peer?.ToString() ?? string.Empty, packet?.GetType().Name ?? "Unknown") ?? Task.CompletedTask);
         }
     }
 } 

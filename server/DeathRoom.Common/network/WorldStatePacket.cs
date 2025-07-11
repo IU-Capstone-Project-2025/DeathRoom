@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using DeathRoom.Common.dto;
+using DeathRoom.Common.Dto;
 using MessagePack;
 
-namespace DeathRoom.Common.network
+namespace DeathRoom.Common.Network
 {
     [MessagePackObject]
     public class WorldStatePacket : IPacket

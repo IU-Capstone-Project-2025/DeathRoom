@@ -10,6 +10,11 @@ public class PlayerSessionService
     private int _nextPlayerId = 1;
     private readonly Dictionary<int, object> _peersById = new();
 
+    public PlayerSessionService()
+    {
+        Console.WriteLine("[PlayerSessionService] Конструктор вызван");
+    }
+
     public PlayerState RegisterPlayer(string username)
     {
         var playerState = new PlayerState

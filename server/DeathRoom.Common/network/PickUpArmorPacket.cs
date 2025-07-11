@@ -1,6 +1,6 @@
 using MessagePack;
 
-namespace DeathRoom.Common.network
+namespace DeathRoom.Common.Network
 {
     [MessagePackObject]
     public class PickUpArmorPacket : IPacket

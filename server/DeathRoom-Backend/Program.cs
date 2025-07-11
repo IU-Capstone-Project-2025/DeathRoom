@@ -1,7 +1,7 @@
 using DeathRoom.GameServer;
 using DeathRoom.Application;
 using DeathRoom.Domain;
-using DeathRoom.Common.network;
+using DeathRoom.Common.Network;
 using LiteNetLib;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,38 +22,19 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // NetManager и GameServer будут связаны через фабрику
         services.AddSingleton<GameServer>();
-        services.AddSingleton<NetManager>(sp => sp.GetRequiredService<GameServer>().NetManager);
+        // Удаляю регистрацию NetManager
+        // services.AddSingleton<NetManager>(sp => sp.GetRequiredService<GameServer>().NetManager);
 
         // Реальные делегаты для Application-слоя
         services.AddSingleton<GameLoopService>(sp =>
         {
             var playerSession = sp.GetRequiredService<PlayerSessionService>();
             var worldState = sp.GetRequiredService<WorldStateService>();
-            var netManager = sp.GetRequiredService<NetManager>();
+            // var netManager = sp.GetRequiredService<NetManager>(); // Удалено
             return new GameLoopService(
                 playerSession,
                 worldState,
-                async (ws) =>
-                {
-                    var packet = new WorldStatePacket
-                    {
-                        PlayerStates = ws.PlayerStates.Select(p => new DeathRoom.Common.dto.PlayerState
-                        {
-                            Id = p.Id,
-                            Username = p.Username,
-                            Position = new DeathRoom.Common.dto.Vector3Serializable { X = p.Position.X, Y = p.Position.Y, Z = p.Position.Z },
-                            Rotation = new DeathRoom.Common.dto.Vector3Serializable { X = p.Rotation.X, Y = p.Rotation.Y, Z = p.Rotation.Z },
-                            HealthPoint = p.HealthPoint,
-                            MaxHealthPoint = p.MaxHealthPoint,
-                            ArmorPoint = p.ArmorPoint,
-                            MaxArmorPoint = p.MaxArmorPoint,
-                            ArmorExpirationTick = p.ArmorExpirationTick
-                        }).ToList(),
-                        ServerTick = ws.ServerTick
-                    };
-                    var data = MessagePackSerializer.Serialize<IPacket>(packet);
-                    netManager.SendToAll(data, DeliveryMethod.Unreliable);
-                },
+                ws => Task.CompletedTask, // Временно заглушка, реальный делегат будет установлен в GameServer
                 broadcastIntervalMs,
                 idleIntervalMs
             );
@@ -64,22 +45,25 @@ var builder = Host.CreateDefaultBuilder(args)
             var worldState = sp.GetRequiredService<WorldStateService>();
             var hitRegistration = sp.GetRequiredService<HitRegistrationService>();
             var hitPhysics = sp.GetRequiredService<HitPhysicsService>();
-            var netManager = sp.GetRequiredService<NetManager>();
+            // var netManager = sp.GetRequiredService<NetManager>(); // Удалено
             return new PacketHandlerService(
                 playerSession,
                 worldState,
                 hitRegistration,
                 hitPhysics,
-                async (player, id, tick) =>
+                (player, id, tick) =>
                 {
-                    // Отключение peer при смерти
                     var peerObj = playerSession.GetPeerById(id);
-                    if (peerObj is NetPeer netPeer)
-                        netPeer.Disconnect();
+                    if (peerObj != null && peerObj.GetType().Name == "NetPeer")
+                    {
+                        var disconnectMethod = peerObj.GetType().GetMethod("Disconnect");
+                        disconnectMethod?.Invoke(peerObj, null);
+                    }
+                    return Task.CompletedTask;
                 },
-                async (username, type) => Console.WriteLine($"Player {username} logged in. Type: {type}"),
-                async (peer, type) => Console.WriteLine($"Unknown packet from {peer}: {type}"),
-                async (peer, error) => Console.WriteLine($"Error from {peer}: {error}"),
+                (username, type) => { Console.WriteLine($"Player {username} logged in. Type: {type}"); return Task.CompletedTask; },
+                (peer, type) => { Console.WriteLine($"Unknown packet from {peer}: {type}"); return Task.CompletedTask; },
+                (peer, error) => { Console.WriteLine($"Error from {peer}: {error}"); return Task.CompletedTask; },
                 () => sp.GetRequiredService<GameLoopService>().GetCurrentTick()
             );
         });

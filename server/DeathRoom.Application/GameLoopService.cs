@@ -19,6 +19,7 @@ public class GameLoopService
         int broadcastIntervalMs,
         int idleIntervalMs)
     {
+        Console.WriteLine("[GameLoopService] Конструктор вызван");
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
         _broadcastWorldState = broadcastWorldState;
@@ -29,25 +30,38 @@ public class GameLoopService
     public async Task RunAsync(CancellationToken cancellationToken)
     {
         Console.WriteLine("[GameLoopService] RunAsync: старт игрового цикла");
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            _serverTick++;
-            var players = _playerSessionService.GetAllPlayers().ToList();
-            if (players.Any())
+            while (!cancellationToken.IsCancellationRequested)
             {
-                var worldState = new WorldState
+                _serverTick++;
+                var players = _playerSessionService.GetAllPlayers().ToList();
+                Console.WriteLine($"[GameLoopService] Tick {_serverTick}, игроков: {players.Count}");
+                if (players.Any())
                 {
-                    PlayerStates = players.Select(p => p.Clone()).ToList(),
-                    ServerTick = _serverTick
-                };
-                _worldStateService.SaveWorldState(_serverTick, worldState);
-                await _broadcastWorldState(worldState);
-                await Task.Delay(_broadcastIntervalMs, cancellationToken);
+                    var worldState = new WorldState
+                    {
+                        PlayerStates = players.Select(p => p.Clone()).ToList(),
+                        ServerTick = _serverTick
+                    };
+                    _worldStateService.SaveWorldState(_serverTick, worldState);
+                    await _broadcastWorldState(worldState);
+                    Console.WriteLine($"[GameLoopService] Broadcast world state, tick {_serverTick}");
+                    await Task.Delay(_broadcastIntervalMs, cancellationToken);
+                }
+                else
+                {
+                    await Task.Delay(_idleIntervalMs, cancellationToken);
+                }
             }
-            else
-            {
-                await Task.Delay(_idleIntervalMs, cancellationToken);
-            }
+        }
+        catch (TaskCanceledException)
+        {
+            Console.WriteLine("[GameLoopService] RunAsync: TaskCanceledException — игровой цикл завершён");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[GameLoopService] RunAsync: Exception: {ex}");
         }
         Console.WriteLine("[GameLoopService] RunAsync: завершение игрового цикла");
     }
