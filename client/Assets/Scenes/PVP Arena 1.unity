@@ -534,13 +534,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverPort: 9050
-  playerName: Player
+  playerName: play
   localPlayerPrefab: {fileID: 8647007826477569418, guid: 1767d81102f39404caf39c3f15b54889,
     type: 3}
   networkPlayerPrefab: {fileID: 8647007826477569418, guid: e80a889cc67959541beebb43b9aa4bf9,
     type: 3}
   spawnPoints:
   - {fileID: 369769488}
+  - {fileID: 1082449784}
+  - {fileID: 1615518778}
+  - {fileID: 412151086}
+  - {fileID: 1694919644}
+  - {fileID: 510116151}
+  - {fileID: 1294381191}
+  - {fileID: 1872906536}
+  - {fileID: 1317450627}
+  - {fileID: 2068126463}
+  - {fileID: 301361672}
+  - {fileID: 779218564}
+  - {fileID: 913334485}
+  - {fileID: 2013420413}
+  - {fileID: 640889188}
+  - {fileID: 840257929}
+  - {fileID: 108595361}
+  - {fileID: 1885720905}
+  - {fileID: 491863166}
+  - {fileID: 768811383}
   localPlayer: {fileID: 0}
   isConnected: 0
 --- !u!1 &166482534
