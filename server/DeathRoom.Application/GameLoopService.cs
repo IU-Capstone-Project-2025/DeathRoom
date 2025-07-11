@@ -41,7 +41,7 @@ public class GameLoopService
                 _logger.LogDebug($"[DEBUG] CancellationToken: {cancellationToken.IsCancellationRequested}");
                 _serverTick++;
                 var players = _playerSessionService.GetAllPlayers().ToList();
-                _logger.LogInformation($"[INFO] Tick {_serverTick}, игроков: {players.Count}");
+                _logger.LogTrace("[TICK] Tick {Tick}, игроков: {Count}", _serverTick, players.Count);
                 if (players.Any())
                 {
                     var worldState = new WorldState
