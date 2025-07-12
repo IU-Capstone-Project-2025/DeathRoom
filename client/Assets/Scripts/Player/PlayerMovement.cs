@@ -5,6 +5,8 @@ using UnityEngine.Animations.Rigging;
 
 public class PlayerMovement : MonoBehaviour
 {
+
+    public Client client;
     [Range(1f, 10f)]
     public float mouseSensitive = 3;
     [Range(-180f, 180f)]
@@ -67,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
                 {
                     usingGun.Shoot();
+                    client.SendShoot(Vector3.forward);
                 }
             }
         }
@@ -97,7 +100,6 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // ���������� ������ �������
         if (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero)
         {
             if (crouch)
