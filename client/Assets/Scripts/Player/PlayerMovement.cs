@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Animations.Rigging;
 
 public class PlayerMovement : MonoBehaviour
 {
-
+    public RectTransform PauseMenu;
+    public RectTransform leaderBoard;
     public Client client;
     [Range(1f, 10f)]
     public float mouseSensitive = 3;
@@ -47,7 +49,6 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         Hcamera = cameraPack.GetChild(0);
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
         radius = controller.radius;
         height = controller.height;
     }
@@ -56,6 +57,29 @@ public class PlayerMovement : MonoBehaviour
     {
         speed = walkSpeed;
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            takeBreak();
+        }
+    }
+
+    private void takeBreak()
+    {
+        Time.timeScale = 0f;
+        PauseMenu.gameObject.SetActive(true);
+        //leaderBoard.gameObject.SetActive(true);
+    }
+
+    public void resume() 
+    {
+        Time.timeScale = 1f;
+        Cursor.visible = false;
+        PauseMenu.gameObject.SetActive(false);
+        //leaderBoard.gameObject.SetActive(false);
     }
 
     void LateUpdate()

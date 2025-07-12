@@ -232,6 +232,7 @@ public class Client : MonoBehaviour
         if (localPlayer != null) return;
         Vector3 spawn = GetRandomSpawnPoint();
         localPlayer = Instantiate(localPlayerPrefab, spawn, Quaternion.identity);
+        localPlayer.transform.Find("Player").GetComponent<PlayerMovement>().client = this;
         Debug.Log($"Spawned local player {playerName}");
     }
 
