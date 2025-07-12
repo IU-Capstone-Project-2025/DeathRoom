@@ -10,7 +10,7 @@ using DeathRoom.Common.network;
 
 public class Client : MonoBehaviour
 {
-    private string serverAddress = "77.233.222.200";
+    private string serverAddress = "127.0.0.1";
     [Header("Network Settings")]
     public int serverPort = 9050;
     public string playerName = "Player";

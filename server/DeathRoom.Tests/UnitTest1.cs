@@ -1,6 +1,6 @@
 using Xunit;
-using DeathRoom.Common.network;
-using DeathRoom.Common.dto;
+using DeathRoom.Common.Network;
+using DeathRoom.Common.Dto;
 
 namespace DeathRoom.Tests;
 
