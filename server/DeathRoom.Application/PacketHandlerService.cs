@@ -13,7 +13,6 @@ public class PacketHandlerService
     private readonly WorldStateService _worldStateService;
     private readonly HitRegistrationService _hitRegistrationService;
     private readonly HitPhysicsService _hitPhysicsService;
-    private readonly Func<DomainPlayerState, int, long, Task> _onPlayerDeath;
     private readonly Func<string, string, Task> _onPlayerLogin;
     private readonly Func<string, string, Task> _onUnknownPacket;
     private readonly Func<string, string, Task> _onError;
@@ -25,7 +24,6 @@ public class PacketHandlerService
         WorldStateService worldStateService,
         HitRegistrationService hitRegistrationService,
         HitPhysicsService hitPhysicsService,
-        Func<DomainPlayerState, int, long, Task> onPlayerDeath,
         Func<string, string, Task> onPlayerLogin,
         Func<string, string, Task> onUnknownPacket,
         Func<string, string, Task> onError,
@@ -38,7 +36,6 @@ public class PacketHandlerService
         _worldStateService = worldStateService;
         _hitRegistrationService = hitRegistrationService;
         _hitPhysicsService = hitPhysicsService;
-        _onPlayerDeath = onPlayerDeath;
         _onPlayerLogin = onPlayerLogin;
         _onUnknownPacket = onUnknownPacket;
         _onError = onError;
@@ -156,12 +153,11 @@ public class PacketHandlerService
                     bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, currTick);
                     if (died)
                     {
-                        var targetPeer = _playerSessionService.GetPeerById(target.Id);
-                        if (targetPeer != null && targetPeer.GetType().Name == "NetPeer")
-                        {
-                            var disconnectMethod = targetPeer.GetType().GetMethod("Disconnect");
-                            disconnectMethod?.Invoke(targetPeer, null);
-                        }
+                        // Вместо отключения игрока - восстанавливаем здоровье и броню
+                        liveTarget.HealthPoint = liveTarget.MaxHealthPoint;
+                        liveTarget.ArmorPoint = 0; // Броня сбрасывается при смерти
+                        _logger.LogInformation("[RESPAWN] Игрок {PlayerName} (ID: {PlayerId}) умер и восстановлен", 
+                            liveTarget.Username, liveTarget.Id);
                     }
                 }
             }

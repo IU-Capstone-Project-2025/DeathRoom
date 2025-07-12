@@ -74,16 +74,6 @@ var builder = Host.CreateDefaultBuilder(args)
                 worldState,
                 hitRegistration,
                 hitPhysics,
-                (player, id, tick) =>
-                {
-                    var peerObj = playerSession.GetPeerById(id);
-                    if (peerObj != null && peerObj.GetType().Name == "NetPeer")
-                    {
-                        var disconnectMethod = peerObj.GetType().GetMethod("Disconnect");
-                        disconnectMethod?.Invoke(peerObj, null);
-                    }
-                    return Task.CompletedTask;
-                },
                 (username, type) => { logger.LogInformation($"Player {username} logged in. Type: {type}"); return Task.CompletedTask; },
                 (peer, type) => { logger.LogWarning($"Unknown packet from {peer}: {type}"); return Task.CompletedTask; },
                 (peer, error) => { logger.LogError($"Error from {peer}: {error}"); return Task.CompletedTask; },
