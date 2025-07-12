@@ -25,32 +25,64 @@ public class PlayerState
         };
     }
 
-    public bool TakeDamage(int damage, long tick)
+    public bool TakeDamage(int armorDamage, int healthDamage, long tick)
     {
+        // Проверяем, не истекла ли броня
         if (this.ArmorExpirationTick > tick) { this.ArmorPoint = 0; }
-        if (this.ArmorPoint >= damage)
+        
+        // Сначала наносим урон по броне
+        if (this.ArmorPoint > 0)
         {
-            this.ArmorPoint -= damage;
-            return false;
+            if (this.ArmorPoint >= armorDamage)
+            {
+                this.ArmorPoint -= armorDamage;
+            }
+            else
+            {
+                // Если брони недостаточно, остаток урона идет на здоровье
+                int remainingDamage = armorDamage - this.ArmorPoint;
+                this.ArmorPoint = 0;
+                healthDamage += remainingDamage;
+            }
         }
-        else if (this.ArmorPoint > 0)
+        else
         {
-            damage -= this.ArmorPoint;
-            this.ArmorPoint = 0;
+            // Если брони нет, весь урон по броне идет на здоровье
+            healthDamage += armorDamage;
         }
 
-        this.HealthPoint -= damage;
+        // Наносим урон по здоровью
+        this.HealthPoint -= healthDamage;
         if (this.HealthPoint <= 0)
         {
             this.HealthPoint = 0;
-            return true;
+            return true; // Игрок умер
         }
-        return false;
+        return false; // Игрок жив
+    }
+
+    public bool TakeDamage(int damage, long tick)
+    {
+        // Обратная совместимость - разделяем урон пополам
+        int armorDamage = damage / 2;
+        int healthDamage = damage - armorDamage;
+        return TakeDamage(armorDamage, healthDamage, tick);
     }
 
     public void ObtainArmor(long tick)
     {
         this.ArmorPoint = this.MaxArmorPoint;
+        this.ArmorExpirationTick = tick;
+    }
+
+    public void Heal(int healAmount)
+    {
+        this.HealthPoint = Math.Min(this.HealthPoint + healAmount, this.MaxHealthPoint);
+    }
+
+    public void AddArmor(int armorAmount, long tick)
+    {
+        this.ArmorPoint = Math.Min(this.ArmorPoint + armorAmount, this.MaxArmorPoint);
         this.ArmorExpirationTick = tick;
     }
 } 

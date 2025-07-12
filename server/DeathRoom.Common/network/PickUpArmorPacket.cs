@@ -1,3 +1,4 @@
+using DeathRoom.Common.Dto;
 using MessagePack;
 
 namespace DeathRoom.Common.Network
@@ -7,5 +8,8 @@ namespace DeathRoom.Common.Network
     {
         [Key(0)]
         public long ClientTick { get; set; }
+        
+        [Key(1)]
+        public int ArmorAmount { get; set; } = 100; // Количество брони, которое дает подбор
     }
 } 

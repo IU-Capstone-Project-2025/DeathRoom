@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DeathRoom.Common\DeathRoom.Common.csproj" />
+    <ProjectReference Include="..\DeathRoom.Application\DeathRoom.Application.csproj" />
+    <ProjectReference Include="..\DeathRoom.Domain\DeathRoom.Domain.csproj" />
   </ItemGroup>
 
 </Project>
