@@ -9,12 +9,9 @@ public class PlayerMovement : MonoBehaviour
     public RectTransform PauseMenu;
     public RectTransform leaderBoard;
     public Client client;
-    [Range(1f, 10f)]
-    public float mouseSensitive = 3;
-    [Range(-180f, 180f)]
-    public float minCameraRotY = -60f;
-    [Range(-180f, 180f)]
-    public float maxCameraRotY = 40f;
+    [Range(1f, 10f)] public float mouseSensitive = 3;
+    [Range(-180f, 180f)] public float minCameraRotY = -60f;
+    [Range(-180f, 180f)] public float maxCameraRotY = 40f;
     private Transform Hcamera;
     private float rotationY = 20f;
 
@@ -74,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
         //leaderBoard.gameObject.SetActive(true);
     }
 
-    public void resume() 
+    public void resume()
     {
         Time.timeScale = 1f;
         Cursor.visible = false;
@@ -93,10 +90,29 @@ public class PlayerMovement : MonoBehaviour
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
                 {
                     usingGun.Shoot();
-                    client.SendShoot(Vector3.forward);
+
+                    // Добавить raycast для определения попаданий
+                    RaycastHit hit;
+                    if (Physics.Raycast(Hcamera.position, Hcamera.forward, out hit, 100f))
+                    {
+                        var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
+                        if (networkPlayer != null)
+                        {
+                            client.SendShoot(transform.forward, networkPlayer.PlayerId);
+                        }
+                        else
+                        {
+                            client.SendShoot(transform.forward);
+                        }
+                    }
+                    else
+                    {
+                        client.SendShoot(transform.forward);
+                    }
                 }
             }
         }
+
         GravitySystem();
         CameraPack();
 
@@ -110,6 +126,7 @@ public class PlayerMovement : MonoBehaviour
             movement = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical")).normalized;
             moveDirection = Quaternion.AngleAxis(transform.eulerAngles.y, Vector3.up) * movement * speed;
         }
+
         transform.Rotate(0f, Input.GetAxis("Mouse X") * mouseSensitive * 100f * Time.deltaTime, 0f);
 
         if (Input.GetMouseButton(1))
@@ -185,6 +202,7 @@ public class PlayerMovement : MonoBehaviour
         {
             animMove = new Vector3(animMove.x / 2f, 0f, animMove.z / 2f);
         }
+
         float velocity = (oldPos - new Vector3(transform.position.x, 0f, transform.position.z)).magnitude * 100f;
         if (velocity < 0.5f)
         {
@@ -194,6 +212,7 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetBool("Sprint", (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero));
         }
+
         velocity = Mathf.Clamp(velocity, 0f, 1f);
 
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
@@ -201,19 +220,23 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("MoveZ", Mathf.Lerp(animator.GetFloat("MoveZ"), animMove.z, Time.deltaTime * 20f));
         float turnValue = Input.GetAxis("Mouse X") * 3f;
         turnValue = Mathf.Clamp(turnValue, -1f, 1f);
-        animator.SetFloat("TurnValue", Mathf.Lerp(animator.GetFloat("TurnValue"), Input.GetAxis("Mouse X") * 2f, Time.deltaTime * 3f));
+        animator.SetFloat("TurnValue",
+            Mathf.Lerp(animator.GetFloat("TurnValue"), Input.GetAxis("Mouse X") * 2f, Time.deltaTime * 3f));
 
         if (!isReload)
         {
-            RHandRig.weight = Mathf.Lerp(RHandRig.weight, (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero) ? 0f : 1f, Time.deltaTime * 10f);
-            WeaponRig.weight = Mathf.Lerp(WeaponRig.weight, (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero) ? 0f : 1f, Time.deltaTime * 10f);
+            RHandRig.weight = Mathf.Lerp(RHandRig.weight,
+                (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero) ? 0f : 1f, Time.deltaTime * 10f);
+            WeaponRig.weight = Mathf.Lerp(WeaponRig.weight,
+                (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero) ? 0f : 1f, Time.deltaTime * 10f);
             LHandRig.weight = Mathf.Lerp(LHandRig.weight, 1f, Time.deltaTime * 10f);
         }
 
         animator.SetBool("OnAir", !controller.isGrounded);
         animator.SetBool("Shoot", Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload);
         animator.SetBool("Aim", Input.GetMouseButton(1));
-        animator.SetFloat("ShootType", Mathf.Lerp(animator.GetFloat("ShootType"), Input.GetMouseButton(1) ? 1f : 0f, Time.deltaTime * 5f));
+        animator.SetFloat("ShootType",
+            Mathf.Lerp(animator.GetFloat("ShootType"), Input.GetMouseButton(1) ? 1f : 0f, Time.deltaTime * 5f));
 
         if (Input.GetKeyDown(KeyCode.R) && !isReload && usingGun.GetAllAmo() > 0)
         {
@@ -254,5 +277,4 @@ public class PlayerMovement : MonoBehaviour
     {
         gravity = force;
     }
-
 }

@@ -10,7 +10,7 @@ using DeathRoom.Common.network;
 
 public class Client : MonoBehaviour
 {
-    private string serverAddress = "127.0.0.1";
+    public string serverAddress = "77.233.222.200";
     [Header("Network Settings")]
     public int serverPort = 9050;
     public string playerName = "Player";
@@ -168,6 +168,12 @@ public class Client : MonoBehaviour
                         if (!presentPlayers.Contains(kvp.Key)) toRemove.Add(kvp.Key);
                     }
                     toRemove.ForEach(RemoveNetworkPlayer);
+                    lastServerTick = worldState.ServerTick; 
+                    break;
+
+                case PlayerShootPacket shootPacket:
+                    // Обработать выстрел от другого игрока
+                    Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
                     break;
 
                 case null:
@@ -261,7 +267,7 @@ public class Client : MonoBehaviour
         };
         SendPacket(sp);
 
-        if (targetId > 0)
+        if (targetId >= 0) // или targetId != -1
         {
             var hp = new PlayerHitPacket
             {
