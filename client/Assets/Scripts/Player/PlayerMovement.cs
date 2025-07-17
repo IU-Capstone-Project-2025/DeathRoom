@@ -91,7 +91,6 @@ public class PlayerMovement : MonoBehaviour
                 {
                     usingGun.Shoot();
 
-                    // Добавить raycast для определения попаданий
                     RaycastHit hit;
                     if (Physics.Raycast(Hcamera.position, Hcamera.forward, out hit, 100f))
                     {
