@@ -105,8 +105,20 @@ public class NetworkPlayer : MonoBehaviour {
 
 
     void UpdateAnimation() {
+        if (animator == null) {
+            Debug.LogWarning($"NetworkPlayer {Username} (ID: {PlayerId}): Animator is null, skipping animation update");
+            return;
+        }
+        
+        if (transform == null) {
+            Debug.LogError($"NetworkPlayer {Username} (ID: {PlayerId}): Transform is null!");
+            return;
+        }
+        
         Vector3 velocity = (targetPosition - transform.position) / Time.deltaTime;
         Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        
+        Debug.Log($"NetworkPlayer {Username}: UpdateAnimation - velocity: {velocity.magnitude:F2}, localVel: ({localVelocity.x:F2}, {localVelocity.z:F2}), isMoving: {isMoving}");
         
         animator.SetFloat("MoveX", localVelocity.x);
         animator.SetFloat("MoveZ", localVelocity.z);
@@ -115,6 +127,9 @@ public class NetworkPlayer : MonoBehaviour {
         if (currentState != null) {
             bool isDead = currentState.HealthPoint <= 0;
             animator.SetBool("Dead", isDead);
+            Debug.Log($"NetworkPlayer {Username}: Health: {currentState.HealthPoint}, isDead: {isDead}");
+        } else {
+            Debug.LogWarning($"NetworkPlayer {Username} (ID: {PlayerId}): currentState is null in UpdateAnimation");
         }
     }
 

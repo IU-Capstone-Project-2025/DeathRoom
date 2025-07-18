@@ -204,16 +204,11 @@ public class Client : MonoBehaviour
                     break;
 
                 case PlayerShootPacket shootPacket:
-                    // Обработать выстрел от другого игрока
                     Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
                     break;
 
                 case PlayerAnimationPacket animPacket:
-                    // Этот пакет приходит от сервера и касается других игроков
-                    // Игнорируем пакеты о себе
                     if (animPacket.PlayerId == localPlayerId) break;
-
-                    // Находим нужного сетевого игрока и передаем ему данные
                     if (networkPlayers.TryGetValue(animPacket.PlayerId, out var player))
                     {
                         player.ApplyAnimationUpdate(animPacket);
@@ -254,7 +249,7 @@ public class Client : MonoBehaviour
     {
         Vector3 spawnPos = ps.Position != Vector3.zero ? UnityVector3(ps.Position) : GetRandomSpawnPoint();
         GameObject go = Instantiate(networkPlayerPrefab, spawnPos, Quaternion.identity);
-        var nw = go.GetComponent<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
+        var nw = go.GetComponentInChildren<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
         nw.Initialize(ps);
         networkPlayers[ps.Id] = nw;
         Debug.Log($"Created network player {ps.Username} (ID {ps.Id})");
