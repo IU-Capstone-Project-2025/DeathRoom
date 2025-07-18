@@ -172,6 +172,7 @@ public class Client : MonoBehaviour
                     break;
 
                 case PlayerShootPacket shootPacket:
+                    // Обработать выстрел от другого игрока
                     Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
                     break;
 

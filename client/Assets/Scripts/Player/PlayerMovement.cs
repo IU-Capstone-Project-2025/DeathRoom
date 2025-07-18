@@ -40,7 +40,6 @@ public class PlayerMovement : MonoBehaviour
     private bool isReload = false;
     private bool jumpOver = false;
     public Gun usingGun;
-    public bool IsCrouching => crouch;
 
     void Awake()
     {
@@ -95,7 +94,6 @@ public class PlayerMovement : MonoBehaviour
                     RaycastHit hit;
                     if (Physics.Raycast(Hcamera.position, Hcamera.forward, out hit, 100f))
                     {
-                        Debug.DrawRay(Hcamera.position, Hcamera.forward * hit.distance, Color.red, 1f);
                         var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
                         if (networkPlayer != null)
                         {
