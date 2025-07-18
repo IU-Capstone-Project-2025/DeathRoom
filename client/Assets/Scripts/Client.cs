@@ -267,7 +267,7 @@ public class Client : MonoBehaviour
         };
         SendPacket(sp);
 
-        if (targetId >= 0) // или targetId != -1
+        if (targetId >= 0) 
         {
             var hp = new PlayerHitPacket
             {
