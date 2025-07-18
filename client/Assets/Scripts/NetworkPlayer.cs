@@ -8,7 +8,7 @@ public class NetworkPlayer : MonoBehaviour {
     public float maxDistance = 1f;
     
     [Header("Animation Settings")]
-    public float animationUpdateRate = 10f; // Updates per second
+    public float animationUpdateRate = 10f;
     public float movementThreshold = 0.05f;
     public float animationSmoothTime = 0.1f;
     
