@@ -146,6 +146,38 @@ public class Client : MonoBehaviour
 		return;
     }
 
+    public void SendAnimationUpdate(Dictionary<string, object> parameters)
+    {
+        if (!isConnected || localPlayerId == -1) return;
+
+        var packet = new PlayerAnimationPacket
+        {
+            PlayerId = this.localPlayerId,
+            ClientTick = lastServerTick
+        };
+
+        foreach (var param in parameters)
+        {
+            switch (param.Value)
+            {
+                case bool bValue:
+                    packet.BoolParams[param.Key] = bValue;
+                    break;
+                case float fValue:
+                    packet.FloatParams[param.Key] = fValue;
+                    break;
+                case int iValue:
+                    packet.IntParams[param.Key] = iValue;
+                    break;
+            }
+        }
+
+        if (packet.BoolParams.Count > 0 || packet.FloatParams.Count > 0 || packet.IntParams.Count > 0)
+        {
+            SendPacket(packet, DeliveryMethod.Unreliable);
+        }
+    }
+
     void ProcessPacket(byte[] data)
     {
         try
@@ -318,7 +350,7 @@ public class Client : MonoBehaviour
         Debug.Log($"Showing local shoot effects from {origin} in direction {direction}");
     }
 
-    void SendPacket<T>(T packet) where T : IPacket
+    void SendPacket<T>(T packet, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered) where T : IPacket
     {
         if (!isConnected || serverPeer == null)
         {
@@ -330,7 +362,7 @@ public class Client : MonoBehaviour
         {
             var data = MessagePackSerializer.Serialize<IPacket>(packet, MessagePackSerializer.DefaultOptions);
             Debug.Log($"Sending packet type: {packet.GetType().Name}, size: {data.Length}");
-            serverPeer.Send(data, DeliveryMethod.ReliableOrdered);
+            serverPeer.Send(data, deliveryMethod);
         }
         catch (Exception e)
         {
