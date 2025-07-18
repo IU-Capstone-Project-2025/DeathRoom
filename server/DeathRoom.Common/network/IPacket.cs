@@ -9,6 +9,7 @@ namespace DeathRoom.Common.Network
     [Union(4, typeof(PlayerHitPacket))]
     [Union(5, typeof(PickUpHealthPacket))]
     [Union(6, typeof(PickUpArmorPacket))]
+    [Union(7, typeof(PlayerShootBroadcastPacket))]
     public interface IPacket
     {
     }
