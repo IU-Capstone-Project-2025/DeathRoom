@@ -98,6 +98,18 @@ public class NetworkPlayer : MonoBehaviour {
 
     void Update()
     {
+        // Interpolate position and rotation
+        if (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPosition, interpolationSpeed * Time.deltaTime);
+        }
+        
+        if (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, interpolationSpeed * Time.deltaTime);
+        }
+        
+        // Calculate movement for animation
         float velocity = Vector3.Distance(lastPosition, transform.position) / Time.deltaTime;
         isMoving = velocity > 0.1f;
         lastPosition = transform.position;
