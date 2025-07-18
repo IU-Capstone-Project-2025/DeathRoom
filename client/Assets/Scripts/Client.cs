@@ -135,6 +135,37 @@ public class Client : MonoBehaviour
 		return;
     }
 
+    public void SendAnimationUpdate(Dictionary<string, object> parameters)
+    {
+        if (!isConnected) return;
+
+        var packet = new AnimationUpdatePacket
+        {
+            ClientTick = lastServerTick
+        };
+
+        foreach (var param in parameters)
+        {
+            switch (param.Value)
+            {
+                case bool bValue:
+                    packet.BoolParams[param.Key] = bValue;
+                    break;
+                case float fValue:
+                    packet.FloatParams[param.Key] = fValue;
+                    break;
+                case int iValue:
+                    packet.IntParams[param.Key] = iValue;
+                    break;
+            }
+        }
+
+        if (packet.BoolParams.Count > 0 || packet.FloatParams.Count > 0 || packet.IntParams.Count > 0)
+        {
+            SendPacket(packet);
+        }
+    }
+
     void ProcessPacket(byte[] data)
     {
         try
@@ -174,6 +205,18 @@ public class Client : MonoBehaviour
                 case PlayerShootPacket shootPacket:
                     // Обработать выстрел от другого игрока
                     Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
+                    break;
+
+                case AnimationUpdatePacket animPacket:
+                    // Этот пакет приходит от сервера и касается других игроков
+                    // Игнорируем пакеты о себе
+                    if (animPacket.PlayerId == localPlayerId) break;
+
+                    // Находим нужного сетевого игрока и передаем ему данные
+                    if (networkPlayers.TryGetValue(animPacket.PlayerId, out var player))
+                    {
+                        player.ApplyAnimationUpdate(animPacket);
+                    }
                     break;
 
                 case null:

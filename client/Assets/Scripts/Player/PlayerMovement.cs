@@ -41,6 +41,11 @@ public class PlayerMovement : MonoBehaviour
     private bool jumpOver = false;
     public Gun usingGun;
 
+    private Dictionary<string, object> animationParams = new Dictionary<string, object>();
+    private Dictionary<string, object> changedAnimationParams = new Dictionary<string, object>();
+    private float animationSendInterval = 0.1f;
+    private float animationSendTimer = 0f;
+
     void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -48,7 +53,24 @@ public class PlayerMovement : MonoBehaviour
         Cursor.visible = false;
         radius = controller.radius;
         height = controller.height;
+
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            switch (param.type)
+            {
+                case AnimatorControllerParameterType.Bool:
+                    animationParams[param.name] = animator.GetBool(param.name);
+                    break;
+                case AnimatorControllerParameterType.Float:
+                    animationParams[param.name] = animator.GetFloat(param.name);
+                    break;
+                case AnimatorControllerParameterType.Int:
+                    animationParams[param.name] = animator.GetInteger(param.name);
+                    break;
+            }
+        }
     }
+
 
     void Start()
     {
@@ -71,6 +93,37 @@ public class PlayerMovement : MonoBehaviour
         //leaderBoard.gameObject.SetActive(true);
     }
 
+    private void SetBool(string name, bool value)
+    {
+        if (!animationParams.ContainsKey(name) || (bool)animationParams[name] != value)
+        {
+            animationParams[name] = value;
+            changedAnimationParams[name] = value;
+            animator.SetBool(name, value);
+        }
+    }
+
+    private void SetFloat(string name, float value)
+    {
+        if (!animationParams.ContainsKey(name) || Mathf.Abs((float)animationParams[name] - value) > 0.01f)
+        {
+            animationParams[name] = value;
+            changedAnimationParams[name] = value;
+            animator.SetFloat(name, value);
+        }
+    }
+
+    private void SetInt(string name, int value)
+    {
+        if (!animationParams.ContainsKey(name) || (int)animationParams[name] != value)
+        {
+            animationParams[name] = value;
+            changedAnimationParams[name] = value;
+            animator.SetInteger(name, value);
+        }
+    }
+
+
     public void resume()
     {
         Time.timeScale = 1f;
@@ -85,6 +138,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Movement();
             AnimatorSystem();
+
             if (!isReload)
             {
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
@@ -116,6 +170,14 @@ public class PlayerMovement : MonoBehaviour
         CameraPack();
 
         controller.Move(new Vector3(moveDirection.x, gravity, moveDirection.z) * Time.deltaTime);
+
+        animationSendTimer += Time.deltaTime;
+        if (animationSendTimer >= animationSendInterval && changedAnimationParams.Count > 0)
+        {
+            SendAnimationParameters(changedAnimationParams);
+            changedAnimationParams.Clear();
+            animationSendTimer = 0f;
+        }
     }
 
     void Movement()
@@ -205,22 +267,21 @@ public class PlayerMovement : MonoBehaviour
         float velocity = (oldPos - new Vector3(transform.position.x, 0f, transform.position.z)).magnitude * 100f;
         if (velocity < 0.5f)
         {
-            animator.SetBool("Sprint", false);
+            SetBool("Sprint", false);
         }
         else
         {
-            animator.SetBool("Sprint", (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero));
+            SetBool("Sprint", (Input.GetKey(KeyCode.LeftShift) && movement != Vector3.zero));
         }
 
         velocity = Mathf.Clamp(velocity, 0f, 1f);
 
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
-        animator.SetFloat("MoveX", Mathf.Lerp(animator.GetFloat("MoveX"), animMove.x, Time.deltaTime * 20f));
-        animator.SetFloat("MoveZ", Mathf.Lerp(animator.GetFloat("MoveZ"), animMove.z, Time.deltaTime * 20f));
+        SetFloat("MoveX", Mathf.Lerp(animator.GetFloat("MoveX"), animMove.x, Time.deltaTime * 20f));
+        SetFloat("MoveZ", Mathf.Lerp(animator.GetFloat("MoveZ"), animMove.z, Time.deltaTime * 20f));
         float turnValue = Input.GetAxis("Mouse X") * 3f;
         turnValue = Mathf.Clamp(turnValue, -1f, 1f);
-        animator.SetFloat("TurnValue",
-            Mathf.Lerp(animator.GetFloat("TurnValue"), Input.GetAxis("Mouse X") * 2f, Time.deltaTime * 3f));
+        SetFloat("TurnValue", Mathf.Lerp(animator.GetFloat("TurnValue"), Input.GetAxis("Mouse X") * 2f, Time.deltaTime * 3f));
 
         if (!isReload)
         {
@@ -231,11 +292,10 @@ public class PlayerMovement : MonoBehaviour
             LHandRig.weight = Mathf.Lerp(LHandRig.weight, 1f, Time.deltaTime * 10f);
         }
 
-        animator.SetBool("OnAir", !controller.isGrounded);
-        animator.SetBool("Shoot", Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload);
-        animator.SetBool("Aim", Input.GetMouseButton(1));
-        animator.SetFloat("ShootType",
-            Mathf.Lerp(animator.GetFloat("ShootType"), Input.GetMouseButton(1) ? 1f : 0f, Time.deltaTime * 5f));
+        SetBool("OnAir", !controller.isGrounded);
+        SetBool("Shoot", Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload);
+        SetBool("Aim", Input.GetMouseButton(1));
+        SetFloat("ShootType", Mathf.Lerp(animator.GetFloat("ShootType"), Input.GetMouseButton(1) ? 1f : 0f, Time.deltaTime * 5f));
 
         if (Input.GetKeyDown(KeyCode.R) && !isReload && usingGun.GetAllAmo() > 0)
         {
@@ -245,6 +305,13 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) && !isReload)
         {
             StartCoroutine(ChangeWeapon(1.9f / 2f));
+        }
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Reload") &&
+            animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.98f)
+        {
+            isReload = false;
+            SetBool("Reload", false);
         }
     }
 
@@ -275,5 +342,14 @@ public class PlayerMovement : MonoBehaviour
     public void LaunchUpward(float force)
     {
         gravity = force;
+    }
+     
+    private void SendAnimationParameters(Dictionary<string, object> changedParams)
+    {
+        if (client != null && changedParams.Count > 0)
+        {
+            client.SendAnimationUpdate(changedParams);
+        }
+
     }
 }

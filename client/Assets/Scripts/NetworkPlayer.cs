@@ -119,7 +119,25 @@ public class NetworkPlayer : MonoBehaviour {
             animator.SetBool("Dead", isDead);
         }
     }
-    
+
+    public void ApplyAnimationUpdate(AnimationUpdatePacket packet)
+    {
+        if (animator == null) return;
+
+        foreach (var param in packet.BoolParams)
+        {
+            animator.SetBool(param.Key, param.Value);
+        }
+        foreach (var param in packet.FloatParams)
+        {
+            animator.SetFloat(param.Key, param.Value);
+        }
+        foreach (var param in packet.IntParams)
+        {
+            animator.SetInteger(param.Key, param.Value);
+        }
+    }
+
     void OnDestroy() {
         Debug.Log($"NetworkPlayer destroyed: {Username}");
     }
