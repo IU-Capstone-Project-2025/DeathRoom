@@ -16,6 +16,7 @@ public class NetworkPlayer : MonoBehaviour {
     private Quaternion targetRotation;
     private Vector3 lastPosition;
     private bool isMoving = false;
+    private float lastUpdateTime;
     
     public string Username { get; private set; }
     public int PlayerId { get; private set; }
@@ -64,6 +65,7 @@ public class NetworkPlayer : MonoBehaviour {
         lastTargetPosition = pos;
         targetRotation = rot;
         lastPosition = pos;
+        lastUpdateTime = Time.time;
         
         Debug.Log($"NetworkPlayer initialized: {Username} (ID: {PlayerId}) at {pos}");
     }
@@ -90,11 +92,13 @@ public class NetworkPlayer : MonoBehaviour {
             lastTargetPosition = targetPosition;
             targetPosition = newPosition;
             targetRotation = newRotation;
+            lastUpdateTime = Time.time;
             Debug.Log($"NetworkPlayer {Username} teleported due to large distance: {distance:F2}");
         } else {
             lastTargetPosition = targetPosition;
             targetPosition = newPosition;
             targetRotation = newRotation;
+            lastUpdateTime = Time.time;
         }
         
         UpdateAnimation();
