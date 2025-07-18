@@ -108,18 +108,18 @@ public class PlayerMovement : MonoBehaviour
                         if (networkPlayer != null)
                         {
                             Debug.Log("Hit player: " + networkPlayer.PlayerId);
-                            client.SendShoot(transform.forward, networkPlayer.PlayerId);
+                            client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
                         }
                         else
                         {
                             Debug.Log($"Hit non-player object: {hit.collider.gameObject.layer}");
-                            client.SendShoot(transform.forward);
+                            client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
                         }
                     }
                     else
                     {
                         Debug.LogWarning("Ray missed! Check if objects have colliders and are in the right layers");
-                        client.SendShoot(transform.forward);
+                        client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
                     }
                 }
             }
