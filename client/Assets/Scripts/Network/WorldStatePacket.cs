@@ -36,5 +36,31 @@ namespace DeathRoom.Common.network
         [Key(5)]
         public int MaxHealthPoint { get; set; }
     }
-    
+
+    [MessagePackObject]
+    public class PlayerAnimationPacket : IPacket
+    {
+        [Key(0)]
+        public int PlayerId { get; set; }
+
+        [Key(1)]
+        public long ClientTick { get; set; }
+
+        [Key(2)]
+        public Dictionary<string, bool> BoolParams { get; set; }
+
+        [Key(3)]
+        public Dictionary<string, float> FloatParams { get; set; }
+
+        [Key(4)]
+        public Dictionary<string, int> IntParams { get; set; }
+
+        public PlayerAnimationPacket()
+        {
+            BoolParams = new Dictionary<string, bool>();
+            FloatParams = new Dictionary<string, float>();
+            IntParams = new Dictionary<string, int>();
+        }
+    }
+
 } 
