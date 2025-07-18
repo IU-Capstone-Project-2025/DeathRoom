@@ -12,9 +12,11 @@ public class NetworkPlayer : MonoBehaviour {
     
     private PlayerState currentState;
     private Vector3 targetPosition;
+    private Vector3 previousTargetPosition;
     private Quaternion targetRotation;
     private Vector3 lastPosition;
     private bool isMoving = false;
+    private float lastTargetUpdateTime;
     
     public string Username { get; private set; }
     public int PlayerId { get; private set; }
@@ -60,8 +62,10 @@ public class NetworkPlayer : MonoBehaviour {
         transform.rotation = rot;
         
         targetPosition = pos;
+        previousTargetPosition = pos;
         targetRotation = rot;
         lastPosition = pos;
+        lastTargetUpdateTime = Time.time;
         
         Debug.Log($"NetworkPlayer initialized: {Username} (ID: {PlayerId}) at {pos}");
     }
@@ -85,12 +89,16 @@ public class NetworkPlayer : MonoBehaviour {
         if (distance > maxDistance) {
             transform.position = newPosition;
             transform.rotation = newRotation;
+            previousTargetPosition = targetPosition;
             targetPosition = newPosition;
             targetRotation = newRotation;
+            lastTargetUpdateTime = Time.time;
             Debug.Log($"NetworkPlayer {Username} teleported due to large distance: {distance:F2}");
         } else {
+            previousTargetPosition = targetPosition;
             targetPosition = newPosition;
             targetRotation = newRotation;
+            lastTargetUpdateTime = Time.time;
         }
         
         UpdateAnimation();
@@ -127,14 +135,23 @@ public class NetworkPlayer : MonoBehaviour {
             return;
         }
         
-        Vector3 velocity = (targetPosition - transform.position) / Time.deltaTime;
-        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        Vector3 targetMovement = targetPosition - previousTargetPosition;
+        float timeSinceLastUpdate = Time.time - lastTargetUpdateTime;
         
-        Debug.Log($"NetworkPlayer {Username}: UpdateAnimation - velocity: {velocity.magnitude:F2}, localVel: ({localVelocity.x:F2}, {localVelocity.z:F2}), isMoving: {isMoving}");
+        Vector3 targetVelocity = Vector3.zero;
+        if (timeSinceLastUpdate > 0 && timeSinceLastUpdate < 1f) // Prevent division by zero and ignore old updates
+        {
+            targetVelocity = targetMovement / timeSinceLastUpdate;
+        }
+        
+        Vector3 localVelocity = transform.InverseTransformDirection(targetVelocity);
+        bool isActuallyMoving = targetMovement.magnitude > 0.01f;
+        
+        Debug.Log($"NetworkPlayer {Username}: UpdateAnimation - targetMovement: {targetMovement.magnitude:F2}, targetVel: {targetVelocity.magnitude:F2}, localVel: ({localVelocity.x:F2}, {localVelocity.z:F2}), isMoving: {isActuallyMoving}");
         
         animator.SetFloat("MoveX", localVelocity.x);
         animator.SetFloat("MoveZ", localVelocity.z);
-        animator.SetBool("Sprint", isMoving && velocity.magnitude > 3f);
+        animator.SetBool("Sprint", isActuallyMoving && targetVelocity.magnitude > 3f);
         
         if (currentState != null) {
             bool isDead = currentState.HealthPoint <= 0;
