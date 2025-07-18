@@ -40,6 +40,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isReload = false;
     private bool jumpOver = false;
     public Gun usingGun;
+    public bool IsCrouching => crouch;
 
     void Awake()
     {
