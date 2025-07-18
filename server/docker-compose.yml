@@ -3,7 +3,7 @@ services:
     image: ghcr.io/iu-capstone-project-2025/deathroom/server:latest
     container_name: deathroom-server
     ports:
-      - "8050:9050"
+      - "8050:9050/udp"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
     restart: unless-stopped

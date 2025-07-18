@@ -37,6 +37,10 @@ public class Client : MonoBehaviour
     private long lastServerTick = 0;
     private int localPlayerId = -1;
     
+    // Client tick synchronization
+    private long clientTick = 0;
+    private float tickRate = 60f; // Match server rate
+    private float nextTickTime = 0f;
 
     void Start()
     {
@@ -123,6 +127,13 @@ public class Client : MonoBehaviour
             SendPlayerMovement();
             nextSendTime = Time.time + (1f / sendRate);
         }
+
+        // Client tick synchronization
+        if (isConnected && Time.time >= nextTickTime)
+        {
+            clientTick++;
+            nextTickTime = Time.time + (1f / tickRate);
+        }
     }
 
     void OnDestroy()
@@ -174,6 +185,11 @@ public class Client : MonoBehaviour
                 case PlayerShootPacket shootPacket:
                     // Обработать выстрел от другого игрока
                     Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
+                    break;
+
+                case PlayerShootBroadcastPacket broadcastPacket:
+                    // Handle shoot broadcast from server
+                    OnReceiveShootBroadcast(broadcastPacket);
                     break;
 
                 case null:
@@ -250,33 +266,56 @@ public class Client : MonoBehaviour
         {
             Position = new Vector3Serializable(localPlayer.transform.Find("Player").position),
             Rotation = new Vector3Serializable(localPlayer.transform.Find("Player").eulerAngles),
-            ClientTick = lastServerTick
+            ClientTick = clientTick
         };
         
         Debug.Log($"packet: send player movement coordinates: {pkt.Position.X}, {pkt.Position.Y}, {pkt.Position.Z}");
         SendPacket(pkt);
     }
 
-    public void SendShoot(Vector3 direction, int targetId = -1)
+    public void PerformShoot(Vector3 origin, Vector3 direction)
     {
         if (!isConnected) return;
 
-        var sp = new PlayerShootPacket { 
+        long shootTick = clientTick;
+        
+        // 1. Send shoot packet first
+        var shootPacket = new PlayerShootPacket { 
             Direction = new Vector3Serializable(direction),
-            ClientTick = lastServerTick 
+            ClientTick = shootTick 
         };
-        SendPacket(sp);
-
-        if (targetId >= 0) // или targetId != -1
+        SendPacket(shootPacket);
+        
+        // 2. Perform local hit detection
+        RaycastHit hit;
+        if (Physics.Raycast(origin, direction, out hit, Mathf.Infinity))
         {
-            var hp = new PlayerHitPacket
+            // Check if we hit a player
+            var hitPlayer = hit.collider.GetComponent<NetworkPlayer>();
+            if (hitPlayer != null && hitPlayer.PlayerId != localPlayerId)
             {
-                TargetId = targetId,
-                ClientTick = lastServerTick,
-                Direction = new Vector3Serializable(direction)
-            };
-            SendPacket(hp);
+                // 3. Send hit packet with SAME tick and direction
+                var hitPacket = new PlayerHitPacket
+                {
+                    TargetId = hitPlayer.PlayerId,
+                    ClientTick = shootTick,  // Same tick!
+                    Direction = new Vector3Serializable(direction)  // Same direction!
+                };
+                SendPacket(hitPacket);
+                
+                Debug.Log($"Hit detected on player {hitPlayer.PlayerId} at tick {shootTick}");
+            }
         }
+        
+        // 4. Show local effects immediately (muzzle flash, sound, etc.)
+        ShowLocalShootEffects(origin, direction);
+    }
+
+    void ShowLocalShootEffects(Vector3 origin, Vector3 direction)
+    {
+        // Implement local visual/audio effects here
+        // This gives immediate feedback while waiting for server validation
+        Debug.Log($"Showing local shoot effects from {origin} in direction {direction}");
     }
 
     void SendPacket<T>(T packet) where T : IPacket
@@ -306,5 +345,66 @@ public class Client : MonoBehaviour
         if (spawnPoints != null && spawnPoints.Length > 0)
             return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].position;
         return Vector3.zero;
+    }
+
+    void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
+    {
+        // Don't show effects for own shots (already shown locally)
+        if (broadcastPacket.ShooterId == localPlayerId) 
+        {
+            Debug.Log($"Ignoring own shoot broadcast from server");
+            return;
+        }
+        
+        // Show effects for other players' shots
+        if (networkPlayers.TryGetValue(broadcastPacket.ShooterId, out NetworkPlayer shooter))
+        {
+            Vector3 shootDirection = new Vector3(
+                broadcastPacket.Direction.X, 
+                broadcastPacket.Direction.Y, 
+                broadcastPacket.Direction.Z
+            );
+            
+            ShowShootEffectsForPlayer(shooter, shootDirection, broadcastPacket.ClientTick, broadcastPacket.ServerTick);
+            Debug.Log($"Showing shoot effects for player {broadcastPacket.ShooterId}");
+        }
+        else
+        {
+            Debug.LogWarning($"Received shoot broadcast for unknown player {broadcastPacket.ShooterId}");
+        }
+    }
+
+    void ShowShootEffectsForPlayer(NetworkPlayer shooter, Vector3 direction, long clientTick, long serverTick)
+    {
+        // Implement visual and audio effects for other players' shots
+        // This could include:
+        // - Muzzle flash at shooter position
+        // - Shoot sound effect
+        // - Bullet tracer/projectile
+        // - Screen shake if close
+        
+        Vector3 shooterPosition = shooter.transform.position;
+        Debug.Log($"Player {shooter.PlayerId} shot from {shooterPosition} in direction {direction}");
+        
+        // Example: Create bullet tracer (you would implement this based on your game's visual system)
+        CreateBulletTracer(shooterPosition, direction);
+        PlayShootSound(shooterPosition);
+    }
+
+    void CreateBulletTracer(Vector3 origin, Vector3 direction)
+    {
+        // Placeholder for bullet tracer implementation
+        Debug.Log($"Creating bullet tracer from {origin} in direction {direction}");
+    }
+
+    void PlayShootSound(Vector3 position)
+    {
+        // Placeholder for 3D positioned audio
+        Debug.Log($"Playing shoot sound at position {position}");
+    }
+
+    public long GetCurrentClientTick()
+    {
+        return clientTick;
     }
 }
