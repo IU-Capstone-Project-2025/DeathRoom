@@ -130,16 +130,34 @@ public class NetworkPlayer : MonoBehaviour {
         Vector3 velocity = (targetPosition - transform.position) / Time.deltaTime;
         Vector3 localVelocity = transform.InverseTransformDirection(velocity);
         
-        // If velocity is very small, set animation parameters to zero
+        // If velocity is very small, set all animation parameters to zero/false
         if (velocity.magnitude < 0.1f) {
             localVelocity = Vector3.zero;
+            
+            // Reset all animation parameters to idle state
+            animator.SetFloat("MoveX", 0f);
+            animator.SetFloat("MoveZ", 0f);
+            animator.SetFloat("TurnValue", 0f);
+            animator.SetFloat("ShootType", 0f);
+            animator.SetBool("Sprint", false);
+            animator.SetBool("OnAir", false);
+            animator.SetBool("Jump", false);
+            animator.SetBool("FlipForward", false);
+            animator.SetBool("Kick", false);
+            animator.SetBool("Shoot", false);
+            animator.SetBool("Reload", false);
+            animator.SetBool("Aim", false);
+            animator.SetBool("JumpOver", false);
+            animator.SetBool("HitWall", false);
+            animator.SetBool("ChangeWeapon", false);
+        } else {
+            // Normal movement - set movement parameters
+            animator.SetFloat("MoveX", localVelocity.x);
+            animator.SetFloat("MoveZ", localVelocity.z);
+            animator.SetBool("Sprint", velocity.magnitude > 3f);
         }
         
         Debug.Log($"NetworkPlayer {Username}: UpdateAnimation - velocity: {velocity.magnitude:F2}, localVel: ({localVelocity.x:F2}, {localVelocity.z:F2}), isMoving: {isMoving}");
-        
-        animator.SetFloat("MoveX", localVelocity.x);
-        animator.SetFloat("MoveZ", localVelocity.z);
-        animator.SetBool("Sprint", velocity.magnitude > 0.1f && velocity.magnitude > 3f);
         
         if (currentState != null) {
             bool isDead = currentState.HealthPoint <= 0;
