@@ -94,6 +94,7 @@ public class PlayerMovement : MonoBehaviour
                     RaycastHit hit;
                     if (Physics.Raycast(Hcamera.position, Hcamera.forward, out hit, 100f))
                     {
+                        Debug.DrawRay(Hcamera.position, Hcamera.forward * hit.distance, Color.red, 1f);
                         var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
                         if (networkPlayer != null)
                         {
