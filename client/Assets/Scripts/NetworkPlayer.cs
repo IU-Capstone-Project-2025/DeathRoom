@@ -126,7 +126,6 @@ public class NetworkPlayer : MonoBehaviour {
         
         if (currentState != null) {
             bool isDead = currentState.HealthPoint <= 0;
-            animator.SetBool("Dead", isDead);
             Debug.Log($"NetworkPlayer {Username}: Health: {currentState.HealthPoint}, isDead: {isDead}");
         } else {
             Debug.LogWarning($"NetworkPlayer {Username} (ID: {PlayerId}): currentState is null in UpdateAnimation");
