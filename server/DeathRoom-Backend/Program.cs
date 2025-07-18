@@ -44,10 +44,7 @@ var builder = Host.CreateDefaultBuilder(args)
             var logger = sp.GetRequiredService<ILogger<GameServer>>();
             return new GameServer(playerSession, worldState, gameLoop, packetHandler, logger);
         });
-        // Удаляю регистрацию NetManager
-        // services.AddSingleton<NetManager>(sp => sp.GetRequiredService<GameServer>().NetManager);
-
-        // Реальные делегаты для Application-слоя
+   
         services.AddSingleton<GameLoopService>(sp =>
         {
             var playerSession = sp.GetRequiredService<PlayerSessionService>();
