@@ -215,13 +215,19 @@ public class Client : MonoBehaviour
                     break;
 
                 case PlayerShootPacket shootPacket:
-                    // Обработать выстрел от другого игрока
                     Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
                     break;
 
                 case PlayerShootBroadcastPacket broadcastPacket:
                     // Handle shoot broadcast from server
                     OnReceiveShootBroadcast(broadcastPacket);
+                    break;
+                case PlayerAnimationPacket animPacket:
+                    if (animPacket.PlayerId == localPlayerId) break;
+                    if (networkPlayers.TryGetValue(animPacket.PlayerId, out var player))
+                    {
+                        player.ApplyAnimationUpdate(animPacket);
+                    }
                     break;
 
                 case null:
@@ -258,7 +264,7 @@ public class Client : MonoBehaviour
     {
         Vector3 spawnPos = ps.Position != Vector3.zero ? UnityVector3(ps.Position) : GetRandomSpawnPoint();
         GameObject go = Instantiate(networkPlayerPrefab, spawnPos, Quaternion.identity);
-        var nw = go.GetComponent<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
+        var nw = go.GetComponentInChildren<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
         nw.Initialize(ps);
         networkPlayers[ps.Id] = nw;
         Debug.Log($"Created network player {ps.Username} (ID {ps.Id})");
@@ -298,7 +304,7 @@ public class Client : MonoBehaviour
         {
             Position = new Vector3Serializable(localPlayer.transform.Find("Player").position),
             Rotation = new Vector3Serializable(localPlayer.transform.Find("Player").eulerAngles),
-            ClientTick = clientTick
+            ClientTick = lastServerTick
         };
         
         Debug.Log($"packet: send player movement coordinates: {pkt.Position.X}, {pkt.Position.Y}, {pkt.Position.Z}");
