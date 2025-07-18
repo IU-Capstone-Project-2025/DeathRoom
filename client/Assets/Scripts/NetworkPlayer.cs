@@ -98,28 +98,47 @@ public class NetworkPlayer : MonoBehaviour {
 
     void Update()
     {
+        if (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * interpolationSpeed);
+        }
+        else
+        {
+            transform.position = targetPosition;
+        }
+
+        if (Quaternion.Angle(transform.rotation, targetRotation) > 0.01f)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * interpolationSpeed);
+        }
+        else
+        {
+            transform.rotation = targetRotation;
+        }
         float velocity = Vector3.Distance(lastPosition, transform.position) / Time.deltaTime;
         isMoving = velocity > 0.1f;
         lastPosition = transform.position;
     }
 
 
-    void UpdateAnimation() {
-        if (animator == null) return;
-        
-        Vector3 velocity = (targetPosition - transform.position) / Time.deltaTime;
-        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-        
-        animator.SetFloat("MoveX", localVelocity.x);
-        animator.SetFloat("MoveZ", localVelocity.z);
-        animator.SetBool("Sprint", isMoving && velocity.magnitude > 3f);
-        
-        if (currentState != null) {
-            bool isDead = currentState.HealthPoint <= 0;
-            animator.SetBool("Dead", isDead);
-        }
+    void UpdateAnimation()
+    {
+        if (animator == null || currentState == null) return;
+
+        animator.SetBool("IsCrouching", currentState.IsCrouching);
+        animator.SetBool("IsOnAir", currentState.IsOnAir);
+        animator.SetBool("IsRunning", currentState.IsRunning);
+        animator.SetBool("IsShooting", currentState.IsShooting);
+        animator.SetBool("IsAiming", currentState.IsAiming);
+
+        animator.SetFloat("MoveX", currentState.MoveX);
+        animator.SetFloat("MoveZ", currentState.MoveZ);
+
+        bool isDead = currentState.HealthPoint <= 0;
+        animator.SetBool("Dead", isDead);
+
     }
-    
+
     void OnDestroy() {
         Debug.Log($"NetworkPlayer destroyed: {Username}");
     }
