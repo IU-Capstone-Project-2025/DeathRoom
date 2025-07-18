@@ -49,10 +49,8 @@ public class GameServer : INetEventListener
                     {
                         Id = p.Id,
                         Username = p.Username,
-                        Position = new DeathRoom.Common.Dto.Vector3Serializable
-                            { X = p.Position.X, Y = p.Position.Y, Z = p.Position.Z },
-                        Rotation = new DeathRoom.Common.Dto.Vector3Serializable
-                            { X = p.Rotation.X, Y = p.Rotation.Y, Z = p.Rotation.Z },
+                        Position = new DeathRoom.Common.Dto.Vector3Serializable { X = p.Position.X, Y = p.Position.Y, Z = p.Position.Z },
+                        Rotation = new DeathRoom.Common.Dto.Vector3Serializable { X = p.Rotation.X, Y = p.Rotation.Y, Z = p.Rotation.Z },
                         HealthPoint = p.HealthPoint,
                         MaxHealthPoint = p.MaxHealthPoint,
                         ArmorPoint = p.ArmorPoint,
@@ -63,6 +61,20 @@ public class GameServer : INetEventListener
                 };
                 var data = MessagePack.MessagePackSerializer.Serialize<DeathRoom.Common.Network.IPacket>(packet);
                 _netManager.SendToAll(data, LiteNetLib.DeliveryMethod.Unreliable);
+                return Task.CompletedTask;
+            }));
+        }
+
+        // Внедряю реальный делегат для рассылки пакетов через PacketHandlerService
+        var packetHandlerType = _packetHandlerService.GetType();
+        var broadcastField = packetHandlerType.GetField("_broadcastPacket",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        if (broadcastField != null)
+        {
+            broadcastField.SetValue(_packetHandlerService, (Func<DeathRoom.Common.Network.IPacket, Task>)(packet =>
+            {
+                var data = MessagePack.MessagePackSerializer.Serialize<DeathRoom.Common.Network.IPacket>(packet);
+                _netManager.SendToAll(data, LiteNetLib.DeliveryMethod.Reliable);
                 return Task.CompletedTask;
             }));
         }
