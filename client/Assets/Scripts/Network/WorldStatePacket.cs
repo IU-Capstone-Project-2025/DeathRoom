@@ -38,7 +38,7 @@ namespace DeathRoom.Common.network
     }
 
     [MessagePackObject]
-    public class AnimationUpdatePacket : IPacket
+    public class PlayerAnimationPacket : IPacket
     {
         [Key(0)]
         public int PlayerId { get; set; }
@@ -55,7 +55,7 @@ namespace DeathRoom.Common.network
         [Key(4)]
         public Dictionary<string, int> IntParams { get; set; }
 
-        public AnimationUpdatePacket()
+        public PlayerAnimationPacket()
         {
             BoolParams = new Dictionary<string, bool>();
             FloatParams = new Dictionary<string, float>();

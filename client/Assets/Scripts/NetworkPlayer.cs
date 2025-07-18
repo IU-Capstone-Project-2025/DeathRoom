@@ -105,8 +105,6 @@ public class NetworkPlayer : MonoBehaviour {
 
 
     void UpdateAnimation() {
-        if (animator == null) return;
-        
         Vector3 velocity = (targetPosition - transform.position) / Time.deltaTime;
         Vector3 localVelocity = transform.InverseTransformDirection(velocity);
         
@@ -120,7 +118,7 @@ public class NetworkPlayer : MonoBehaviour {
         }
     }
 
-    public void ApplyAnimationUpdate(AnimationUpdatePacket packet)
+    public void ApplyAnimationUpdate(PlayerAnimationPacket packet)
     {
         if (animator == null) return;
 

@@ -137,10 +137,11 @@ public class Client : MonoBehaviour
 
     public void SendAnimationUpdate(Dictionary<string, object> parameters)
     {
-        if (!isConnected) return;
+        if (!isConnected || localPlayerId == -1) return;
 
-        var packet = new AnimationUpdatePacket
+        var packet = new PlayerAnimationPacket
         {
+            PlayerId = this.localPlayerId,
             ClientTick = lastServerTick
         };
 
@@ -162,7 +163,7 @@ public class Client : MonoBehaviour
 
         if (packet.BoolParams.Count > 0 || packet.FloatParams.Count > 0 || packet.IntParams.Count > 0)
         {
-            SendPacket(packet);
+            SendPacket(packet, DeliveryMethod.Unreliable);
         }
     }
 
@@ -207,7 +208,7 @@ public class Client : MonoBehaviour
                     Debug.Log($"Player {shootPacket} shot in direction {shootPacket.Direction}");
                     break;
 
-                case AnimationUpdatePacket animPacket:
+                case PlayerAnimationPacket animPacket:
                     // Этот пакет приходит от сервера и касается других игроков
                     // Игнорируем пакеты о себе
                     if (animPacket.PlayerId == localPlayerId) break;
@@ -322,7 +323,7 @@ public class Client : MonoBehaviour
         }
     }
 
-    void SendPacket<T>(T packet) where T : IPacket
+    void SendPacket<T>(T packet, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered) where T : IPacket
     {
         if (!isConnected || serverPeer == null)
         {
@@ -334,7 +335,7 @@ public class Client : MonoBehaviour
         {
             var data = MessagePackSerializer.Serialize<IPacket>(packet, MessagePackSerializer.DefaultOptions);
             Debug.Log($"Sending packet type: {packet.GetType().Name}, size: {data.Length}");
-            serverPeer.Send(data, DeliveryMethod.ReliableOrdered);
+            serverPeer.Send(data, deliveryMethod);
         }
         catch (Exception e)
         {
