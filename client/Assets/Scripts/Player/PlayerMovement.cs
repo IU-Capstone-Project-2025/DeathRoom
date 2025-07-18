@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [Range(-180f, 180f)] public float minCameraRotY = -60f;
     [Range(-180f, 180f)] public float maxCameraRotY = 40f;
     private Transform Hcamera;
+    private Transform RayForShooting;
     private float rotationY = 20f;
 
     public float walkSpeed = 3f;
@@ -89,23 +90,35 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
                 {
+                    Debug.Log("Shooting!");
                     usingGun.Shoot();
 
+                    // Visualize the ray in the editor with longer duration for debugging
+                    Debug.DrawRay(usingGun.shootOut.position, usingGun.shootOut.forward * 100f, Color.red, 2f);
+                    
+                    // Log ray origin and direction for debugging
+                    Debug.Log($"Ray Origin: {usingGun.shootOut.position}, Direction: {usingGun.shootOut.forward}");
+
                     RaycastHit hit;
-                    if (Physics.Raycast(Hcamera.position, Hcamera.forward, out hit, 100f))
+                    int layerMask = ~0; // All layers
+                    if (Physics.Raycast(usingGun.shootOut.position, usingGun.shootOut.forward, out hit, 100f, layerMask))
                     {
+                        Debug.Log($"Hit: {hit.collider.name} at distance {hit.distance}");
                         var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
                         if (networkPlayer != null)
                         {
+                            Debug.Log("Hit player: " + networkPlayer.PlayerId);
                             client.SendShoot(transform.forward, networkPlayer.PlayerId);
                         }
                         else
                         {
+                            Debug.Log($"Hit non-player object: {hit.collider.gameObject.layer}");
                             client.SendShoot(transform.forward);
                         }
                     }
                     else
                     {
+                        Debug.LogWarning("Ray missed! Check if objects have colliders and are in the right layers");
                         client.SendShoot(transform.forward);
                     }
                 }

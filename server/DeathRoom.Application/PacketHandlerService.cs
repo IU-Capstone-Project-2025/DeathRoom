@@ -17,6 +17,7 @@ public class PacketHandlerService
     private readonly Func<string, string, Task> _onUnknownPacket;
     private readonly Func<string, string, Task> _onError;
     private readonly Func<long> _getCurrentTick;
+    private readonly Func<IPacket, Task> _broadcastPacket;
     private readonly ILogger<PacketHandlerService> _logger;
 
     public PacketHandlerService(
@@ -28,6 +29,7 @@ public class PacketHandlerService
         Func<string, string, Task> onUnknownPacket,
         Func<string, string, Task> onError,
         Func<long> getCurrentTick,
+        Func<IPacket, Task> broadcastPacket,
         ILogger<PacketHandlerService> logger)
     {
         _logger = logger;
@@ -40,6 +42,7 @@ public class PacketHandlerService
         _onUnknownPacket = onUnknownPacket;
         _onError = onError;
         _getCurrentTick = getCurrentTick;
+        _broadcastPacket = broadcastPacket;
     }
 
     public async Task HandlePacket(object peer, byte[] data)
@@ -126,6 +129,18 @@ public class PacketHandlerService
         {
             _logger.LogInformation("[SHOOT] Игрок {PlayerName} (ID: {PlayerId}) выстрелил в направлении ({X}, {Y}, {Z}) на тике {Tick}", 
                 shooterState.Username, shooterState.Id, shootPacket.Direction.X, shootPacket.Direction.Y, shootPacket.Direction.Z, shootPacket.ClientTick);
+        
+            // Создаем пакет для отправки всем клиентам о выстреле
+            var shootBroadcastPacket = new PlayerShootBroadcastPacket
+            {
+                ShooterId = shooterState.Id,
+                Direction = shootPacket.Direction,
+                ClientTick = shootPacket.ClientTick,
+                ServerTick = _getCurrentTick()
+            };
+        
+            // Отправляем информацию о выстреле всем клиентам
+            BroadcastPacketToAllClients(shootBroadcastPacket);
         }
     }
 
@@ -133,24 +148,42 @@ public class PacketHandlerService
     {
         if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? shooterState) && shooterState != null)
         {
+            _logger.LogInformation("[HIT] Игрок {PlayerName} (ID: {PlayerId}) сообщает о попадании в игрока {TargetId} на тике {Tick}", 
+                shooterState.Username, shooterState.Id, hitPacket.TargetId, hitPacket.ClientTick);
+
             var worldStateAtShot = _worldStateService.GetWorldStateAtTick(hitPacket.ClientTick);
-            if (worldStateAtShot == null) return;
+            if (worldStateAtShot == null) 
+            {
+                _logger.LogWarning("[HIT] Не найдено состояние мира для тика {Tick}", hitPacket.ClientTick);
+                return;
+            }
             
             var shooter = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == shooterState.Id);
             var target = worldStateAtShot.PlayerStates.FirstOrDefault(p => p.Id == hitPacket.TargetId);
-            var currTick = hitPacket.ClientTick;
             
-            if (shooter == null || target == null) return;
-            
+            if (shooter == null || target == null) 
+            {
+                _logger.LogWarning("[HIT] Не найден стрелок или цель в историческом состоянии мира");
+                return;
+            }
+
             var shooterPos = new DeathRoom.Domain.Vector3(shooter.Position.X, shooter.Position.Y, shooter.Position.Z);
             var shootDir = new DeathRoom.Domain.Vector3(hitPacket.Direction.X, hitPacket.Direction.Y, hitPacket.Direction.Z);
             var targetPos = new DeathRoom.Domain.Vector3(target.Position.X, target.Position.Y, target.Position.Z);
             
+            // Проверяем валидность попадания с помощью физики
             if (_hitPhysicsService.IsHit(shooterPos, shootDir, targetPos))
             {
-                if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? liveTarget) && liveTarget != null)
+                _logger.LogInformation("[HIT] Попадание подтверждено физикой");
+                
+                // Находим живую цель для применения урона
+                var liveTargetPeer = _playerSessionService.GetPeerById(hitPacket.TargetId);
+                if (liveTargetPeer != null && _playerSessionService.TryGetSession(liveTargetPeer, out DomainPlayerState? liveTarget) && liveTarget != null)
                 {
-                    bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, currTick);
+                    bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, hitPacket.ClientTick);
+                    _logger.LogInformation("[HIT] Урон применен к игроку {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}", 
+                        liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint);
+                    
                     if (died)
                     {
                         // Вместо отключения игрока - восстанавливаем здоровье и броню
@@ -160,6 +193,14 @@ public class PacketHandlerService
                             liveTarget.Username, liveTarget.Id);
                     }
                 }
+                else
+                {
+                    _logger.LogWarning("[HIT] Не найден живой игрок с ID {TargetId} для применения урона", hitPacket.TargetId);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("[HIT] Попадание НЕ подтверждено физикой - возможная попытка читерства от {PlayerName}", shooterState.Username);
             }
         }
     }
@@ -182,5 +223,10 @@ public class PacketHandlerService
             _logger.LogInformation("[PICKUP] Игрок {PlayerName} (ID: {PlayerId}) подобрал аптечку: +{HealthAmount} HP", 
                 playerState.Username, playerState.Id, pickHealthPacket.HealthAmount);
         }
+    }
+
+    private async Task BroadcastPacketToAllClients(IPacket packet)
+    {
+        await _broadcastPacket(packet);
     }
 } 

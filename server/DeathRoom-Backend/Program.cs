@@ -78,6 +78,7 @@ var builder = Host.CreateDefaultBuilder(args)
                 (peer, type) => { logger.LogWarning($"Unknown packet from {peer}: {type}"); return Task.CompletedTask; },
                 (peer, error) => { logger.LogError($"Error from {peer}: {error}"); return Task.CompletedTask; },
                 () => sp.GetRequiredService<GameLoopService>().GetCurrentTick(),
+                packet => Task.CompletedTask, // Temporary placeholder, will be set by GameServer
                 logger
             );
         });
