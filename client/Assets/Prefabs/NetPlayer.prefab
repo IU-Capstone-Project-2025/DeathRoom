@@ -1148,6 +1148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b64ff546d39a99469dfd6ee94803b8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PauseMenu: {fileID: 0}
+  leaderBoard: {fileID: 0}
+  client: {fileID: 0}
   mouseSensitive: 3
   minCameraRotY: -40
   maxCameraRotY: 40
@@ -5357,6 +5360,13 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 55
   isActive: 1
+  pelletCount: 8
+  spreadAngle: 6
+  range: 50
+  shootParticle: {fileID: 0}
+  shellParticle: {fileID: 0}
+  shootTrail: {fileID: 0}
+  shootHoles: []
 --- !u!4 &7947223637112594122 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 467766, guid: e3f6749e3b34b374ba0ae9092315c715,
