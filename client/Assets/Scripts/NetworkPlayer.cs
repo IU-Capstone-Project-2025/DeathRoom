@@ -12,6 +12,7 @@ public class NetworkPlayer : MonoBehaviour {
     
     private PlayerState currentState;
     private Vector3 targetPosition;
+    private Vector3 lastTargetPosition;
     private Quaternion targetRotation;
     private Vector3 lastPosition;
     private bool isMoving = false;
@@ -60,6 +61,7 @@ public class NetworkPlayer : MonoBehaviour {
         transform.rotation = rot;
         
         targetPosition = pos;
+        lastTargetPosition = pos;
         targetRotation = rot;
         lastPosition = pos;
         
@@ -85,10 +87,12 @@ public class NetworkPlayer : MonoBehaviour {
         if (distance > maxDistance) {
             transform.position = newPosition;
             transform.rotation = newRotation;
+            lastTargetPosition = targetPosition;
             targetPosition = newPosition;
             targetRotation = newRotation;
             Debug.Log($"NetworkPlayer {Username} teleported due to large distance: {distance:F2}");
         } else {
+            lastTargetPosition = targetPosition;
             targetPosition = newPosition;
             targetRotation = newRotation;
         }
@@ -127,11 +131,12 @@ public class NetworkPlayer : MonoBehaviour {
             return;
         }
         
-        Vector3 velocity = (targetPosition - transform.position) / Time.deltaTime;
-        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        // Calculate movement based on target position changes, not interpolation
+        Vector3 targetMovement = targetPosition - lastTargetPosition;
+        Vector3 localVelocity = transform.InverseTransformDirection(targetMovement.normalized);
         
-        // If velocity is very small, set all animation parameters to zero/false
-        if (velocity.magnitude < 0.1f) {
+        // If target hasn't changed (no real movement), set all animation parameters to zero/false
+        if (targetMovement.magnitude < 0.01f) {
             localVelocity = Vector3.zero;
             
             // Reset all animation parameters to idle state
@@ -154,10 +159,10 @@ public class NetworkPlayer : MonoBehaviour {
             // Normal movement - set movement parameters
             animator.SetFloat("MoveX", localVelocity.x);
             animator.SetFloat("MoveZ", localVelocity.z);
-            animator.SetBool("Sprint", velocity.magnitude > 3f);
+            animator.SetBool("Sprint", targetMovement.magnitude > 0.5f); // Sprint if significant movement
         }
         
-        Debug.Log($"NetworkPlayer {Username}: UpdateAnimation - velocity: {velocity.magnitude:F2}, localVel: ({localVelocity.x:F2}, {localVelocity.z:F2}), isMoving: {isMoving}");
+        Debug.Log($"NetworkPlayer {Username}: UpdateAnimation - targetMovement: {targetMovement.magnitude:F2}, localVel: ({localVelocity.x:F2}, {localVelocity.z:F2}), isMoving: {isMoving}");
         
         if (currentState != null) {
             bool isDead = currentState.HealthPoint <= 0;
