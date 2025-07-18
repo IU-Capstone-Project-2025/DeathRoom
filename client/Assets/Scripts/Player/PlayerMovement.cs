@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     [Range(-180f, 180f)] public float minCameraRotY = -60f;
     [Range(-180f, 180f)] public float maxCameraRotY = 40f;
     private Transform Hcamera;
+    private Transform Camera;
     private float rotationY = 20f;
 
     public float walkSpeed = 3f;
@@ -89,14 +90,20 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
                 {
+                    Debug.Log("Shooting!");
                     usingGun.Shoot();
+
+                    // Visualize the ray in the editor
+                    Debug.DrawRay(Hcamera.position, Hcamera.forward * 100f, Color.red, 1f);
 
                     RaycastHit hit;
                     if (Physics.Raycast(Hcamera.position, Hcamera.forward, out hit, 100f))
                     {
+                        Debug.Log("Hit: " + hit.collider.name);
                         var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
                         if (networkPlayer != null)
                         {
+                            Debug.Log("Hit player: " + networkPlayer.PlayerId);
                             client.SendShoot(transform.forward, networkPlayer.PlayerId);
                         }
                         else
@@ -106,6 +113,7 @@ public class PlayerMovement : MonoBehaviour
                     }
                     else
                     {
+                        Debug.Log("Hit nothing! Shot but hit nothing");
                         client.SendShoot(transform.forward);
                     }
                 }
