@@ -51,6 +51,7 @@
     <Compile Include="Assets\Scripts\Network\WorldStatePacket.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\Scripts\Network\PlayerMovePacket.cs" />
+    <Compile Include="Assets\Scripts\Network\PickUpArmorPacket.cs" />
     <Compile Include="Assets\Scripts\NetworkDebugger.cs" />
     <Compile Include="Assets\Scripts\NetworkTestUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Assets\EffectExamples\Shared\Scripts\ParticleExamples.cs" />
     <Compile Include="Assets\Scripts\Player\FootIK.cs" />
     <Compile Include="Assets\Scripts\MultiplayerManager.cs" />
+    <Compile Include="Assets\Scripts\Network\PickUpHealthPacket.cs" />
     <Compile Include="Assets\Scripts\Weapons\Shootgun.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />

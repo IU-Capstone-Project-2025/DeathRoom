@@ -182,7 +182,16 @@ public class Client : MonoBehaviour
     {
         try
         {
+            Debug.Log($"Attempting to deserialize packet of {data.Length} bytes");
             var packet = MessagePackSerializer.Deserialize<IPacket>(data, MessagePackSerializer.DefaultOptions);
+            
+            if (packet == null)
+            {
+                Debug.LogError($"Failed to deserialize packet - got null. Data length: {data.Length}");
+                return;
+            }
+            
+            Debug.Log($"Successfully deserialized packet of type: {packet.GetType().Name}");
             
             switch (packet)
             {
@@ -231,7 +240,10 @@ public class Client : MonoBehaviour
                     break;
 
                 case null:
-                    Debug.LogError("Unknown packet type");
+                    Debug.LogError("Unknown packet type - this should not happen after null check above");
+                    break;
+                default:
+                    Debug.LogError($"Unhandled packet type: {packet.GetType().Name}");
                     break;
             }
         }
@@ -239,6 +251,8 @@ public class Client : MonoBehaviour
         {
             Debug.LogError($"Error processing packet: {e}");
             Debug.LogError($"Stack trace: {e.StackTrace}");
+            Debug.LogError($"Packet data length: {data.Length}");
+           
         }
     }
 
