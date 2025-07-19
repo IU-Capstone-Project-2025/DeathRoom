@@ -1,7 +1,7 @@
-using DeathRoom.Common.dto;
+using DeathRoom.Common.Dto;
 using MessagePack;
 
-namespace DeathRoom.Common.network
+namespace DeathRoom.Common.Network
 {
     [MessagePackObject]
     public class PlayerShootPacket : IPacket
@@ -10,6 +10,6 @@ namespace DeathRoom.Common.network
         public long ClientTick { get; set; }
 
         [Key(1)]
-        public Vector3 Direction { get; set; }
+        public Vector3Serializable Direction { get; set; }
     }
 } 

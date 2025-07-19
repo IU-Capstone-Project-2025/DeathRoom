@@ -18,7 +18,6 @@ public class Rifle : Gun
         {
             StartCoroutine(ShootCoroutine(fireRate));
         }
-
     }
 
     private IEnumerator ShootCoroutine(float shootTime)

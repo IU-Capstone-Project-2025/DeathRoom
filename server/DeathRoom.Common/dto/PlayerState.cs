@@ -1,6 +1,6 @@
 using MessagePack;
 
-namespace DeathRoom.Common.dto
+namespace DeathRoom.Common.Dto
 {
     [MessagePackObject]
     public class PlayerState
@@ -10,9 +10,9 @@ namespace DeathRoom.Common.dto
         [Key(1)]
         public required string Username { get; set; }
         [Key(2)]
-        public Vector3 Position { get; set; }
+        public Vector3Serializable Position { get; set; }
         [Key(3)]
-        public Vector3 Rotation { get; set; }
+        public Vector3Serializable Rotation { get; set; }
         [Key(4)]
         public int HealthPoint { get; set; }
         [Key(5)]
@@ -32,8 +32,8 @@ namespace DeathRoom.Common.dto
             {
                 Id = this.Id,
                 Username = this.Username,
-                Position = new Vector3(this.Position.X, this.Position.Y, this.Position.Z),
-                Rotation = new Vector3(this.Rotation.X, this.Rotation.Y, this.Rotation.Z),
+                Position = new Vector3Serializable(this.Position.X, this.Position.Y, this.Position.Z),
+                Rotation = new Vector3Serializable(this.Rotation.X, this.Rotation.Y, this.Rotation.Z),
                 HealthPoint = this.HealthPoint
             };
         }

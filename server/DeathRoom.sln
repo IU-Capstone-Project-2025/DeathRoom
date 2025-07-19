@@ -7,9 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom-Backend", "DeathR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Common", "DeathRoom.Common\DeathRoom.Common.csproj", "{448F4ADE-C577-45CE-8455-F91274CFCE48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Data", "DeathRoom.Data\DeathRoom.Data.csproj", "{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Tests", "DeathRoom.Tests\DeathRoom.Tests.csproj", "{EA4140EA-31FF-46DF-B665-A653EE9068E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Application", "DeathRoom.Application\DeathRoom.Application.csproj", "{D3B3849E-86CA-463A-93D7-BFD0639D43EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Domain", "DeathRoom.Domain\DeathRoom.Domain.csproj", "{5BA3CFE5-AB39-4543-B9E4-79E9C65343B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeathRoom.Infrastructure", "DeathRoom.Infrastructure\DeathRoom.Infrastructure.csproj", "{C1173242-A498-4EE8-AC24-998AC883A74F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,13 +32,21 @@ Global
 		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{448F4ADE-C577-45CE-8455-F91274CFCE48}.Release|Any CPU.Build.0 = Release|Any CPU
-		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{14C7C6A7-6F33-4BFD-8CBC-B204A62464A1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EA4140EA-31FF-46DF-B665-A653EE9068E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EA4140EA-31FF-46DF-B665-A653EE9068E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA4140EA-31FF-46DF-B665-A653EE9068E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA4140EA-31FF-46DF-B665-A653EE9068E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3B3849E-86CA-463A-93D7-BFD0639D43EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3B3849E-86CA-463A-93D7-BFD0639D43EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3B3849E-86CA-463A-93D7-BFD0639D43EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3B3849E-86CA-463A-93D7-BFD0639D43EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BA3CFE5-AB39-4543-B9E4-79E9C65343B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BA3CFE5-AB39-4543-B9E4-79E9C65343B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BA3CFE5-AB39-4543-B9E4-79E9C65343B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BA3CFE5-AB39-4543-B9E4-79E9C65343B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1173242-A498-4EE8-AC24-998AC883A74F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1173242-A498-4EE8-AC24-998AC883A74F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1173242-A498-4EE8-AC24-998AC883A74F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1173242-A498-4EE8-AC24-998AC883A74F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

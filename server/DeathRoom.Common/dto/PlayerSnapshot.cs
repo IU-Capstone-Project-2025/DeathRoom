@@ -1,6 +1,6 @@
 using MessagePack;
 
-namespace DeathRoom.Common.dto
+namespace DeathRoom.Common.Dto
 {
     [MessagePackObject]
     public class PlayerSnapshot
@@ -9,9 +9,9 @@ namespace DeathRoom.Common.dto
         public long ServerTick { get; set; }
 
         [Key(1)]
-        public Vector3 Position { get; set; }
+        public Vector3Serializable Position { get; set; }
 
         [Key(2)]
-        public Vector3 Rotation { get; set; }
+        public Vector3Serializable Rotation { get; set; }
     }
 } 

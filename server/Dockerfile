@@ -9,7 +9,9 @@ COPY *.sln ./
 COPY global.json ./
 COPY DeathRoom-Backend/*.csproj ./DeathRoom-Backend/
 COPY DeathRoom.Common/*.csproj ./DeathRoom.Common/
-COPY DeathRoom.Data/*.csproj ./DeathRoom.Data/
+COPY DeathRoom.Application/*.csproj ./DeathRoom.Application/
+COPY DeathRoom.Domain/*.csproj ./DeathRoom.Domain/
+COPY DeathRoom.Infrastructure/*.csproj ./DeathRoom.Infrastructure/
 COPY DeathRoom.Tests/*.csproj ./DeathRoom.Tests/
 
 # Restore dependencies

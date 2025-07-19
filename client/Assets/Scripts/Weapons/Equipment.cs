@@ -88,6 +88,6 @@ public class Equipment : MonoBehaviour
         lHandTarget.parent = usingGun.LHandTarget;
         lHandTarget.localPosition = Vector3.zero;
         lHandTarget.localEulerAngles = Vector3.zero;
-        gunInfo.Inite(usingGun);
+        if (usingGun != null) { gunInfo.Inite(usingGun); }
     }
 }

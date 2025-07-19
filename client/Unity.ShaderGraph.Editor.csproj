@@ -456,9 +456,9 @@
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Nodes\Channel\FlipNode.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Drawing\Colors\CategoryColors.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Drawing\Inspector\PropertyDrawers\PositionNodePropertyDrawer.cs" />
-    <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Nodes\Input\Lighting\AmbientNode.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Nodes\Math\Advanced\LengthNode.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Attributes\ContextFilterableAttribute.cs" />
+    <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Nodes\Input\Lighting\AmbientNode.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Nodes\Input\Geometry\NormalVectorNode.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Drawing\Views\Slots\UVSlotControlView.cs" />
     <Compile Include="Library\PackageCache\com.unity.shadergraph@14.0.12\Editor\Data\Graphs\MatrixShaderProperty.cs" />
