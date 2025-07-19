@@ -35,6 +35,12 @@ namespace DeathRoom.Common.network
 
         [Key(5)]
         public int MaxHealthPoint { get; set; }
+        
+        [Key(6)]
+        public int ArmorPoint { get; set; }
+        
+        [Key(7)]
+        public int MaxArmorPoint { get; set; }
     }
 
     [MessagePackObject]

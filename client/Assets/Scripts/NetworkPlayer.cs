@@ -98,7 +98,7 @@ public class NetworkPlayer : MonoBehaviour {
         
         float distance = Vector3.Distance(transform.position, newPosition);
         
-        Debug.Log($"NetworkPlayer {Username} (ID: {PlayerId}) update: pos {newPosition}, distance {distance:F2}");
+        Debug.Log($"NetworkPlayer {Username} (ID: {PlayerId}) update: pos {newPosition}, distance {distance:F2}, health {newState.HealthPoint}/{newState.MaxHealthPoint}, armor {newState.ArmorPoint}/{newState.MaxArmorPoint}");
         
         if (distance > maxDistance) {
             transform.position = newPosition;
@@ -113,6 +113,18 @@ public class NetworkPlayer : MonoBehaviour {
             targetPosition = newPosition;
             targetRotation = newRotation;
             lastUpdateTime = Time.time;
+        }
+        
+        // Update health and armor from server
+        var healthComponent = GetComponent<Playerhealth>();
+        if (healthComponent != null)
+        {
+            healthComponent.SetHealthAndArmorFromServer(
+                newState.HealthPoint, 
+                newState.MaxHealthPoint, 
+                newState.ArmorPoint, 
+                newState.MaxArmorPoint
+            );
         }
         
         // Only update animation at limited rate to prevent jerkiness

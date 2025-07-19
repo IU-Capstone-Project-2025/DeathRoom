@@ -261,7 +261,22 @@ public class Client : MonoBehaviour
     {
         if (ps.Id == localPlayerId && localPlayerId != -1) 
         {
-            Debug.Log($"Skipping local player {ps.Username} (ID: {ps.Id})");
+            Debug.Log($"Updating local player {ps.Username} (ID: {ps.Id}) - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
+            
+            // Update local player's health and armor from server
+            if (localPlayer != null)
+            {
+                var healthComponent = localPlayer.GetComponentInChildren<Playerhealth>();
+                if (healthComponent != null)
+                {
+                    healthComponent.SetHealthAndArmorFromServer(
+                        ps.HealthPoint, 
+                        ps.MaxHealthPoint, 
+                        ps.ArmorPoint, 
+                        ps.MaxArmorPoint
+                    );
+                }
+            }
             return;
         }
 

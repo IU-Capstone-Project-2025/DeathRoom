@@ -61,6 +61,42 @@ public class Playerhealth : MonoBehaviour
         UpdateArmorUI();
     }
 
+    // Server-authoritative health/armor updates
+    public void SetHealthFromServer(int health, int maxHealth)
+    {
+        currentHealth = health;
+        maxHealth = maxHealth;
+        UpdateHealthUI();
+        
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    
+    public void SetArmorFromServer(int armor, int maxArmor)
+    {
+        currentArmor = armor;
+        this.maxArmor = maxArmor;
+        UpdateArmorUI();
+    }
+    
+    public void SetHealthAndArmorFromServer(int health, int maxHealth, int armor, int maxArmor)
+    {
+        currentHealth = health;
+        this.maxHealth = maxHealth;
+        currentArmor = armor;
+        this.maxArmor = maxArmor;
+        
+        UpdateHealthUI();
+        UpdateArmorUI();
+        
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
     private void UpdateHealthUI()
     {
         if (healthBarSlider != null)
