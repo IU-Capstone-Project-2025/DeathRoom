@@ -65,6 +65,8 @@ jobs:
           cd /opt/deathroom || exit 1
           git pull 
           cd server
+          docker stop deathroom-server || true
+          docker rm deathroom-server || true
           docker compose pull
           docker compose -f docker-compose.yml up -d --remove-orphans
           
