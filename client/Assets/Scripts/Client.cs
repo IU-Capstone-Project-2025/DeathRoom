@@ -247,12 +247,16 @@ public class Client : MonoBehaviour
 
     void CreateNetworkPlayer(PlayerState ps)
     {
-        Vector3 spawnPos = ps.Position != Vector3.zero ? UnityVector3(ps.Position) : GetRandomSpawnPoint();
+        // Check if position is valid (not zero or very close to zero)
+        Vector3 playerPos = ps.Position.ToUnityVector3();
+        bool hasValidPosition = playerPos.magnitude > 0.1f;
+        
+        Vector3 spawnPos = hasValidPosition ? playerPos : GetRandomSpawnPoint();
         GameObject go = Instantiate(networkPlayerPrefab, spawnPos, Quaternion.identity);
         var nw = go.GetComponentInChildren<NetworkPlayer>() ?? go.AddComponent<NetworkPlayer>();
         nw.Initialize(ps);
         networkPlayers[ps.Id] = nw;
-        Debug.Log($"Created network player {ps.Username} (ID {ps.Id})");
+        Debug.Log($"Created network player {ps.Username} (ID {ps.Id}) at position {spawnPos}");
     }
 
     void RemoveNetworkPlayer(int id)
