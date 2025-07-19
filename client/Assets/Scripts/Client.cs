@@ -189,6 +189,7 @@ public class Client : MonoBehaviour
 
                 case PlayerShootBroadcastPacket broadcastPacket:
                     // Handle shoot broadcast from server
+                    Debug.Log($"Received PlayerShootBroadcastPacket: ShooterId={broadcastPacket.ShooterId}, Direction=({broadcastPacket.Direction.X}, {broadcastPacket.Direction.Y}, {broadcastPacket.Direction.Z}), ClientTick={broadcastPacket.ClientTick}, ServerTick={broadcastPacket.ServerTick}");
                     OnReceiveShootBroadcast(broadcastPacket);
                     break;
 
