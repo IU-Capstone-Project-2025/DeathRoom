@@ -161,7 +161,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
                 {
-                    Debug.Log("Shooting!");
                     usingGun.Shoot();
                 }
             }

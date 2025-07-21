@@ -364,33 +364,73 @@ public class Client : MonoBehaviour
         SendPacket(shootPacket);
         Debug.Log($"[SHOOT] Sent PlayerShootPacket at tick {shootTick}");
         
-        // 2. Perform local hit detection
+        // Debug raycast parameters
+        Debug.Log($"[RAYCAST DEBUG] Origin: {origin}, Direction: {direction}, Distance: Infinity");
+        Debug.DrawRay(origin, direction * 100f, Color.red, 5f); // Visualize ray for 5 seconds
+        
+        // 2. Perform local hit detection with detailed debugging
         RaycastHit hit;
-        if (Physics.Raycast(origin, direction, out hit, Mathf.Infinity))
+        bool raycastHit = Physics.Raycast(origin, direction, out hit, Mathf.Infinity);
+        Debug.Log($"[RAYCAST DEBUG] Raycast result: {raycastHit}");
+        
+        if (raycastHit)
         {
-            // Check if we hit a player
+            Debug.Log($"[RAYCAST] Hit object: '{hit.collider.name}' at distance {hit.distance:F2}, tag: '{hit.collider.tag}', layer: {hit.collider.gameObject.layer}");
+            Debug.Log($"[RAYCAST] Collider isTrigger: {hit.collider.isTrigger}, enabled: {hit.collider.enabled}");
+            Debug.Log($"[RAYCAST] Hit point: {hit.point}, normal: {hit.normal}");
+            
+            // Check if we hit a player - try both current object and parents
             var hitPlayer = hit.collider.GetComponent<NetworkPlayer>();
-            if (hitPlayer != null && hitPlayer.PlayerId != localPlayerId)
+            if (hitPlayer == null)
             {
-                // 3. Send hit packet with SAME tick and direction
-                var hitPacket = new PlayerHitPacket
-                {
-                    TargetId = hitPlayer.PlayerId,
-                    ClientTick = shootTick,  // Same tick!
-                    Direction = new Vector3Serializable(direction)  // Same direction!
-                };
-                SendPacket(hitPacket);
+                hitPlayer = hit.collider.GetComponentInParent<NetworkPlayer>();
+                if (hitPlayer != null) Debug.Log($"[RAYCAST] Found NetworkPlayer in parent object");
+            }
+            if (hitPlayer == null)
+            {
+                hitPlayer = hit.collider.GetComponentInChildren<NetworkPlayer>();
+                if (hitPlayer != null) Debug.Log($"[RAYCAST] Found NetworkPlayer in child object");
+            }
+            
+            if (hitPlayer != null)
+            {
+                Debug.Log($"[RAYCAST] Found NetworkPlayer: ID={hitPlayer.PlayerId}, Name='{hitPlayer.Username}', IsLocalPlayer={hitPlayer.PlayerId == localPlayerId}");
                 
-                Debug.Log($"[HIT SENT] Hit detected on player {hitPlayer.PlayerId} at tick {shootTick} - waiting for server health update");
+                if (hitPlayer.PlayerId != localPlayerId)
+                {
+                    // 3. Send hit packet with SAME tick and direction
+                    var hitPacket = new PlayerHitPacket
+                    {
+                        TargetId = hitPlayer.PlayerId,
+                        ClientTick = shootTick,  // Same tick!
+                        Direction = new Vector3Serializable(direction)  // Same direction!
+                    };
+                    SendPacket(hitPacket);
+                    
+                    Debug.Log($"[HIT SENT] Hit detected on player {hitPlayer.PlayerId} (name: {hitPlayer.Username}) at tick {shootTick} - waiting for server health update");
+                }
+                else
+                {
+                    Debug.Log($"[SHOOT] Hit own player, ignoring");
+                }
+            }
+            else
+            {
+                Debug.Log($"[SHOOT] Hit object '{hit.collider.name}' but no NetworkPlayer component found");
             }
         }
         else
         {
-            Debug.Log($"[SHOOT] No hit detected - raycast missed");
+            Debug.Log("[SHOOT] No hit detected - raycast missed");
         }
         
         // 4. Show local effects immediately (muzzle flash, sound, etc.)
         ShowLocalShootEffects(origin, direction);
+    }
+
+    public long GetCurrentClientTick()
+    {
+        return clientTick;
     }
 
     void ShowLocalShootEffects(Vector3 origin, Vector3 direction)
@@ -488,10 +528,5 @@ public class Client : MonoBehaviour
 			time += Time.deltaTime / trail.time;
 		}
 		// Destroy(trail.gameObject, trail.time);
-    }
-
-    public long GetCurrentClientTick()
-    {
-        return clientTick;
     }
 }
