@@ -77,6 +77,12 @@ public class PlayerMovement : MonoBehaviour
     {
         speed = walkSpeed;
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
+        
+        // Initialize the gun's client reference to prevent null reference errors
+        if (usingGun != null && client != null)
+        {
+            usingGun.client = client;
+        }
     }
 
     private void Update()
