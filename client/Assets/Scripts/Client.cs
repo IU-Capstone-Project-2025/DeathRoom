@@ -19,6 +19,9 @@ public class Client : MonoBehaviour
     public GameObject localPlayerPrefab;
     public GameObject networkPlayerPrefab;
 
+	[Header("Shooting")]
+	public TrailRenderer shootTrail;
+
     [Header("Spawn Points")]
     public Transform[] spawnPoints;
 
@@ -448,6 +451,17 @@ public class Client : MonoBehaviour
     {
         // Placeholder for bullet tracer implementation
         Debug.Log($"Creating bullet tracer from {origin} in direction {direction}");
+		TrailRenderer trail = Instantiate(shootTrail, origin, Quaternion.Euler(direction.x, direction.y, direction.z));
+        RaycastHit hit;
+        Quaternion recoilRotation = Quaternion.Euler(direction.x, direction.y, direction.z);
+        bool isHit = Physics.Raycast(origin, recoilRotation * direction * 1000f, out hit);
+		if(!isHit)
+			hit.point = direction * 100f;
+		float time=0;
+		while (time<1) {
+			trail.transform.position = Vector3.MoveTowards(origin, hit.point, time * 20f);
+			time += Time.deltaTime / trail.time;
+		}
     }
 
     void PlayShootSound(Vector3 position)
