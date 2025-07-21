@@ -5,7 +5,7 @@ namespace DeathRoom.Application;
 public class HitRegistrationService
 {
     private const int ARMOR_DAMAGE = 20;
-    private const int HEALTH_DAMAGE = 10;
+    private const int HEALTH_DAMAGE = 15;
     private const float ARMOR_DAMAGE_REDUCTION = 0.5f;
 
     public bool RegisterHit(PlayerState target, int damage, long tick)

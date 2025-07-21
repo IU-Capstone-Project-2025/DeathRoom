@@ -32,29 +32,71 @@ public class Shootgun : Gun
         yield return new WaitForSeconds(shootDelay);
         canShoot = true;
 
-        // Эффекты выстрела
         shootParticle?.Play();
         shellParticle?.Play();
+
+        if (client != null)
+        {
+            if (Input.GetMouseButton(0) && CheckAmo())
+            {
+                Debug.Log("Shotgun Shooting!");
+
+                // Visualize the main ray in the editor for debugging
+                Debug.DrawRay(shootOut.position, shootOut.forward * range, Color.red, 2f);
+                
+                // Log ray origin and direction for debugging
+                Debug.Log($"Shotgun Ray Origin: {shootOut.position}, Direction: {shootOut.forward}");
+
+                bool hitDetected = false;
+                int layerMask = ~0; // All layers
+
+                // Fire multiple pellets with spread
+                for (int i = 0; i < pelletCount; i++)
+                {
+                    Vector3 direction = GetSpreadDirection();
+                    
+                    if (Physics.Raycast(shootOut.position, direction, out RaycastHit hit, range, layerMask))
+                    {
+                        Debug.Log($"Shotgun pellet {i} hit: {hit.collider.name} at distance {hit.distance}");
+                        var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
+                        if (networkPlayer != null)
+                        {
+                            Debug.Log("Shotgun hit player: " + networkPlayer.PlayerId);
+                            hitDetected = true;
+                        }
+                        
+                        HandleHit(hit, true);
+                        SpawnTrail(hit.point);
+                    }
+                    else
+                    {
+                        Vector3 missPoint = shootOut.position + direction * range;
+                        SpawnTrail(missPoint);
+                    }
+                }
+
+                // Send shoot packet to server (use main direction for server communication)
+                if (hitDetected)
+                {
+                    Debug.Log("Shotgun detected hit, sending shoot packet");
+                }
+                else
+                {
+                    Debug.LogWarning("Shotgun missed all pellets");
+                }
+                
+                // Always send the shoot packet with the main direction
+                client.PerformShoot(shootOut.position, shootOut.forward);
+            }
+        }
+        else
+        {
+            Debug.Log("Client is null in Shotgun");
+        }
 
         amo--;
         if (amo <= 0) isAmo = false;
         gunInfo?.UpdateInfo();
-
-        // Стрельба дробью
-        for (int i = 0; i < pelletCount; i++)
-        {
-            Vector3 direction = GetSpreadDirection();
-            if (Physics.Raycast(shootOut.position, direction, out RaycastHit hit, range))
-            {
-                HandleHit(hit, true);
-                SpawnTrail(hit.point);
-            }
-            else
-            {
-                Vector3 missPoint = shootOut.position + direction * range;
-                SpawnTrail(missPoint);
-            }
-        }
     }
 
     private Vector3 GetSpreadDirection()
