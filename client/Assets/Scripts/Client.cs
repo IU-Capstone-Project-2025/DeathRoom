@@ -235,6 +235,7 @@ public class Client : MonoBehaviour
                     Debug.Log($"Received PlayerShootBroadcastPacket: ShooterId={broadcastPacket.ShooterId}, Direction=({broadcastPacket.Direction.X}, {broadcastPacket.Direction.Y}, {broadcastPacket.Direction.Z}), ClientTick={broadcastPacket.ClientTick}, ServerTick={broadcastPacket.ServerTick}");
                     OnReceiveShootBroadcast(broadcastPacket);
                     break;
+
                 case PlayerAnimationPacket animPacket:
                     if (animPacket.PlayerId == localPlayerId) break;
                     if (networkPlayers.TryGetValue(animPacket.PlayerId, out var player))
@@ -444,7 +445,6 @@ public class Client : MonoBehaviour
         
         // Example: Create bullet tracer (you would implement this based on your game's visual system)
         CreateBulletTracer(shooterPosition, direction);
-        PlayShootSound(shooterPosition);
     }
 
     void CreateBulletTracer(Vector3 origin, Vector3 direction)
@@ -454,7 +454,7 @@ public class Client : MonoBehaviour
 		TrailRenderer trail = Instantiate(shootTrail, origin, Quaternion.Euler(direction.x, direction.y, direction.z));
         RaycastHit hit;
         Quaternion recoilRotation = Quaternion.Euler(direction.x, direction.y, direction.z);
-        bool isHit = Physics.Raycast(origin, recoilRotation * direction * 1000f, out hit);
+        bool isHit = Physics.Raycast(origin, recoilRotation * new Vector3(direction.x,0,0) * 1000f, out hit);
 		if(!isHit)
 			hit.point = direction * 100f;
 		float time=0;
@@ -462,12 +462,7 @@ public class Client : MonoBehaviour
 			trail.transform.position = Vector3.MoveTowards(origin, hit.point, time * 20f);
 			time += Time.deltaTime / trail.time;
 		}
-    }
-
-    void PlayShootSound(Vector3 position)
-    {
-        // Placeholder for 3D positioned audio
-        Debug.Log($"Playing shoot sound at position {position}");
+		// Destroy(trail.gameObject, trail.time);
     }
 
     public long GetCurrentClientTick()
