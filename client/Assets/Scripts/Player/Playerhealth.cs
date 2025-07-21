@@ -61,6 +61,61 @@ public class Playerhealth : MonoBehaviour
         UpdateArmorUI();
     }
 
+    // Server-authoritative health/armor updates
+    public void SetHealthFromServer(int health, int maxHealth)
+    {
+        float previousHealth = currentHealth;
+        float previousMaxHealth = this.maxHealth;
+        
+        currentHealth = health;
+        this.maxHealth = maxHealth;
+        UpdateHealthUI();
+        
+        Debug.Log($"[HEALTH UPDATE] Player health changed from {previousHealth}/{previousMaxHealth} to {currentHealth}/{this.maxHealth}");
+        
+        if (currentHealth <= 0)
+        {
+            Debug.Log($"[DEATH] Player died - health reached {currentHealth}");
+            Die();
+        }
+    }
+    
+    public void SetArmorFromServer(int armor, int maxArmor)
+    {
+        float previousArmor = currentArmor;
+        float previousMaxArmor = this.maxArmor;
+        
+        currentArmor = armor;
+        this.maxArmor = maxArmor;
+        UpdateArmorUI();
+        
+        Debug.Log($"[ARMOR UPDATE] Player armor changed from {previousArmor}/{previousMaxArmor} to {currentArmor}/{this.maxArmor}");
+    }
+    
+    public void SetHealthAndArmorFromServer(int health, int maxHealth, int armor, int maxArmor)
+    {
+        float previousHealth = currentHealth;
+        float previousMaxHealth = this.maxHealth;
+        float previousArmor = currentArmor;
+        float previousMaxArmor = this.maxArmor;
+        
+        currentHealth = health;
+        this.maxHealth = maxHealth;
+        currentArmor = armor;
+        this.maxArmor = maxArmor;
+        
+        UpdateHealthUI();
+        UpdateArmorUI();
+        
+        Debug.Log($"[HIT RECEIVED] Player hit! Health: {previousHealth}/{previousMaxHealth} → {currentHealth}/{this.maxHealth}, Armor: {previousArmor}/{previousMaxArmor} → {currentArmor}/{this.maxArmor}");
+        
+        if (currentHealth <= 0)
+        {
+            Debug.Log($"[DEATH] Player killed - health reached {currentHealth}");
+            Die();
+        }
+    }
+
     private void UpdateHealthUI()
     {
         if (healthBarSlider != null)

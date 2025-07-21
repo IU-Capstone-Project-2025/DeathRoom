@@ -33,6 +33,7 @@ public class Gun : MonoBehaviour
     protected GunInfoUI gunInfo;
     protected bool isAmo = true;
     public Crosshair crosshair;
+    public Client client;
 
     protected AudioSource audioSource;
     [SerializeField]
