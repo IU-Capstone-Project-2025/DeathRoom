@@ -180,17 +180,21 @@ public class PacketHandlerService
                 var liveTargetPeer = _playerSessionService.GetPeerById(hitPacket.TargetId);
                 if (liveTargetPeer != null && _playerSessionService.TryGetSession(liveTargetPeer, out DomainPlayerState? liveTarget) && liveTarget != null)
                 {
-                    bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, hitPacket.ClientTick);
-                    _logger.LogInformation("[HIT] Урон применен к игроку {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}", 
+                    _logger.LogInformation("[HIT] BEFORE DAMAGE - Игрок {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}", 
                         liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint);
+                    
+                    bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, hitPacket.ClientTick);
+                    
+                    _logger.LogInformation("[HIT] AFTER DAMAGE - Игрок {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}, Died: {Died}", 
+                        liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint, died);
                     
                     if (died)
                     {
                         // Вместо отключения игрока - восстанавливаем здоровье и броню
                         liveTarget.HealthPoint = liveTarget.MaxHealthPoint;
                         liveTarget.ArmorPoint = 0; // Броня сбрасывается при смерти
-                        _logger.LogInformation("[RESPAWN] Игрок {PlayerName} (ID: {PlayerId}) умер и восстановлен", 
-                            liveTarget.Username, liveTarget.Id);
+                        _logger.LogInformation("[RESPAWN] Игрок {PlayerName} (ID: {PlayerId}) умер и восстановлен. HP: {HP}, Armor: {Armor}", 
+                            liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint);
                     }
                 }
                 else
