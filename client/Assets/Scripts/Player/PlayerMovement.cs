@@ -141,6 +141,12 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void SetTrigger(string name)
+    {
+        // Триггеры всегда отправляются по сети
+        changedAnimationParams[name] = true;
+        animator.SetTrigger(name);
+    }
 
     public void resume()
     {
@@ -193,13 +199,23 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetMouseButton(1))
         {
-            crouch = true;
+            if (!crouch)
+            {
+                crouch = true;
+                SetBool("Crouch", true);
+            }
         }
         else
         {
             if (Input.GetKeyDown(KeyCode.C))
             {
                 crouch = !crouch;
+                SetBool("Crouch", crouch);
+            }
+            else if (crouch && !Input.GetMouseButton(1))
+            {
+                crouch = false;
+                SetBool("Crouch", false);
             }
         }
 
@@ -237,9 +253,18 @@ public class PlayerMovement : MonoBehaviour
         {
             gravity = Physics.gravity.y;
 
-            if (Input.GetButton("Jump"))
+            if (Input.GetButtonDown("Jump") && !jumpOver)
             {
                 gravity = jumpPower;
+                jumpOver = true;
+                SetTrigger("Jump");
+                SetBool("OnAir", true);
+            }
+            
+            if (jumpOver)
+            {
+                jumpOver = false;
+                SetBool("OnAir", false);
             }
         }
         else
@@ -332,7 +357,8 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator Reload(float duration)
     {
-        animator.SetTrigger("Reload");
+        SetTrigger("Reload");
+        SetBool("Reload", true);
         usingGun.StartReload();
         isReload = true;
         RHandRig.weight = 0f;
@@ -345,7 +371,7 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator ChangeWeapon(float duration)
     {
-        animator.SetTrigger("ChangeWeapon");
+        SetTrigger("ChangeWeapon");
         isReload = true;
         RHandRig.weight = 0f;
         WeaponRig.weight = 0f;

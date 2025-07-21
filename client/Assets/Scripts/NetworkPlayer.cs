@@ -293,16 +293,34 @@ public class NetworkPlayer : MonoBehaviour {
 
         foreach (var param in packet.BoolParams)
         {
-            animator.SetBool(param.Key, param.Value);
+            // Проверяем, является ли это триггером
+            if (param.Value == true && IsTriggerParameter(param.Key))
+            {
+                animator.SetTrigger(param.Key);
+                Debug.Log($"NetworkPlayer {Username}: Applied trigger {param.Key}");
+            }
+            else
+            {
+                animator.SetBool(param.Key, param.Value);
+                Debug.Log($"NetworkPlayer {Username}: Set bool {param.Key} = {param.Value}");
+            }
         }
         foreach (var param in packet.FloatParams)
         {
             animator.SetFloat(param.Key, param.Value);
+            Debug.Log($"NetworkPlayer {Username}: Set float {param.Key} = {param.Value}");
         }
         foreach (var param in packet.IntParams)
         {
             animator.SetInteger(param.Key, param.Value);
+            Debug.Log($"NetworkPlayer {Username}: Set int {param.Key} = {param.Value}");
         }
+    }
+    
+    private bool IsTriggerParameter(string paramName)
+    {
+        // Список известных триггеров
+        return paramName == "Reload" || paramName == "ChangeWeapon" || paramName == "Jump";
     }
 
     void OnDestroy() {
