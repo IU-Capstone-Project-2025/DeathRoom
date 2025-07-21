@@ -205,7 +205,7 @@ public class Client : MonoBehaviour
                     List<int> presentPlayers = new List<int>();
                     foreach (var ps in worldState.PlayerStates)
                     {
-                        Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z}");
+                        Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z} - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
                         
                         if (ps.Username == playerName && localPlayerId == -1)
                         {
@@ -265,7 +265,23 @@ public class Client : MonoBehaviour
     {
         if (ps.Id == localPlayerId && localPlayerId != -1) 
         {
-            Debug.Log($"Skipping local player {ps.Username} (ID: {ps.Id})");
+            Debug.Log($"Updating local player {ps.Username} (ID: {ps.Id}) - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
+            
+            // Update local player's health and armor from server
+            if (localPlayer != null)
+            {
+                var healthComponent = localPlayer.GetComponentInChildren<Playerhealth>();
+                if (healthComponent != null)
+                {
+                    healthComponent.SetHealthAndArmorFromServer(
+                        ps.HealthPoint, 
+                        ps.MaxHealthPoint, 
+                        ps.ArmorPoint, 
+                        ps.MaxArmorPoint
+                    );
+                    Debug.Log($"[HEALTH UPDATE] Received health update from server: {ps.HealthPoint}/{ps.MaxHealthPoint}");
+                }
+            }
             return;
         }
 
@@ -342,6 +358,7 @@ public class Client : MonoBehaviour
             ClientTick = shootTick 
         };
         SendPacket(shootPacket);
+        Debug.Log($"[SHOOT] Sent PlayerShootPacket at tick {shootTick}");
         
         // 2. Perform local hit detection
         RaycastHit hit;
@@ -360,8 +377,12 @@ public class Client : MonoBehaviour
                 };
                 SendPacket(hitPacket);
                 
-                Debug.Log($"Hit detected on player {hitPlayer.PlayerId} at tick {shootTick}");
+                Debug.Log($"[HIT SENT] Hit detected on player {hitPlayer.PlayerId} at tick {shootTick} - waiting for server health update");
             }
+        }
+        else
+        {
+            Debug.Log($"[SHOOT] No hit detected - raycast missed");
         }
         
         // 4. Show local effects immediately (muzzle flash, sound, etc.)
