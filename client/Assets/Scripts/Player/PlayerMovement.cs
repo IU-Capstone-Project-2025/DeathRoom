@@ -146,35 +146,6 @@ public class PlayerMovement : MonoBehaviour
                 {
                     Debug.Log("Shooting!");
                     usingGun.Shoot();
-
-                    // Visualize the ray in the editor with longer duration for debugging
-                    Debug.DrawRay(usingGun.shootOut.position, usingGun.shootOut.forward * 100f, Color.red, 2f);
-                    
-                    // Log ray origin and direction for debugging
-                    Debug.Log($"Ray Origin: {usingGun.shootOut.position}, Direction: {usingGun.shootOut.forward}");
-
-                    RaycastHit hit;
-                    int layerMask = ~0; // All layers
-                    if (Physics.Raycast(usingGun.shootOut.position, usingGun.shootOut.forward, out hit, 100f, layerMask))
-                    {
-                        Debug.Log($"Hit: {hit.collider.name} at distance {hit.distance}");
-                        var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
-                        if (networkPlayer != null)
-                        {
-                            Debug.Log("Hit player: " + networkPlayer.PlayerId);
-                            client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
-                        }
-                        else
-                        {
-                            Debug.Log($"Hit non-player object: {hit.collider.gameObject.layer}");
-                            client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Ray missed! Check if objects have colliders and are in the right layers");
-                        client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
-                    }
                 }
             }
         }
