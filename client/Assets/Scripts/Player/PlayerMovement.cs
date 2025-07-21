@@ -34,12 +34,16 @@ public class PlayerMovement : MonoBehaviour
 
     private float gravity = Physics.gravity.y;
     private Vector3 oldPos;
+    private Quaternion oldRotation;
     private bool crouch = true;
     private bool freezMovement = false;
     private float radius;
     private float height;
     private bool isReload = false;
     private bool jumpOver = false;
+    private bool isRotatingOnly = false;
+    private float rotationThreshold = 1f;
+    private UnityEngine.Animations.Rigging.RigBuilder rigBuilder;
     public Gun usingGun;
 
     private Dictionary<string, object> animationParams = new Dictionary<string, object>();
@@ -55,6 +59,12 @@ public class PlayerMovement : MonoBehaviour
         radius = controller.radius;
         height = controller.height;
 
+        // Находим RigBuilder компонент
+        if (animator != null)
+        {
+            rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
+        }
+        
         foreach (AnimatorControllerParameter param in animator.parameters)
         {
             switch (param.type)
@@ -77,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
     {
         speed = walkSpeed;
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
+        oldRotation = transform.rotation;
     }
 
     private void Update()
@@ -272,6 +283,20 @@ public class PlayerMovement : MonoBehaviour
     void AnimatorSystem()
     {
         Vector3 animMove = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+        
+        // Проверяем поворот без движения
+        float rotationDelta = Quaternion.Angle(oldRotation, transform.rotation);
+        bool isMoving = animMove.magnitude > 0.1f;
+        isRotatingOnly = !isMoving && rotationDelta > rotationThreshold;
+        
+        // Отключаем RigBuilder если только поворачиваемся
+        if (rigBuilder != null)
+        {
+            rigBuilder.enabled = !isRotatingOnly;
+        }
+        
+        oldRotation = transform.rotation;
+        
         if (crouch)
         {
             animMove = new Vector3(animMove.x / 2f, 0f, animMove.z / 2f);

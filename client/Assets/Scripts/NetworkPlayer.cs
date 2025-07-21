@@ -20,7 +20,11 @@ public class NetworkPlayer : MonoBehaviour {
     private Vector3 lastTargetPosition;
     private Quaternion targetRotation;
     private Vector3 lastPosition;
+    private Quaternion lastRotation;
     private bool isMoving = false;
+    private bool isRotatingOnly = false;
+    private float rotationThreshold = 1f;
+    private UnityEngine.Animations.Rigging.RigBuilder rigBuilder;
     private float lastUpdateTime;
     
     // Animation smoothing variables
@@ -61,13 +65,18 @@ public class NetworkPlayer : MonoBehaviour {
         Username = playerState.Username;
         PlayerId = playerState.Id;
         
-      
         var pos = playerState.Position.ToUnityVector3();
         var rot = Quaternion.Euler(
             playerState.Rotation.X,
             playerState.Rotation.Y,
             playerState.Rotation.Z
         );
+        
+        // Validate position data
+        if (float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsNaN(pos.z)) {
+            Debug.LogError($"NetworkPlayer {Username} (ID: {PlayerId}) received invalid initial position: {pos}");
+            pos = Vector3.zero; // Fallback to origin
+        }
         
         transform.position = pos;
         transform.rotation = rot;
@@ -76,12 +85,19 @@ public class NetworkPlayer : MonoBehaviour {
         lastTargetPosition = pos;
         targetRotation = rot;
         lastPosition = pos;
+        lastRotation = rot;
         lastUpdateTime = Time.time;
         lastAnimationUpdateTime = Time.time;
         smoothedVelocity = Vector3.zero;
         wasMovingLastFrame = false;
         
-        Debug.Log($"NetworkPlayer initialized: {Username} (ID: {PlayerId}) at {pos}");
+        // Находим RigBuilder компонент
+        if (animator != null)
+        {
+            rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
+        }
+        
+        Debug.Log($"NetworkPlayer initialized: {Username} (ID: {PlayerId}) at {pos} with rotation {rot.eulerAngles}");
     }
     
     public void UpdateState(PlayerState newState) {
@@ -98,7 +114,13 @@ public class NetworkPlayer : MonoBehaviour {
         
         float distance = Vector3.Distance(transform.position, newPosition);
         
-        Debug.Log($"NetworkPlayer {Username} (ID: {PlayerId}) update: pos {newPosition}, distance {distance:F2}");
+        // Add validation for position data
+        if (float.IsNaN(newPosition.x) || float.IsNaN(newPosition.y) || float.IsNaN(newPosition.z)) {
+            Debug.LogError($"NetworkPlayer {Username} (ID: {PlayerId}) received invalid position: {newPosition}");
+            return;
+        }
+        
+        Debug.Log($"NetworkPlayer {Username} (ID: {PlayerId}) update: pos {newPosition}, current pos {transform.position}, distance {distance:F2}");
         
         if (distance > maxDistance) {
             transform.position = newPosition;
@@ -124,10 +146,21 @@ public class NetworkPlayer : MonoBehaviour {
 
     void Update()
     {
+        // Validate target position before interpolation
+        if (float.IsNaN(targetPosition.x) || float.IsNaN(targetPosition.y) || float.IsNaN(targetPosition.z)) {
+            Debug.LogError($"NetworkPlayer {Username} (ID: {PlayerId}) has invalid target position: {targetPosition}");
+            return;
+        }
+        
         // Interpolate position and rotation
         if (Vector3.Distance(transform.position, targetPosition) > 0.01f)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPosition, interpolationSpeed * Time.deltaTime);
+            Vector3 newPos = Vector3.Lerp(transform.position, targetPosition, interpolationSpeed * Time.deltaTime);
+            
+            // Validate interpolated position
+            if (!float.IsNaN(newPos.x) && !float.IsNaN(newPos.y) && !float.IsNaN(newPos.z)) {
+                transform.position = newPos;
+            }
         }
         
         if (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
@@ -138,11 +171,28 @@ public class NetworkPlayer : MonoBehaviour {
         // Calculate movement for animation with smoothing
         Vector3 currentVelocity = (transform.position - lastPosition) / Time.deltaTime;
         
+        // Validate velocity calculation
+        if (float.IsNaN(currentVelocity.x) || float.IsNaN(currentVelocity.y) || float.IsNaN(currentVelocity.z)) {
+            currentVelocity = Vector3.zero;
+        }
+        
         // Smooth the velocity using SmoothDamp for natural animation transitions
         smoothedVelocity = Vector3.SmoothDamp(smoothedVelocity, currentVelocity, ref velocitySmoothing, animationSmoothTime);
         
         isMoving = smoothedVelocity.magnitude > movementThreshold;
+        
+        // Проверяем поворот без движения
+        float rotationDelta = Quaternion.Angle(lastRotation, transform.rotation);
+        isRotatingOnly = !isMoving && rotationDelta > rotationThreshold;
+        
+        // Отключаем RigBuilder если только поворачиваемся
+        if (rigBuilder != null)
+        {
+            rigBuilder.enabled = !isRotatingOnly;
+        }
+        
         lastPosition = transform.position;
+        lastRotation = transform.rotation;
         
         // Update animations in Update loop for smoother transitions
         UpdateAnimationInUpdate();
