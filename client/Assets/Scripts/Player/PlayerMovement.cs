@@ -41,7 +41,8 @@ public class PlayerMovement : MonoBehaviour
     private bool isReload = false;
     private bool jumpOver = false;
     private bool isRotatingOnly = false;
-    private float rotationThreshold = 1f; // минимальный угол поворота для определения вращения
+    private float rotationThreshold = 1f;
+    private UnityEngine.Animations.Rigging.RigBuilder rigBuilder;
     public Gun usingGun;
 
     private Dictionary<string, object> animationParams = new Dictionary<string, object>();
@@ -57,6 +58,12 @@ public class PlayerMovement : MonoBehaviour
         radius = controller.radius;
         height = controller.height;
 
+        // Находим RigBuilder компонент
+        if (animator != null)
+        {
+            rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
+        }
+        
         foreach (AnimatorControllerParameter param in animator.parameters)
         {
             switch (param.type)
@@ -269,10 +276,10 @@ public class PlayerMovement : MonoBehaviour
         bool isMoving = animMove.magnitude > 0.1f;
         isRotatingOnly = !isMoving && rotationDelta > rotationThreshold;
         
-        // Отключаем аниматор если только поворачиваемся
-        if (animator != null)
+        // Отключаем RigBuilder если только поворачиваемся
+        if (rigBuilder != null)
         {
-            animator.enabled = !isRotatingOnly;
+            rigBuilder.enabled = !isRotatingOnly;
         }
         
         oldRotation = transform.rotation;

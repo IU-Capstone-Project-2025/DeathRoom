@@ -23,7 +23,8 @@ public class NetworkPlayer : MonoBehaviour {
     private Quaternion lastRotation;
     private bool isMoving = false;
     private bool isRotatingOnly = false;
-    private float rotationThreshold = 1f; // минимальный угол поворота для определения вращения
+    private float rotationThreshold = 1f;
+    private UnityEngine.Animations.Rigging.RigBuilder rigBuilder;
     private float lastUpdateTime;
     
     // Animation smoothing variables
@@ -89,6 +90,12 @@ public class NetworkPlayer : MonoBehaviour {
         lastAnimationUpdateTime = Time.time;
         smoothedVelocity = Vector3.zero;
         wasMovingLastFrame = false;
+        
+        // Находим RigBuilder компонент
+        if (animator != null)
+        {
+            rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
+        }
         
         Debug.Log($"NetworkPlayer initialized: {Username} (ID: {PlayerId}) at {pos} with rotation {rot.eulerAngles}");
     }
@@ -178,10 +185,10 @@ public class NetworkPlayer : MonoBehaviour {
         float rotationDelta = Quaternion.Angle(lastRotation, transform.rotation);
         isRotatingOnly = !isMoving && rotationDelta > rotationThreshold;
         
-        // Отключаем аниматор если только поворачиваемся
-        if (animator != null)
+        // Отключаем RigBuilder если только поворачиваемся
+        if (rigBuilder != null)
         {
-            animator.enabled = !isRotatingOnly;
+            rigBuilder.enabled = !isRotatingOnly;
         }
         
         lastPosition = transform.position;
