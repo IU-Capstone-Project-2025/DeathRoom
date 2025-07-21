@@ -1065,6 +1065,7 @@ GameObject:
   - component: {fileID: 8954159923457369804}
   - component: {fileID: 860462250097851269}
   - component: {fileID: 1917068965964324005}
+  - component: {fileID: 2773936159155755854}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1167,6 +1168,26 @@ CapsuleCollider:
   m_Height: 2.3179126
   m_Direction: 1
   m_Center: {x: 0, y: 0.6589563, z: 0}
+--- !u!114 &2773936159155755854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2451112007903609645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ebbdd4fc3168564f9d101aadab17c41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverAddress: 77.233.222.200
+  serverPort: 9050
+  playerName: Player
+  localPlayerPrefab: {fileID: 0}
+  networkPlayerPrefab: {fileID: 0}
+  spawnPoints: []
+  localPlayer: {fileID: 0}
+  isConnected: 0
 --- !u!1 &2625019308077774962
 GameObject:
   m_ObjectHideFlags: 0
@@ -6795,6 +6816,7 @@ MonoBehaviour:
   normalRecoil: 5
   aimRecoil: 2
   crosshair: {fileID: 5543932948102341988}
+  client: {fileID: 2773936159155755854}
   reloadClip: {fileID: 8300000, guid: e5198250a6a57408bb36e14bc4a322c4, type: 3}
   hitCrosshair: {fileID: 3775909073248724149}
   hitCrosshairLayer:
@@ -7148,6 +7170,7 @@ MonoBehaviour:
   normalRecoil: 1
   aimRecoil: 0.5
   crosshair: {fileID: 5543932948102341988}
+  client: {fileID: 2773936159155755854}
   reloadClip: {fileID: 8300000, guid: eb5685b26a6494994af389a3293064e8, type: 3}
   hitCrosshair: {fileID: 3775909073248724149}
   hitCrosshairLayer:

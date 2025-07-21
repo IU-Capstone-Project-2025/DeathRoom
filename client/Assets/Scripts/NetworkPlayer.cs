@@ -114,7 +114,6 @@ public class NetworkPlayer : MonoBehaviour {
         
         float distance = Vector3.Distance(transform.position, newPosition);
         
-        // Add validation for position data
         if (float.IsNaN(newPosition.x) || float.IsNaN(newPosition.y) || float.IsNaN(newPosition.z)) {
             Debug.LogError($"NetworkPlayer {Username} (ID: {PlayerId}) received invalid position: {newPosition}");
             return;
@@ -135,6 +134,18 @@ public class NetworkPlayer : MonoBehaviour {
             targetPosition = newPosition;
             targetRotation = newRotation;
             lastUpdateTime = Time.time;
+        }
+        
+        // Update health and armor from server
+        var healthComponent = GetComponent<Playerhealth>();
+        if (healthComponent != null)
+        {
+            healthComponent.SetHealthAndArmorFromServer(
+                newState.HealthPoint, 
+                newState.MaxHealthPoint, 
+                newState.ArmorPoint, 
+                newState.MaxArmorPoint
+            );
         }
         
         // Only update animation at limited rate to prevent jerkiness

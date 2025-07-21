@@ -19,6 +19,9 @@ public class Client : MonoBehaviour
     public GameObject localPlayerPrefab;
     public GameObject networkPlayerPrefab;
 
+	[Header("Shooting")]
+	public TrailRenderer shootTrail;
+
     [Header("Spawn Points")]
     public Transform[] spawnPoints;
 
@@ -202,7 +205,7 @@ public class Client : MonoBehaviour
                     List<int> presentPlayers = new List<int>();
                     foreach (var ps in worldState.PlayerStates)
                     {
-                        Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z}");
+                        Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z} - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
                         
                         if (ps.Username == playerName && localPlayerId == -1)
                         {
@@ -232,6 +235,7 @@ public class Client : MonoBehaviour
                     Debug.Log($"Received PlayerShootBroadcastPacket: ShooterId={broadcastPacket.ShooterId}, Direction=({broadcastPacket.Direction.X}, {broadcastPacket.Direction.Y}, {broadcastPacket.Direction.Z}), ClientTick={broadcastPacket.ClientTick}, ServerTick={broadcastPacket.ServerTick}");
                     OnReceiveShootBroadcast(broadcastPacket);
                     break;
+
                 case PlayerAnimationPacket animPacket:
                     if (animPacket.PlayerId == localPlayerId) break;
                     if (networkPlayers.TryGetValue(animPacket.PlayerId, out var player))
@@ -261,7 +265,23 @@ public class Client : MonoBehaviour
     {
         if (ps.Id == localPlayerId && localPlayerId != -1) 
         {
-            Debug.Log($"Skipping local player {ps.Username} (ID: {ps.Id})");
+            Debug.Log($"Updating local player {ps.Username} (ID: {ps.Id}) - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
+            
+            // Update local player's health and armor from server
+            if (localPlayer != null)
+            {
+                var healthComponent = localPlayer.GetComponentInChildren<Playerhealth>();
+                if (healthComponent != null)
+                {
+                    healthComponent.SetHealthAndArmorFromServer(
+                        ps.HealthPoint, 
+                        ps.MaxHealthPoint, 
+                        ps.ArmorPoint, 
+                        ps.MaxArmorPoint
+                    );
+                    Debug.Log($"[HEALTH UPDATE] Received health update from server: {ps.HealthPoint}/{ps.MaxHealthPoint}");
+                }
+            }
             return;
         }
 
@@ -342,6 +362,7 @@ public class Client : MonoBehaviour
             ClientTick = shootTick 
         };
         SendPacket(shootPacket);
+        Debug.Log($"[SHOOT] Sent PlayerShootPacket at tick {shootTick}");
         
         // 2. Perform local hit detection
         RaycastHit hit;
@@ -360,8 +381,12 @@ public class Client : MonoBehaviour
                 };
                 SendPacket(hitPacket);
                 
-                Debug.Log($"Hit detected on player {hitPlayer.PlayerId} at tick {shootTick}");
+                Debug.Log($"[HIT SENT] Hit detected on player {hitPlayer.PlayerId} at tick {shootTick} - waiting for server health update");
             }
+        }
+        else
+        {
+            Debug.Log($"[SHOOT] No hit detected - raycast missed");
         }
         
         // 4. Show local effects immediately (muzzle flash, sound, etc.)
@@ -445,19 +470,24 @@ public class Client : MonoBehaviour
         
         // Example: Create bullet tracer (you would implement this based on your game's visual system)
         CreateBulletTracer(shooterPosition, direction);
-        PlayShootSound(shooterPosition);
     }
 
     void CreateBulletTracer(Vector3 origin, Vector3 direction)
     {
         // Placeholder for bullet tracer implementation
         Debug.Log($"Creating bullet tracer from {origin} in direction {direction}");
-    }
-
-    void PlayShootSound(Vector3 position)
-    {
-        // Placeholder for 3D positioned audio
-        Debug.Log($"Playing shoot sound at position {position}");
+		TrailRenderer trail = Instantiate(shootTrail, origin, Quaternion.Euler(direction.x, direction.y, direction.z));
+        RaycastHit hit;
+        Quaternion recoilRotation = Quaternion.Euler(direction.x, direction.y, direction.z);
+        bool isHit = Physics.Raycast(origin, recoilRotation * new Vector3(direction.x,0,0) * 1000f, out hit);
+		if(!isHit)
+			hit.point = direction * 100f;
+		float time=0;
+		while (time<1) {
+			trail.transform.position = Vector3.MoveTowards(origin, hit.point, time * 20f);
+			time += Time.deltaTime / trail.time;
+		}
+		// Destroy(trail.gameObject, trail.time);
     }
 
     public long GetCurrentClientTick()
