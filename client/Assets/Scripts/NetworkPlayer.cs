@@ -20,7 +20,10 @@ public class NetworkPlayer : MonoBehaviour {
     private Vector3 lastTargetPosition;
     private Quaternion targetRotation;
     private Vector3 lastPosition;
+    private Quaternion lastRotation;
     private bool isMoving = false;
+    private bool isRotatingOnly = false;
+    private float rotationThreshold = 1f; // минимальный угол поворота для определения вращения
     private float lastUpdateTime;
     
     // Animation smoothing variables
@@ -81,6 +84,7 @@ public class NetworkPlayer : MonoBehaviour {
         lastTargetPosition = pos;
         targetRotation = rot;
         lastPosition = pos;
+        lastRotation = rot;
         lastUpdateTime = Time.time;
         lastAnimationUpdateTime = Time.time;
         smoothedVelocity = Vector3.zero;
@@ -169,7 +173,19 @@ public class NetworkPlayer : MonoBehaviour {
         smoothedVelocity = Vector3.SmoothDamp(smoothedVelocity, currentVelocity, ref velocitySmoothing, animationSmoothTime);
         
         isMoving = smoothedVelocity.magnitude > movementThreshold;
+        
+        // Проверяем поворот без движения
+        float rotationDelta = Quaternion.Angle(lastRotation, transform.rotation);
+        isRotatingOnly = !isMoving && rotationDelta > rotationThreshold;
+        
+        // Отключаем аниматор если только поворачиваемся
+        if (animator != null)
+        {
+            animator.enabled = !isRotatingOnly;
+        }
+        
         lastPosition = transform.position;
+        lastRotation = transform.rotation;
         
         // Update animations in Update loop for smoother transitions
         UpdateAnimationInUpdate();
