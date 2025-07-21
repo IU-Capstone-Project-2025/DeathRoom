@@ -482,7 +482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverAddress: 77.233.222.200
-  serverPort: 9050
+  serverPort: 8050
   playerName: play
   localPlayerPrefab: {fileID: 8647007826477569418, guid: 1767d81102f39404caf39c3f15b54889,
     type: 3}

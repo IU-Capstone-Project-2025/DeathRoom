@@ -1178,6 +1178,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interpolationSpeed: 10
   maxDistance: 1e+31
+  animationUpdateRate: 10
+  movementThreshold: 0.05
+  animationSmoothTime: 0.1
   animator: {fileID: 3679203958512744203}
 --- !u!1 &2840126438575145371
 GameObject:
@@ -3116,6 +3119,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -5687392037042989399, guid: 5369b85345cab9c458d89470b7801473,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.425
       objectReference: {fileID: 0}
     - target: {fileID: -5665043316445423941, guid: 5369b85345cab9c458d89470b7801473,
         type: 3}
