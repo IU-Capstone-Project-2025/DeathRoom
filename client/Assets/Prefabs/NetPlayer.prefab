@@ -1085,7 +1085,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2453990254580750520}
   - component: {fileID: 3397113563774793869}
-  - component: {fileID: 7277499083598992753}
   m_Layer: 2
   m_Name: Player
   m_TagString: Untagged
@@ -1127,29 +1126,6 @@ MonoBehaviour:
   movementThreshold: 0.05
   animationSmoothTime: 0.1
   animator: {fileID: 3679203958512744203}
---- !u!136 &7277499083598992753
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2451112007903609645}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.83, z: 0}
 --- !u!1 &2840126438575145371
 GameObject:
   m_ObjectHideFlags: 0
@@ -2621,6 +2597,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3543356239100543896}
+  - component: {fileID: 5658415479589699535}
   m_Layer: 0
   m_Name: NetPlayer
   m_TagString: Untagged
@@ -2646,6 +2623,29 @@ Transform:
   - {fileID: 8665578494947852183}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &5658415479589699535
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8647007826477569418}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.87, z: 0}
 --- !u!1 &8756599887318548219
 GameObject:
   m_ObjectHideFlags: 0
