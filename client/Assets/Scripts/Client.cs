@@ -206,10 +206,12 @@ public class Client : MonoBehaviour
                     foreach (var ps in worldState.PlayerStates)
                     {
                         Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z} - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
+                        Debug.LogWarning($"[ARMOR DEBUG] Player {ps.Username} armor values: ArmorPoint={ps.ArmorPoint}, MaxArmorPoint={ps.MaxArmorPoint}");
                         
                         if (ps.Id == localPlayerId || (localPlayerId == -1 && ps.Username == playerName))
                         {
                             PlayerMovement pm = localPlayer.GetComponentInChildren<PlayerMovement>();
+                            Debug.LogWarning($"[UI UPDATE] Setting armor text to: {ps.ArmorPoint} for local player {ps.Username}");
                             pm.SetArmorText(ps.ArmorPoint);
                             pm.SetHealthText(ps.HealthPoint);
                         }

@@ -144,7 +144,16 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetArmorText(int armor)
     {
-        armorText.text = armor.ToString();
+        Debug.LogWarning($"[SetArmorText] Setting armor text to: {armor}, armorText component: {(armorText != null ? "found" : "NULL")}");
+        if (armorText != null)
+        {
+            armorText.text = armor.ToString();
+            Debug.LogWarning($"[SetArmorText] Armor text set successfully to: {armorText.text}");
+        }
+        else
+        {
+            Debug.LogError("[SetArmorText] armorText component is NULL!");
+        }
     }
 
     public void SetHealthText(int health)
