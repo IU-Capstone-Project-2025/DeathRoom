@@ -27,18 +27,18 @@ public class PlayerState
 
     public bool TakeDamage(int armorDamage, int healthDamage, long tick)
     {
-        if (this.ArmorExpirationTick > tick) { this.ArmorPoint = 0; }
+        if (ArmorExpirationTick > tick) { ArmorPoint = 0; }
         
-        if (this.ArmorPoint > 0)
+        if (ArmorPoint > 0)
         {
-            if (this.ArmorPoint >= armorDamage)
+            if (ArmorPoint >= armorDamage)
             {
-                this.ArmorPoint -= armorDamage;
+                ArmorPoint -= armorDamage;
             }
             else
             {
-                int remainingDamage = armorDamage - this.ArmorPoint;
-                this.ArmorPoint = 0;
+                int remainingDamage = armorDamage - ArmorPoint;
+                ArmorPoint = 0;
                 healthDamage += remainingDamage;
             }
         }
@@ -52,7 +52,7 @@ public class PlayerState
         this.HealthPoint -= healthDamage;
         if (this.HealthPoint <= 0)
         {
-            this.HealthPoint = 0;
+            HealthPoint = 0;
             return true; // Игрок умер
         }
         return false; // Игрок жив
