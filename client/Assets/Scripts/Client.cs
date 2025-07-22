@@ -308,8 +308,6 @@ public class Client : MonoBehaviour
         if (ps.Id == localPlayerId && localPlayerId != -1) 
         {
             Debug.Log($"Updating local player {ps.Username} (ID: {ps.Id}) - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
-            
-            // Update local player's health and armor from server
             if (localPlayer != null)
             {
                 var healthComponent = localPlayer.GetComponentInChildren<Playerhealth>();
@@ -339,7 +337,6 @@ public class Client : MonoBehaviour
 
     void CreateNetworkPlayer(PlayerState ps)
     {
-        // Check if position is valid (not zero or very close to zero)
         Vector3 playerPos = ps.Position.ToUnityVector3();
         bool hasValidPosition = playerPos.magnitude > 0.1f;
         
@@ -505,11 +502,6 @@ public class Client : MonoBehaviour
 
     public Vector3 GetRandomSpawnPoint()
     {
-        if (spawnPoints == null || spawnPoints.Length == 0)
-        {
-            Debug.LogError("No spawn points assigned in the inspector!");
-            return Vector3.zero;
-        }
         return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].position;
     }
 
@@ -517,10 +509,54 @@ public class Client : MonoBehaviour
     {
         isDead = false;
         Vector3 spawnPoint = GetRandomSpawnPoint();
-        Transform playerChild = localPlayer.transform.Find("Player");
-        playerChild.position = spawnPoint;
-        playerChild.rotation = Quaternion.identity;
-        Debug.Log($"Player respawned at position: {spawnPoint} with 100 health");
+        Transform playerTransform = localPlayer.transform.Find("Player");
+        
+        if (playerTransform != null)
+        {
+            // Reset position and rotation
+            playerTransform.position = spawnPoint;
+            playerTransform.rotation = Quaternion.identity;
+            
+            // Reset movement components if they exist
+            var characterController = playerTransform.GetComponent<CharacterController>();
+            if (characterController != null)
+            {
+                characterController.enabled = false;
+                characterController.transform.position = spawnPoint;
+                characterController.enabled = true;
+            }
+            
+            // Reset rigidbody if it exists
+            var rb = playerTransform.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.velocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
+            
+            // Reset animator state if it exists
+            var animator = playerTransform.GetComponent<Animator>();
+            if (animator != null)
+            {
+                animator.Rebind();
+                animator.Update(0f);
+            }
+            
+            Debug.Log($"Player respawned at position: {spawnPoint}");
+            
+            // Notify server about respawn with new position
+            var movePacket = new PlayerMovePacket
+            {
+                Position = new Vector3Serializable(spawnPoint),
+                Rotation = new Vector3Serializable(Vector3.zero),
+                ClientTick = GetCurrentClientTick()
+            };
+            SendPacket(movePacket);
+        }
+        else
+        {
+            Debug.LogError("Failed to find Player child transform for respawn");
+        }
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
