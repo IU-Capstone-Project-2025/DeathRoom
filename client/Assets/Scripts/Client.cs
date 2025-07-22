@@ -16,12 +16,16 @@ public class Client : MonoBehaviour
     public int serverPort = 9050;
     public string playerName = "Player";
 
+    [Header("Respawn Settings")]
+    public float respawnCooldown = 5f; // Cooldown in seconds between respawns
+    private float lastRespawnTime = -999f; // Initialize to a very low value
+
     [Header("Player")]
     public GameObject localPlayerPrefab;
     public GameObject networkPlayerPrefab;
 
-	[Header("Shooting")]
-	public TrailRenderer shootTrail;
+    [Header("Shooting")]
+    public TrailRenderer shootTrail;
 
     [Header("Spawn Points")]
     public Transform[] spawnPoints;
@@ -147,7 +151,7 @@ public class Client : MonoBehaviour
 
     void OnApplicationPause(bool pauseStatus)
     {
-		return;
+        return;
     }
 
     public void SendAnimationUpdate(Dictionary<string, object> parameters)
@@ -484,32 +488,49 @@ public class Client : MonoBehaviour
     {
         if (localPlayer != null)
         {
+            // Check if cooldown has passed
+            if (Time.time - lastRespawnTime < respawnCooldown)
+            {
+                Debug.Log($"Respawn on cooldown. Time remaining: {respawnCooldown - (Time.time - lastRespawnTime):F1} seconds");
+                return;
+            }
+            
             // Get a random spawn point
             Vector3 spawnPoint = GetRandomSpawnPoint();
             
-            // Move the player to the spawn point
-            CharacterController controller = localPlayer.GetComponent<CharacterController>();
+            // Find the Player child object
+            Transform playerChild = localPlayer.transform.Find("Player");
+            if (playerChild == null)
+            {
+                Debug.LogError("Could not find 'Player' child object in localPlayer");
+                return;
+            }
+            
+            // Move the Player child object to the spawn point
+            CharacterController controller = playerChild.GetComponent<CharacterController>();
             if (controller != null)
             {
                 controller.enabled = false;
-                localPlayer.transform.position = spawnPoint;
+                playerChild.position = spawnPoint;
                 controller.enabled = true;
             }
             else
             {
-                localPlayer.transform.Find("Player").position = spawnPoint;
+                playerChild.position = spawnPoint;
             }
             
             // Reset player rotation
-            localPlayer.transform.Find("Player").rotation = Quaternion.identity;
+            playerChild.rotation = Quaternion.identity;
             
             // Reset camera rotation if needed
-            var camera = localPlayer.GetComponentInChildren<Camera>();
+            var camera = playerChild.GetComponentInChildren<Camera>();
             if (camera != null)
             {
                 camera.transform.localRotation = Quaternion.identity;
             }
             
+            // Update last respawn time
+            lastRespawnTime = Time.time;
             Debug.Log($"Player respawned at position: {spawnPoint}");
         }
     }
