@@ -206,7 +206,8 @@ public class Client : MonoBehaviour
                     foreach (var ps in worldState.PlayerStates)
                     {
                         Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z} - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
-                        
+                        // Point to decrease hp and armor in ui and handle death
+                        PlayerMovement pm = localPlayer.GetComponent<PlayerMovement>();
                         if (ps.Username == playerName && localPlayerId == -1)
                         {
                             localPlayerId = ps.Id;

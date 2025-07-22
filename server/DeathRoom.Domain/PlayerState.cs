@@ -27,10 +27,8 @@ public class PlayerState
 
     public bool TakeDamage(int armorDamage, int healthDamage, long tick)
     {
-        // Проверяем, не истекла ли броня
         if (this.ArmorExpirationTick > tick) { this.ArmorPoint = 0; }
         
-        // Сначала наносим урон по броне
         if (this.ArmorPoint > 0)
         {
             if (this.ArmorPoint >= armorDamage)
@@ -39,7 +37,6 @@ public class PlayerState
             }
             else
             {
-                // Если брони недостаточно, остаток урона идет на здоровье
                 int remainingDamage = armorDamage - this.ArmorPoint;
                 this.ArmorPoint = 0;
                 healthDamage += remainingDamage;
