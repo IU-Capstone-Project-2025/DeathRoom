@@ -160,7 +160,7 @@ public class PlayerMovement : MonoBehaviour
     {
         healthText.text = arg.ToString();
         Debug.LogWarning($"[SetHealthText] Setting health text to: {arg}, healthText component: {(healthText != null ? "found" : "NULL")}");
-        if (arg <= 25)
+        if (arg <= 30)
         {
             Debug.Log("[SetHealthText] Player health is 0 or less!");
             if (client != null)
