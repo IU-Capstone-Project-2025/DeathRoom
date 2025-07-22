@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using DeathRoom.Common.dto;
 using MessagePack;
 using DeathRoom.Common.Network;
+using DeathRoom.Common.network;
 
 public class Client : MonoBehaviour
 {
