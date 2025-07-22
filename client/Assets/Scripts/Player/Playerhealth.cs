@@ -6,10 +6,10 @@ using TMPro;
 
 public class Playerhealth : MonoBehaviour
 {
-    [SerializeField] private float maxHealth = 100f;
-    [SerializeField] private float currentHealth = 100f;
-    [SerializeField] private float maxArmor = 100f;
-    [SerializeField] private float currentArmor = 100f;
+    [SerializeField] public float maxHealth = 100f;
+    [SerializeField] public float currentHealth = 100f;
+    [SerializeField] public float maxArmor = 100f;
+    [SerializeField] public float currentArmor = 100f;
     [SerializeField] private float armorDamageReduction = 0.5f;
     [SerializeField] private Slider healthBarSlider;
     [SerializeField] private TextMeshProUGUI healthText;
@@ -139,14 +139,5 @@ public class Playerhealth : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.T))
             TakeDamage(10);
-    }
-    
-    public void ResetHealthAndArmor()
-    {
-        currentHealth = maxHealth;
-        currentArmor = maxArmor;
-        UpdateHealthUI();
-        UpdateArmorUI();
-        Debug.Log($"[RESPAWN] Health and armor reset to {currentHealth}/{maxHealth} HP and {currentArmor}/{maxArmor} armor");
     }
 }

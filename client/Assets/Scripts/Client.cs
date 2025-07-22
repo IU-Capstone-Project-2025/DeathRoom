@@ -533,7 +533,7 @@ public class Client : MonoBehaviour
         var healthComponent = playerChild.GetComponentInChildren<Playerhealth>();
         if (healthComponent != null)
         {
-            healthComponent.SetHealthAndArmorFromServer(100, 100, healthComponent.currentArmor, healthComponent.maxArmor);
+            healthComponent.SetHealthAndArmorFromServer(100, 100, (int)healthComponent.currentArmor, (int)healthComponent.maxArmor);
         }
 
         // Update last respawn time
