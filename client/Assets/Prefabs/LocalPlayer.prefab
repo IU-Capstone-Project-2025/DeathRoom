@@ -1207,7 +1207,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PauseMenu: {fileID: 6921964830574334400}
   leaderBoard: {fileID: 6973261270249128705}
-  PlayerUI: {fileID: 0}
+  healthText: {fileID: 3213235135900375332}
+  armorText: {fileID: 4187472176633812462}
   client: {fileID: 0}
   mouseSensitive: 3
   minCameraRotY: -40
