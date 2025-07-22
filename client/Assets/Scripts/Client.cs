@@ -268,6 +268,23 @@ public class Client : MonoBehaviour
                         RespawnPlayer();
                     }
                     break;
+                    
+                case PlayerHealthUpdatePacket healthUpdate:
+                    if (localPlayer != null)
+                    {
+                        var healthComponent = localPlayer.GetComponentInChildren<Playerhealth>();
+                        if (healthComponent != null)
+                        {
+                            healthComponent.SetHealthAndArmorFromServer(
+                                healthUpdate.Health,
+                                healthComponent.maxHealth,
+                                healthUpdate.Armor,
+                                healthComponent.maxArmor
+                            );
+                            Debug.Log($"[HEALTH UPDATE] Received health update: {healthUpdate.Health} HP, {healthUpdate.Armor} Armor");
+                        }
+                    }
+                    break;
 
                 case null:
                     Debug.LogError("Unknown packet type - this should not happen after null check above");
