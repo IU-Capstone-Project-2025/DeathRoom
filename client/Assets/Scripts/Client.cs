@@ -515,39 +515,12 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        isDead = false; // Сбрасываем флаг смерти при респавне
-    if (localPlayer != null)
-    {
-        // Check if cooldown has passed
-        if (Time.time - lastRespawnTime < respawnCooldown)
-        {
-            Debug.Log($"Respawn on cooldown. Time remaining: {respawnCooldown - (Time.time - lastRespawnTime):F1} seconds");
-            return;
-        }
-
-        // Get a random spawn point
+        isDead = false;
         Vector3 spawnPoint = GetRandomSpawnPoint();
-        
-        // Find the Player child object
         Transform playerChild = localPlayer.transform.Find("Player");
-        
-            playerChild.position = spawnPoint;
-        
-        // Reset player rotation
+        playerChild.position = spawnPoint;
         playerChild.rotation = Quaternion.identity;
-        
-        // Reset camera rotation if needed
-        var camera = playerChild.GetComponentInChildren<Camera>();
-        if (camera != null)
-        {
-            camera.transform.localRotation = Quaternion.identity;
-        }
-
-
-        // Update last respawn time
-        lastRespawnTime = Time.time;
         Debug.Log($"Player respawned at position: {spawnPoint} with 100 health");
-    }
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
