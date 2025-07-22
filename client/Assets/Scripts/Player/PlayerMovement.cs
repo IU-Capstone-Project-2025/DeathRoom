@@ -159,17 +159,15 @@ public class PlayerMovement : MonoBehaviour
     public void SetHealthText(int health)
     {
         healthText.text = health.ToString();
-        
-        // Check if health is less than or equal to zero
-        if (healthText.text.ToInt() <= 0)
+        if (int.Parse(healthText.text) <= 0)
         {
-            // Call respawn method if available in the Client class
             if (client != null)
             {
                 client.RespawnPlayer();
             }
         }
     }
+
 
     public void resume()
     {
