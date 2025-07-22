@@ -23,7 +23,6 @@ public class PacketHandlerService
     public PacketHandlerService(
         PlayerSessionService playerSessionService,
         WorldStateService worldStateService,
-        HitRegistrationService hitRegistrationService,
         HitPhysicsService hitPhysicsService,
         Func<string, string, Task> onPlayerLogin,
         Func<string, string, Task> onUnknownPacket,
@@ -36,13 +35,15 @@ public class PacketHandlerService
         _logger.LogInformation("Конструктор вызван");
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
-        _hitRegistrationService = hitRegistrationService;
         _hitPhysicsService = hitPhysicsService;
         _onPlayerLogin = onPlayerLogin;
         _onUnknownPacket = onUnknownPacket;
         _onError = onError;
         _getCurrentTick = getCurrentTick;
         _broadcastPacket = broadcastPacket;
+        
+        // Initialize HitRegistrationService with death callback
+        _hitRegistrationService = new HitRegistrationService(OnPlayerDeath);
     }
 
     public async Task HandlePacket(object peer, byte[] data)
@@ -229,5 +230,21 @@ public class PacketHandlerService
     private async Task BroadcastPacketToAllClients(IPacket packet)
     {
         await _broadcastPacket(packet);
+    }
+    
+    private void OnPlayerDeath(Domain.PlayerState deadPlayer, int killerId)
+    {
+        _logger.LogInformation("[DEATH] Player {PlayerName} (ID: {PlayerId}) was killed by {KillerId}", 
+            deadPlayer.Username, deadPlayer.Id, killerId);
+            
+        var deathPacket = new PlayerDeathPacket
+        {
+            PlayerId = deadPlayer.Id,
+            ServerTick = _getCurrentTick(),
+            KillerId = killerId
+        };
+        
+        // Broadcast death event to all clients
+        _ = BroadcastPacketToAllClients(deathPacket);
     }
 } 

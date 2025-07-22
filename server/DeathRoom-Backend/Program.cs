@@ -31,7 +31,6 @@ var builder = Host.CreateDefaultBuilder(args)
 
         services.AddSingleton<PlayerSessionService>();
         services.AddSingleton<WorldStateService>(_ => new WorldStateService(worldStateHistoryLength, worldStateSaveInterval));
-        services.AddSingleton<HitRegistrationService>();
         services.AddSingleton<HitPhysicsService>();
 
         // NetManager и GameServer будут связаны через фабрику
@@ -63,13 +62,11 @@ var builder = Host.CreateDefaultBuilder(args)
         {
             var playerSession = sp.GetRequiredService<PlayerSessionService>();
             var worldState = sp.GetRequiredService<WorldStateService>();
-            var hitRegistration = sp.GetRequiredService<HitRegistrationService>();
             var hitPhysics = sp.GetRequiredService<HitPhysicsService>();
             var logger = sp.GetRequiredService<ILogger<PacketHandlerService>>();
             return new PacketHandlerService(
                 playerSession,
                 worldState,
-                hitRegistration,
                 hitPhysics,
                 (username, type) => { logger.LogInformation($"Player {username} logged in. Type: {type}"); return Task.CompletedTask; },
                 (peer, type) => { logger.LogWarning($"Unknown packet from {peer}: {type}"); return Task.CompletedTask; },
