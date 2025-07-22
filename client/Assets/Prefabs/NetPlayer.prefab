@@ -1115,7 +1115,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2451112007903609645}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed7d6f5606f8f964f86e2e6a3df82e5c, type: 3}
   m_Name: 
@@ -2598,6 +2598,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3543356239100543896}
   - component: {fileID: 5658415479589699535}
+  - component: {fileID: 1150780125362708593}
   m_Layer: 0
   m_Name: NetPlayer
   m_TagString: Untagged
@@ -2639,13 +2640,31 @@ CapsuleCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.87, z: 0}
+--- !u!114 &1150780125362708593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8647007826477569418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed7d6f5606f8f964f86e2e6a3df82e5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interpolationSpeed: 10
+  maxDistance: 1e+31
+  animationUpdateRate: 10
+  movementThreshold: 0.05
+  animationSmoothTime: 0.1
+  animator: {fileID: 0}
 --- !u!1 &8756599887318548219
 GameObject:
   m_ObjectHideFlags: 0

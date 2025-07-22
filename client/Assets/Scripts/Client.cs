@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LiteNetLib;
@@ -506,35 +507,96 @@ public class Client : MonoBehaviour
 
     void ShowShootEffectsForPlayer(NetworkPlayer shooter, Vector3 direction, long clientTick, long serverTick)
     {
-        // Implement visual and audio effects for other players' shots
-        // This could include:
-        // - Muzzle flash at shooter position
-        // - Shoot sound effect
-        // - Bullet tracer/projectile
-        // - Screen shake if close
+        if (shooter == null) return;
         
-        Vector3 shooterPosition = shooter.transform.position;
-        Debug.Log($"Player {shooter.PlayerId} shot from {shooterPosition} in direction {direction}");
+        // Get the shooter's weapon (if available) for more accurate effect positioning
+        Transform shootPoint = shooter.transform.Find("ShootOut"); // Adjust this path based on your hierarchy
+        Vector3 shootPosition = shootPoint != null ? shootPoint.position : shooter.transform.position + Vector3.up * 1.7f;
         
-        // Example: Create bullet tracer (you would implement this based on your game's visual system)
-        CreateBulletTracer(shooterPosition, direction);
+        // Play muzzle flash effect
+        GameObject muzzleFlash = new GameObject("MuzzleFlash");
+        muzzleFlash.transform.position = shootPosition;
+        muzzleFlash.transform.rotation = Quaternion.LookRotation(direction);
+        
+        // Add light component for muzzle flash
+        Light flashLight = muzzleFlash.AddComponent<Light>();
+        flashLight.color = new Color(1f, 0.7f, 0.3f); // Orange-yellow light
+        flashLight.range = 5f;
+        flashLight.intensity = 3f;
+        
+        // Play shoot sound (you'll need to set up your audio system)
+        // AudioSource.PlayClipAtPoint(shootSound, shootPosition, 0.5f);
+        
+        // Create bullet tracer
+        CreateBulletTracer(shootPosition, direction);
+        
+        // Destroy the muzzle flash after a short delay
+        Destroy(muzzleFlash, 0.05f);
+        
+        // Optional: Add screen shake if the shot is close to the local player
+        if (localPlayer != null)
+        {
+            float distance = Vector3.Distance(shootPosition, localPlayer.transform.position);
+            if (distance < 10f)
+            {
+                // Add screen shake effect here if you have one
+                // CameraShake.Instance.Shake(0.1f, 0.1f * (1f - distance/10f));
+            }
+        }
     }
 
     void CreateBulletTracer(Vector3 origin, Vector3 direction)
     {
-        // Placeholder for bullet tracer implementation
-        Debug.Log($"Creating bullet tracer from {origin} in direction {direction}");
-		TrailRenderer trail = Instantiate(shootTrail, origin, Quaternion.Euler(direction.x, direction.y, direction.z));
+        if (shootTrail == null)
+        {
+            Debug.LogWarning("Shoot trail prefab is not assigned!");
+            return;
+        }
+
+        // Create the trail renderer
+        TrailRenderer trail = Instantiate(shootTrail, origin, Quaternion.identity);
+        
+        // Set up raycast to find where the bullet would hit
         RaycastHit hit;
-        Quaternion recoilRotation = Quaternion.Euler(direction.x, direction.y, direction.z);
-        bool isHit = Physics.Raycast(origin, recoilRotation * new Vector3(direction.x,0,0) * 1000f, out hit);
-		if(!isHit)
-			hit.point = direction * 100f;
-		float time=0;
-		while (time<1) {
-			trail.transform.position = Vector3.MoveTowards(origin, hit.point, time * 20f);
-			time += Time.deltaTime / trail.time;
-		}
-		// Destroy(trail.gameObject, trail.time);
+        float maxDistance = 1000f;
+        bool isHit = Physics.Raycast(origin, direction, out hit, maxDistance);
+        
+        // If we didn't hit anything, use a point in the distance
+        Vector3 endPoint = isHit ? hit.point : origin + direction * maxDistance;
+        
+        // Position the trail between origin and endpoint
+        trail.transform.position = origin;
+        trail.Clear(); // Clear any existing points
+        
+        // Animate the trail using a coroutine
+        StartCoroutine(AnimateBulletTracer(trail, origin, endPoint));
+    }
+    
+    IEnumerator AnimateBulletTracer(TrailRenderer trail, Vector3 start, Vector3 end)
+    {
+        float duration = 0.1f; // Duration of the bullet travel
+        float startTime = Time.time;
+        
+        while (Time.time - startTime < duration)
+        {
+            float t = (Time.time - startTime) / duration;
+            // Move the trail renderer along the path
+            trail.transform.position = Vector3.Lerp(start, end, t);
+            yield return null;
+        }
+        
+        // Ensure the final position is set
+        trail.transform.position = end;
+        
+        // Wait for the trail to fade out before destroying it
+        if (trail != null)
+        {
+            yield return new WaitForSeconds(trail.time);
+            if (trail != null)
+            {
+                Destroy(trail.gameObject);
+            }
+        }
     }
 }
+
