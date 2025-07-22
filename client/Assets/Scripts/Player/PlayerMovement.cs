@@ -159,7 +159,15 @@ public class PlayerMovement : MonoBehaviour
     public void SetHealthText(int health)
     {
         healthText.text = health.ToString();
+        if (int.Parse(healthText.text) <= 0)
+        {
+            if (client != null)
+            {
+                client.RespawnPlayer();
+            }
+        }
     }
+
 
     public void resume()
     {
