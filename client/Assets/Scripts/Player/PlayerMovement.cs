@@ -159,10 +159,12 @@ public class PlayerMovement : MonoBehaviour
     public void SetHealthText(int arg)
     {
         healthText.text = arg.ToString();
+        Debug.LogWarning($"[SetHealthText] Setting health text to: {arg}, healthText component: {(healthText != null ? "found" : "NULL")}");
         if (arg <= 0)
         {
             if (client != null)
             {
+                Debug.LogWarning("[SetHealthText] Respawn player");
                 client.RespawnPlayer();
             }
         }
