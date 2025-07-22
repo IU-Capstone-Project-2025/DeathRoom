@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using DeathRoom.Common.dto;
 using MessagePack;
-using DeathRoom.Common.network;
 using DeathRoom.Common.Network;
 
 public class Client : MonoBehaviour
@@ -45,6 +44,7 @@ public class Client : MonoBehaviour
     public bool isConnected = false;
     private long lastServerTick = 0;
     private int localPlayerId = -1;
+    private bool isDead = false; // Флаг, что игрок мертв
     
     // Client tick synchronization
     private long clientTick = 0;
@@ -255,6 +255,16 @@ public class Client : MonoBehaviour
                     if (networkPlayers.TryGetValue(animPacket.PlayerId, out var player))
                     {
                         player.ApplyAnimationUpdate(animPacket);
+                    }
+                    break;
+                    
+                case PlayerDeathPacket deathPacket:
+                    Debug.Log($"Player {deathPacket.PlayerId} died. Killer ID: {deathPacket.KillerId}");
+                    if (deathPacket.PlayerId == localPlayerId && !isDead)
+                    {
+                        Debug.Log("Local player died. Respawning...");
+                        isDead = true;
+                        RespawnPlayer();
                     }
                     break;
 
@@ -487,88 +497,51 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        if (localPlayer != null)
-        {
-            // Check if cooldown has passed
-            if (Time.time - lastRespawnTime < respawnCooldown)
-            {
-                Debug.Log($"Respawn on cooldown. Time remaining: {respawnCooldown - (Time.time - lastRespawnTime):F1} seconds");
-                return;
-            }
-
-            // Get a random spawn point
-            Vector3 spawnPoint = GetRandomSpawnPoint();
-            
-            // Find the Player child object
-            Transform playerChild = localPlayer.transform.Find("Player");
-            if (playerChild == null)
-            {
-                Debug.LogError("Could not find 'Player' child object in localPlayer");
-                return;
-            }
-
-            // Move the player to the spawn point
-            CharacterController controller = playerChild.GetComponent<CharacterController>();
-            if (controller != null)
-            {
-                controller.enabled = false;
-                playerChild.position = spawnPoint;
-                controller.enabled = true;
-            }
-            else
-            {
-                playerChild.position = spawnPoint;
-            }
-            
-            // Reset rotation
-            playerChild.rotation = Quaternion.identity;
-            
-            // Reset camera rotation
-            var camera = playerChild.GetComponentInChildren<Camera>();
-            if (camera != null)
-            {
-                camera.transform.localRotation = Quaternion.identity;
-            }
-            
-            // Send health update to server
-            SendHealthUpdate(100, 100);
-            
-            // Update local UI
-            var playerMovement = playerChild.GetComponent<PlayerMovement>();
-            if (playerMovement != null)
-            {
-                playerMovement.SetHealthText(100);
-                playerMovement.SetArmorText(100);
-            }
-            
-            lastRespawnTime = Time.time;
-            Debug.Log($"Player respawned at position: {spawnPoint} with 100 health and armor");
-        }
-    }
-    
-    private void SendHealthUpdate(int health, int armor)
+        isDead = false; // Сбрасываем флаг смерти при респавне
+    if (localPlayer != null)
     {
-        if (!isConnected || serverPeer == null) return;
-        
-        var packet = new PlayerHealthUpdatePacket
+        // Check if cooldown has passed
+        if (Time.time - lastRespawnTime < respawnCooldown)
         {
-            Health = health,
-            Armor = armor,
-            ClientTick = clientTick
-        };
+            Debug.Log($"Respawn on cooldown. Time remaining: {respawnCooldown - (Time.time - lastRespawnTime):F1} seconds");
+            return;
+        }
+
+        // Get a random spawn point
+        Vector3 spawnPoint = GetRandomSpawnPoint();
         
-        SendPacket(packet);
-        Debug.Log($"[HEALTH] Sent health update to server: Health={health}, Armor={armor}");
+        // Find the Player child object
+        Transform playerChild = localPlayer.transform.Find("Player");
+        
+            playerChild.position = spawnPoint;
+        
+        // Reset player rotation
+        playerChild.rotation = Quaternion.identity;
+        
+        // Reset camera rotation if needed
+        var camera = playerChild.GetComponentInChildren<Camera>();
+        if (camera != null)
+        {
+            camera.transform.localRotation = Quaternion.identity;
+        }
+
+
+        // Update last respawn time
+        lastRespawnTime = Time.time;
+        Debug.Log($"Player respawned at position: {spawnPoint} with 100 health");
+    }
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
     {
+        // Don't show effects for own shots (already shown locally)
         if (broadcastPacket.ShooterId == localPlayerId) 
         {
             Debug.Log($"Ignoring own shoot broadcast from server");
             return;
         }
         
+        // Show effects for other players' shots
         if (networkPlayers.TryGetValue(broadcastPacket.ShooterId, out NetworkPlayer shooter))
         {
             Vector3 shootDirection = new Vector3(
@@ -577,7 +550,8 @@ public class Client : MonoBehaviour
                 broadcastPacket.Direction.Z
             );
             
-             bool isShotgun = shooter.GetCurrentWeaponType() == WeaponType.Shotgun;
+            // Check if this is a shotgun shot (you'll need to implement GetCurrentWeaponType in NetworkPlayer)
+            bool isShotgun = shooter.GetCurrentWeaponType() == WeaponType.Shotgun;
             
             ShowShootEffectsForPlayer(
                 shooter, 
@@ -595,22 +569,28 @@ public class Client : MonoBehaviour
         }
     }
 
+    // Helper method to find a child transform by name recursively
     private Transform FindChildRecursive(Transform parent, string name)
     {
+        // Check if the current transform has the name we're looking for
         if (parent.name == name)
             return parent;
 
+        // Search through all children
         for (int i = 0; i < parent.childCount; i++)
         {
             Transform child = parent.GetChild(i);
+            // Check if this child has the name
             if (child.name == name)
                 return child;
                 
+            // Recursively search the child's children
             Transform found = FindChildRecursive(child, name);
             if (found != null)
                 return found;
         }
 
+        // If we get here, we didn't find it
         return null;
     }
 
@@ -741,18 +721,21 @@ public class Client : MonoBehaviour
     
     IEnumerator AnimateBulletTracer(TrailRenderer trail, Vector3 start, Vector3 end)
     {
-        float duration = 0.1f;
+        float duration = 0.1f; // Duration of the bullet travel
         float startTime = Time.time;
         
         while (Time.time - startTime < duration)
         {
             float t = (Time.time - startTime) / duration;
+            // Move the trail renderer along the path
             trail.transform.position = Vector3.Lerp(start, end, t);
             yield return null;
         }
         
+        // Ensure the final position is set
         trail.transform.position = end;
         
+        // Wait for the trail to fade out before destroying it
         if (trail != null)
         {
             yield return new WaitForSeconds(trail.time);
