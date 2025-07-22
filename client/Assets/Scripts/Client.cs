@@ -541,13 +541,6 @@ public class Client : MonoBehaviour
                 playerMovement.SetArmorText(100);
             }
             
-            // Also update Playerhealth component if it exists
-            var playerHealth = playerChild.GetComponent<Playerhealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.Heal(1000); // Heal to full
-            }
-            
             lastRespawnTime = Time.time;
             Debug.Log($"Player respawned at position: {spawnPoint} with 100 health and armor");
         }
