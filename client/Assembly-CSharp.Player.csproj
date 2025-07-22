@@ -56,8 +56,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
-    <Analyzer Include="D:\projects\DR\DeathRoom\client\Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.SourceGenerator.dll" />
-    <Analyzer Include="D:\projects\DR\DeathRoom\client\Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="D:\projects\DeathRoom\client\Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.SourceGenerator.dll" />
+    <Analyzer Include="D:\projects\DeathRoom\client\Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.Analyzers.CodeFixes.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.62f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\Network\WorldStatePacket.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\Scripts\Network\PlayerMovePacket.cs" />
+    <Compile Include="Assets\Scripts\Network\PickUpArmorPacket.cs" />
     <Compile Include="Assets\Scripts\NetworkDebugger.cs" />
     <Compile Include="Assets\Scripts\NetworkTestUI.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Assets\Scripts\Network\Vector3Serializable.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexJitter.cs" />
     <Compile Include="Assets\Scripts\Weapons\Rifle.cs" />
+    <Compile Include="Assets\Scripts\Network\PlayerShootBroadcastPacket.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\Scripts\Menu\UILeaderBoard.cs" />
@@ -135,6 +137,7 @@
     <Compile Include="Assets\EffectExamples\Shared\Scripts\ParticleExamples.cs" />
     <Compile Include="Assets\Scripts\Player\FootIK.cs" />
     <Compile Include="Assets\Scripts\MultiplayerManager.cs" />
+    <Compile Include="Assets\Scripts\Network\PickUpHealthPacket.cs" />
     <Compile Include="Assets\Scripts\Weapons\Shootgun.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
   </ItemGroup>
