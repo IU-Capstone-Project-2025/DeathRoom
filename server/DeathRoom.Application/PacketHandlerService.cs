@@ -171,12 +171,10 @@ public class PacketHandlerService
             var shootDir = new DeathRoom.Domain.Vector3(hitPacket.Direction.X, hitPacket.Direction.Y, hitPacket.Direction.Z);
             var targetPos = new DeathRoom.Domain.Vector3(target.Position.X, target.Position.Y, target.Position.Z);
             
-            // Проверяем валидность попадания с помощью физики
             if (_hitPhysicsService.IsHit(shooterPos, shootDir, targetPos))
             {
                 _logger.LogInformation("[HIT] Попадание подтверждено физикой");
                 
-                // Находим живую цель для применения урона
                 var liveTargetPeer = _playerSessionService.GetPeerById(hitPacket.TargetId);
                 if (liveTargetPeer != null && _playerSessionService.TryGetSession(liveTargetPeer, out DomainPlayerState? liveTarget) && liveTarget != null)
                 {
@@ -190,9 +188,8 @@ public class PacketHandlerService
                     
                     if (died)
                     {
-                        // Вместо отключения игрока - восстанавливаем здоровье и броню
                         liveTarget.HealthPoint = liveTarget.MaxHealthPoint;
-                        liveTarget.ArmorPoint = 0; // Броня сбрасывается при смерти
+                        liveTarget.ArmorPoint = 0;
                         _logger.LogInformation("[RESPAWN] Игрок {PlayerName} (ID: {PlayerId}) умер и восстановлен. HP: {HP}, Armor: {Armor}", 
                             liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint);
                     }

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Animations.Rigging;
+using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
     public RectTransform PauseMenu;
     public RectTransform leaderBoard;
+    public TextMeshProUGUI healthText;
+    public TextMeshProUGUI armorText;
     public Client client;
     [Range(1f, 10f)] public float mouseSensitive = 3;
     [Range(-180f, 180f)] public float minCameraRotY = -60f;
@@ -59,7 +62,6 @@ public class PlayerMovement : MonoBehaviour
         radius = controller.radius;
         height = controller.height;
 
-        // Находим RigBuilder компонент
         if (animator != null)
         {
             rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
@@ -89,7 +91,6 @@ public class PlayerMovement : MonoBehaviour
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
         oldRotation = transform.rotation;
         
-        // Initialize the gun's client reference to prevent null reference errors
         if (usingGun != null && client != null)
         {
             usingGun.client = client;
@@ -141,6 +142,24 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void SetArmorText(int armor)
+    {
+        Debug.LogWarning($"[SetArmorText] Setting armor text to: {armor}, armorText component: {(armorText != null ? "found" : "NULL")}");
+        if (armorText != null)
+        {
+            armorText.text = armor.ToString();
+            Debug.LogWarning($"[SetArmorText] Armor text set successfully to: {armorText.text}");
+        }
+        else
+        {
+            Debug.LogError("[SetArmorText] armorText component is NULL!");
+        }
+    }
+
+    public void SetHealthText(int health)
+    {
+        healthText.text = health.ToString();
+    }
 
     public void resume()
     {

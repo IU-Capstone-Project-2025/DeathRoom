@@ -24,7 +24,9 @@ public class PlayerSessionService
             Position = new Vector3(),
             Rotation = new Vector3(),
             HealthPoint = 100,
-            MaxHealthPoint = 100
+            MaxHealthPoint = 100,
+            ArmorPoint = 100,
+            MaxArmorPoint = 100
         };
         _inMemoryPlayers[playerState.Id] = playerState;
         return playerState;
