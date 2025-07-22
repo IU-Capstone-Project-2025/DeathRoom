@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using DeathRoom.Common.dto;
 using MessagePack;
 using DeathRoom.Common.network;
+using DeathRoom.Common.Network;
 
 public class Client : MonoBehaviour
 {
@@ -256,6 +257,15 @@ public class Client : MonoBehaviour
                         player.ApplyAnimationUpdate(animPacket);
                     }
                     break;
+                    
+                case DeathRoom.Common.Network.PlayerDeathPacket deathPacket:
+                    Debug.Log($"Player {deathPacket.PlayerId} died. Killer ID: {deathPacket.KillerId}");
+                    if (deathPacket.PlayerId == localPlayerId)
+                    {
+                        Debug.Log("Local player died. Respawning...");
+                        RespawnPlayer();
+                    }
+                    break;
 
                 case null:
                     Debug.LogError("Unknown packet type - this should not happen after null check above");
@@ -500,25 +510,8 @@ public class Client : MonoBehaviour
         
         // Find the Player child object
         Transform playerChild = localPlayer.transform.Find("Player");
-        if (playerChild == null)
-        {
-            Debug.LogError("Could not find 'Player' child object in localPlayer");
-            return;
-        }
-
-        // Move the Player child object to the spawn point
-        CharacterController controller = playerChild.GetComponent<CharacterController>();
-        if (controller != null)
-        {
-            controller.enabled = false;
-            playerChild.position = spawnPoint;
-            controller.enabled = true;
-        }
-        else
-        {
-            playerChild.position = spawnPoint;
-        }
-        
+        playerChild.position = spawnPoint;
+            
         // Reset player rotation
         playerChild.rotation = Quaternion.identity;
         
@@ -529,12 +522,6 @@ public class Client : MonoBehaviour
             camera.transform.localRotation = Quaternion.identity;
         }
 
-        // Set health to 100
-        var healthComponent = playerChild.GetComponentInChildren<Playerhealth>();
-        if (healthComponent != null)
-        {
-            healthComponent.SetHealthAndArmorFromServer(100, 100, (int)healthComponent.currentArmor, (int)healthComponent.maxArmor);
-        }
 
         // Update last respawn time
         lastRespawnTime = Time.time;

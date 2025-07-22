@@ -13,6 +13,6 @@ namespace DeathRoom.Common.Network
         public long ServerTick { get; set; }
         
         [Key(2)]
-        public int KillerId { get; set; } // Can be -1 if killed by environment
+        public int KillerId { get; set; }
     }
 }
