@@ -207,7 +207,7 @@ public class Client : MonoBehaviour
                     {
                         Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z} - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
                         // Point to decrease hp and armor in ui and handle death
-                        PlayerMovement pm = localPlayer.GetComponent<PlayerMovement>();
+                        PlayerMovement pm = localPlayer.GetComponentInChildren<PlayerMovement>();
                         pm.SetArmorText(ps.ArmorPoint);
                         pm.SetHealthText(ps.HealthPoint);
                         if (ps.Username == playerName && localPlayerId == -1)
