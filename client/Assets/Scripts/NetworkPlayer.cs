@@ -230,11 +230,32 @@ public class NetworkPlayer : MonoBehaviour {
         if (currentState != null) {
             bool isDead = currentState.HealthPoint <= 0;
             Debug.Log($"NetworkPlayer {Username}: Health: {currentState.HealthPoint}, isDead: {isDead}");
+            
+            // Handle player death and respawn
+            if (isDead) {
+                Debug.Log($"NetworkPlayer {Username}: Player died, respawning...");
+                RespawnPlayer();
+            }
         } else {
             Debug.LogWarning($"NetworkPlayer {Username} (ID: {PlayerId}): currentState is null in UpdateAnimation");
         }
     }
     
+    private void RespawnPlayer() {
+        // Set position to spawn point (you'll need to define your spawn point)
+        transform.position = new Vector3(0, 1, 0); // Default spawn point
+        
+        // Reset health to full
+        if (currentState != null) {
+            currentState.HealthPoint = currentState.MaxHealthPoint;
+        }
+        
+        // Reset animation state
+        animator.Play("Idle");
+        
+        Debug.Log($"NetworkPlayer {Username}: Respawning complete");
+    }
+
     void UpdateAnimationInUpdate() {
         if (animator == null) return;
         
