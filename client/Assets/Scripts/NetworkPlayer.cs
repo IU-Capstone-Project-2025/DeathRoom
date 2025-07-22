@@ -2,6 +2,12 @@ using DeathRoom.Common.network;
 using DeathRoom.Common.dto;
 using UnityEngine;
 
+public enum WeaponType
+{
+    Rifle,
+    Shotgun
+}
+
 public class NetworkPlayer : MonoBehaviour {
     [Header("Interpolation Settings")]
     public float interpolationSpeed = 10f;
@@ -35,6 +41,8 @@ public class NetworkPlayer : MonoBehaviour {
     
     public string Username { get; private set; }
     public int PlayerId { get; private set; }
+    
+    private WeaponType currentWeapon = WeaponType.Rifle; // Default to Rifle
     
     void Start() { DisableLocalPlayerComponents();}
     
@@ -307,5 +315,22 @@ public class NetworkPlayer : MonoBehaviour {
 
     void OnDestroy() {
         Debug.Log($"NetworkPlayer destroyed: {Username}");
+    }
+    
+    // Method to get the current weapon type
+    public WeaponType GetCurrentWeaponType()
+    {
+        return currentWeapon;
+    }
+    
+    // Method to set the current weapon type
+    public void SetWeaponType(WeaponType weaponType)
+    {
+        currentWeapon = weaponType;
+        // Optional: Trigger weapon change animation
+        if (animator != null)
+        {
+            animator.SetTrigger("ChangeWeapon");
+        }
     }
 }

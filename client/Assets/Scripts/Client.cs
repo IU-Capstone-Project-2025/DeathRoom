@@ -470,7 +470,6 @@ public class Client : MonoBehaviour
         }
     }
 
-    Vector3 UnityVector3(Vector3 v) => new Vector3(v.x, v.y, v.z);
     Vector3 GetRandomSpawnPoint()
     {
         if (spawnPoints != null && spawnPoints.Length > 0)
@@ -496,8 +495,18 @@ public class Client : MonoBehaviour
                 broadcastPacket.Direction.Z
             );
             
-            ShowShootEffectsForPlayer(shooter, shootDirection, broadcastPacket.ClientTick, broadcastPacket.ServerTick);
-            Debug.Log($"Showing shoot effects for player {broadcastPacket.ShooterId}");
+            // Check if this is a shotgun shot (you'll need to implement GetCurrentWeaponType in NetworkPlayer)
+            bool isShotgun = shooter.GetCurrentWeaponType() == WeaponType.Shotgun;
+            
+            ShowShootEffectsForPlayer(
+                shooter, 
+                shootDirection, 
+                broadcastPacket.ClientTick, 
+                broadcastPacket.ServerTick,
+                isShotgun
+            );
+            
+            Debug.Log($"Showing shoot effects for player {broadcastPacket.ShooterId} (Weapon: {(isShotgun ? "Shotgun" : "Rifle")})");
         }
         else
         {
@@ -505,45 +514,128 @@ public class Client : MonoBehaviour
         }
     }
 
-    void ShowShootEffectsForPlayer(NetworkPlayer shooter, Vector3 direction, long clientTick, long serverTick)
+    // Helper method to find a child transform by name recursively
+    private Transform FindChildRecursive(Transform parent, string name)
+    {
+        // Check if the current transform has the name we're looking for
+        if (parent.name == name)
+            return parent;
+
+        // Search through all children
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            Transform child = parent.GetChild(i);
+            // Check if this child has the name
+            if (child.name == name)
+                return child;
+                
+            // Recursively search the child's children
+            Transform found = FindChildRecursive(child, name);
+            if (found != null)
+                return found;
+        }
+
+        // If we get here, we didn't find it
+        return null;
+    }
+
+    void ShowShootEffectsForPlayer(NetworkPlayer shooter, Vector3 direction, long clientTick, long serverTick, bool isShotgun = false)
     {
         if (shooter == null) return;
         
-        // Get the shooter's weapon (if available) for more accurate effect positioning
-        Transform shootPoint = shooter.transform.Find("ShootOut"); // Adjust this path based on your hierarchy
-        Vector3 shootPosition = shootPoint != null ? shootPoint.position : shooter.transform.position + Vector3.up * 1.7f;
+        // Find the appropriate gun barrel transform based on weapon type
+        Transform shootPoint = null;
+        string weaponType = isShotgun ? "Shotgun" : "Rifle";
+        string shootOutTag = isShotgun ? "ShootOutShotgun" : "ShootOutRifle";
         
-        // Play muzzle flash effect
-        GameObject muzzleFlash = new GameObject("MuzzleFlash");
-        muzzleFlash.transform.position = shootPosition;
-        muzzleFlash.transform.rotation = Quaternion.LookRotation(direction);
+        // Try to find the specific weapon's shoot point first
+        var weaponRoot = FindChildRecursive(shooter.transform, shootOutTag);
+        if (weaponRoot != null)
+        {
+            // Find the actual shoot point (usually a child named "ShootOut")
+            shootPoint = weaponRoot.Find("ShootOut") ?? weaponRoot;
+        }
         
-        // Add light component for muzzle flash
-        Light flashLight = muzzleFlash.AddComponent<Light>();
-        flashLight.color = new Color(1f, 0.7f, 0.3f); // Orange-yellow light
-        flashLight.range = 5f;
-        flashLight.intensity = 3f;
+        // Fallback to any shoot point if specific one not found
+        if (shootPoint == null)
+        {
+            shootPoint = FindChildRecursive(shooter.transform, "ShootOut");
+        }
         
-        // Play shoot sound (you'll need to set up your audio system)
-        // AudioSource.PlayClipAtPoint(shootSound, shootPosition, 0.5f);
+        // Default position if no shoot point found
+        Vector3 shootPosition = shootPoint != null ? shootPoint.position : 
+            shooter.transform.position + shooter.transform.forward * 0.5f + Vector3.up * 1.7f;
         
-        // Create bullet tracer
-        CreateBulletTracer(shootPosition, direction);
+        // Create muzzle flash effect with weapon-specific settings
+        CreateMuzzleFlash(shootPosition, direction, isShotgun);
         
-        // Destroy the muzzle flash after a short delay
-        Destroy(muzzleFlash, 0.05f);
+        // Create bullet tracers with weapon-specific patterns
+        if (isShotgun)
+        {
+            // Shotgun spread pattern (5 pellets in a spread)
+            for (int i = 0; i < 5; i++)
+            {
+                // Calculate spread direction (slight random spread for shotgun)
+                Vector3 spreadDirection = direction + UnityEngine.Random.insideUnitSphere * 0.1f;
+                spreadDirection.Normalize();
+                CreateBulletTracer(shootPosition, spreadDirection);
+            }
+        }
+        else
+        {
+            // Single bullet for rifle
+            CreateBulletTracer(shootPosition, direction);
+        }
         
         // Optional: Add screen shake if the shot is close to the local player
         if (localPlayer != null)
         {
             float distance = Vector3.Distance(shootPosition, localPlayer.transform.position);
-            if (distance < 10f)
+            float shakeDistance = isShotgun ? 15f : 10f; // Shotgun has more range for screen shake
+            if (distance < shakeDistance)
             {
-                // Add screen shake effect here if you have one
-                // CameraShake.Instance.Shake(0.1f, 0.1f * (1f - distance/10f));
+                float intensity = isShotgun ? 0.15f : 0.1f; // More intense for shotgun
+                // CameraShake.Instance?.Shake(intensity, intensity * (1f - distance/shakeDistance));
             }
         }
     }
+    
+    void CreateMuzzleFlash(Vector3 position, Vector3 direction, bool isShotgun)
+    {
+        // Create muzzle flash effect
+        GameObject muzzleFlash = new GameObject("MuzzleFlash");
+        muzzleFlash.transform.position = position;
+        muzzleFlash.transform.rotation = Quaternion.LookRotation(direction);
+        
+        // Add light component for muzzle flash with weapon-specific settings
+        Light flashLight = muzzleFlash.AddComponent<Light>();
+        
+        if (isShotgun)
+        {
+            // Shotgun muzzle flash (wider, more intense)
+            flashLight.color = new Color(1f, 0.8f, 0.4f); // Brighter, more white
+            flashLight.range = 8f;
+            flashLight.intensity = 5f;
+            flashLight.shadowStrength = 0.8f;
+            
+            // Play shotgun sound (uncomment when audio is set up)
+            // AudioSource.PlayClipAtPoint(shotgunSound, position, 0.7f);
+        }
+        else
+        {
+            // Rifle muzzle flash
+            flashLight.color = new Color(1f, 0.7f, 0.3f); // Orange-yellow
+            flashLight.range = 5f;
+            flashLight.intensity = 3f;
+            
+            // Play rifle sound (uncomment when audio is set up)
+            // AudioSource.PlayClipAtPoint(rifleSound, position, 0.5f);
+        }
+        
+        // Destroy the muzzle flash after a short delay
+        Destroy(muzzleFlash, 0.05f);
+    }
+    
 
     void CreateBulletTracer(Vector3 origin, Vector3 direction)
     {
