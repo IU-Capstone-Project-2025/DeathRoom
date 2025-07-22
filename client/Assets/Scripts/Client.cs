@@ -498,11 +498,11 @@ public class Client : MonoBehaviour
             }
             else
             {
-                localPlayer.transform.position = spawnPoint;
+                localPlayer.transform.Find("Player").position = spawnPoint;
             }
             
             // Reset player rotation
-            localPlayer.transform.rotation = Quaternion.identity;
+            localPlayer.transform.Find("Player").rotation = Quaternion.identity;
             
             // Reset camera rotation if needed
             var camera = localPlayer.GetComponentInChildren<Camera>();
