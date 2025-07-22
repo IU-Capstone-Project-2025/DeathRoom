@@ -1,4 +1,5 @@
 using MessagePack;
+using DeathRoom.Common.network;
 
 namespace DeathRoom.Common.Network
 {
