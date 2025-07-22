@@ -27,7 +27,6 @@ public class NetworkPlayer : MonoBehaviour {
     private UnityEngine.Animations.Rigging.RigBuilder rigBuilder;
     private float lastUpdateTime;
     
-    // Animation smoothing variables
     private float lastAnimationUpdateTime;
     private Vector3 smoothedVelocity;
     private Vector3 velocitySmoothing;
@@ -72,10 +71,9 @@ public class NetworkPlayer : MonoBehaviour {
             playerState.Rotation.Z
         );
         
-        // Validate position data
         if (float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsNaN(pos.z)) {
             Debug.LogError($"NetworkPlayer {Username} (ID: {PlayerId}) received invalid initial position: {pos}");
-            pos = Vector3.zero; // Fallback to origin
+            pos = Vector3.zero;
         }
         
         transform.position = pos;
@@ -91,7 +89,6 @@ public class NetworkPlayer : MonoBehaviour {
         smoothedVelocity = Vector3.zero;
         wasMovingLastFrame = false;
         
-        // Находим RigBuilder компонент
         if (animator != null)
         {
             rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
@@ -136,7 +133,6 @@ public class NetworkPlayer : MonoBehaviour {
             lastUpdateTime = Time.time;
         }
         
-        // Update health and armor from server
         var healthComponent = GetComponent<Playerhealth>();
         if (healthComponent != null)
         {
@@ -148,7 +144,6 @@ public class NetworkPlayer : MonoBehaviour {
             );
         }
         
-        // Only update animation at limited rate to prevent jerkiness
         if (Time.time - lastAnimationUpdateTime >= 1f / animationUpdateRate) {
             UpdateAnimation();
             lastAnimationUpdateTime = Time.time;
@@ -263,12 +258,10 @@ public class NetworkPlayer : MonoBehaviour {
             animator.SetFloat("MoveX", Mathf.Lerp(currentMoveX, targetMoveX, Time.deltaTime * 8f));
             animator.SetFloat("MoveZ", Mathf.Lerp(currentMoveZ, targetMoveZ, Time.deltaTime * 8f));
             
-            // Sprint only if moving fast enough
             bool shouldSprint = smoothedVelocity.magnitude > 3f;
             animator.SetBool("Sprint", shouldSprint);
         }
         
-        // Only reset other animation states when transitioning from moving to idle
         if (wasMovingLastFrame && !currentlyMoving) {
             animator.SetFloat("TurnValue", 0f);
             animator.SetFloat("ShootType", 0f);
