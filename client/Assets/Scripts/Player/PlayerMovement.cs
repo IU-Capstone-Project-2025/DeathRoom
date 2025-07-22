@@ -156,10 +156,10 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void SetHealthText(int health)
+    public void SetHealthText(int arg)
     {
-        healthText.text = health.ToString();
-        if (int.Parse(healthText.text) <= 0)
+        healthText.text = arg.ToString();
+        if (arg <= 0)
         {
             if (client != null)
             {
