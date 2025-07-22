@@ -43,9 +43,9 @@ public class GameServer : INetEventListener
         {
             field.SetValue(_gameLoopService, (Func<DeathRoom.Domain.WorldState, Task>)(ws =>
             {
-                var packet = new DeathRoom.Common.Network.WorldStatePacket
+                var playerStates = ws.PlayerStates.Select(p => 
                 {
-                    PlayerStates = ws.PlayerStates.Select(p => new DeathRoom.Common.Dto.PlayerState
+                    var state = new DeathRoom.Common.Dto.PlayerState
                     {
                         Id = p.Id,
                         Username = p.Username,
@@ -56,7 +56,15 @@ public class GameServer : INetEventListener
                         ArmorPoint = p.ArmorPoint,
                         MaxArmorPoint = p.MaxArmorPoint,
                         ArmorExpirationTick = p.ArmorExpirationTick
-                    }).ToList(),
+                    };
+                    
+                    _logger.LogInformation($"[SERVER] Sending player {p.Username} (ID: {p.Id}) - Armor: {p.ArmorPoint}/{p.MaxArmorPoint}");
+                    return state;
+                }).ToList();
+                
+                var packet = new DeathRoom.Common.Network.WorldStatePacket
+                {
+                    PlayerStates = playerStates,
                     ServerTick = ws.ServerTick
                 };
                 var data = MessagePack.MessagePackSerializer.Serialize<DeathRoom.Common.Network.IPacket>(packet);

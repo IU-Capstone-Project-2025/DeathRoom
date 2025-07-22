@@ -29,6 +29,9 @@ public class PlayerSessionService
             MaxArmorPoint = 100
         };
         _inMemoryPlayers[playerState.Id] = playerState;
+        
+        Console.WriteLine($"[SERVER] RegisterPlayer: Created player {username} (ID: {playerState.Id}) with ArmorPoint={playerState.ArmorPoint}, MaxArmorPoint={playerState.MaxArmorPoint}");
+        
         return playerState;
     }
 
