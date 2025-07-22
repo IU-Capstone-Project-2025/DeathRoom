@@ -146,9 +146,16 @@ public class Client : MonoBehaviour
         }
     }
 
+    IEnumerator DelayedRespawn()
+    {
+        // Small delay to ensure death state is processed
+        yield return new WaitForSeconds(0.1f);
+        RespawnPlayer();
+    }
+    
     void OnDestroy()
     {
-        netManager?.Stop();
+        Disconnect();
     }
 
     void OnApplicationPause(bool pauseStatus)
@@ -265,8 +272,8 @@ public class Client : MonoBehaviour
                     {
                         Debug.Log("Local player died. Respawning...");
                         isDead = true;
-                        hasRespawned = false; // Reset the respawn flag when player dies
-                        RespawnPlayer();
+                        // Start coroutine to delay respawn slightly to ensure death state is processed
+                        StartCoroutine(DelayedRespawn());
                     }
                     break;
                     
@@ -516,14 +523,9 @@ public class Client : MonoBehaviour
         return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].position;
     }
 
-    private bool hasRespawned = false;
-    
     public void RespawnPlayer()
     {
-        if (hasRespawned) return; // Prevent multiple respawns
-        
         isDead = false;
-        hasRespawned = true; // Mark that we've respawned
         
         Vector3 spawnPoint = GetRandomSpawnPoint();
         Transform playerTransform = localPlayer.transform.Find("Player");
@@ -587,11 +589,13 @@ public class Client : MonoBehaviour
                 ClientTick = GetCurrentClientTick()
             };
             SendPacket(movePacket);
+            
+            // Return true to indicate successful respawn
+            return true;
         }
-        else
-        {
-            Debug.LogError("Failed to find Player child transform for respawn");
-        }
+        
+        Debug.LogError("Failed to find Player child transform for respawn");
+        return false;
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
