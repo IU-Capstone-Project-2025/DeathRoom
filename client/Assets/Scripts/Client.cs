@@ -589,13 +589,7 @@ public class Client : MonoBehaviour
                 ClientTick = GetCurrentClientTick()
             };
             SendPacket(movePacket);
-            
-            // Return true to indicate successful respawn
-            return true;
         }
-        
-        Debug.LogError("Failed to find Player child transform for respawn");
-        return false;
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
