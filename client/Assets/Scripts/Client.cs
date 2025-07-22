@@ -277,9 +277,9 @@ public class Client : MonoBehaviour
                         {
                             healthComponent.SetHealthAndArmorFromServer(
                                 healthUpdate.Health,
-                                healthComponent.maxHealth,
+                                (int)healthComponent.maxHealth,
                                 healthUpdate.Armor,
-                                healthComponent.maxArmor
+                                (int)healthComponent.maxArmor
                             );
                             Debug.Log($"[HEALTH UPDATE] Received health update: {healthUpdate.Health} HP, {healthUpdate.Armor} Armor");
                         }
