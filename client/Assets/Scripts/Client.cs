@@ -265,6 +265,7 @@ public class Client : MonoBehaviour
                     {
                         Debug.Log("Local player died. Respawning...");
                         isDead = true;
+                        hasRespawned = false; // Reset the respawn flag when player dies
                         RespawnPlayer();
                     }
                     break;
@@ -505,15 +506,21 @@ public class Client : MonoBehaviour
         return spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)].position;
     }
 
+    private bool hasRespawned = false;
+    
     public void RespawnPlayer()
     {
+        if (hasRespawned) return; // Prevent multiple respawns
+        
         isDead = false;
+        hasRespawned = true; // Mark that we've respawned
+        
         Vector3 spawnPoint = GetRandomSpawnPoint();
         Transform playerTransform = localPlayer.transform.Find("Player");
         
         if (playerTransform != null)
         {
-            // Reset position and rotation
+            // Reset position and rotation only once
             playerTransform.position = spawnPoint;
             playerTransform.rotation = Quaternion.identity;
             
