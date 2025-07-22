@@ -276,12 +276,22 @@ public class Client : MonoBehaviour
                         var healthComponent = localPlayer.GetComponentInChildren<Playerhealth>();
                         if (healthComponent != null)
                         {
+                            // Update health and armor values
                             healthComponent.SetHealthAndArmorFromServer(
                                 healthUpdate.Health,
                                 (int)healthComponent.maxHealth,
                                 healthUpdate.Armor,
                                 (int)healthComponent.maxArmor
                             );
+                            
+                            // Update UI elements
+                            var playerMovement = localPlayer.GetComponentInChildren<PlayerMovement>();
+                            if (playerMovement != null)
+                            {
+                                playerMovement.SetHealthText(healthUpdate.Health);
+                                playerMovement.SetArmorText(healthUpdate.Armor);
+                            }
+                            
                             Debug.Log($"[HEALTH UPDATE] Received health update: {healthUpdate.Health} HP, {healthUpdate.Armor} Armor");
                         }
                     }
@@ -539,6 +549,24 @@ public class Client : MonoBehaviour
             {
                 rb.velocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
+            }
+            
+            // Restore health and armor to 100
+            var healthComponent = playerTransform.GetComponentInChildren<Playerhealth>();
+            if (healthComponent != null)
+            {
+                // Update health and armor values
+                healthComponent.SetHealthAndArmorFromServer(100, 100, 100, 100);
+                
+                // Update UI directly
+                var playerMovement = playerTransform.GetComponent<PlayerMovement>();
+                if (playerMovement != null)
+                {
+                    playerMovement.SetHealthText(100);
+                    playerMovement.SetArmorText(100);
+                }
+                
+                Debug.Log("Health and armor restored to 100");
             }
             
             // Reset animator state if it exists
