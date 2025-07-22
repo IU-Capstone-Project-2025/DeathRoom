@@ -140,4 +140,13 @@ public class Playerhealth : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
             TakeDamage(10);
     }
+    
+    public void ResetHealthAndArmor()
+    {
+        currentHealth = maxHealth;
+        currentArmor = maxArmor;
+        UpdateHealthUI();
+        UpdateArmorUI();
+        Debug.Log($"[RESPAWN] Health and armor reset to {currentHealth}/{maxHealth} HP and {currentArmor}/{maxArmor} armor");
+    }
 }
