@@ -450,12 +450,11 @@ public class Client : MonoBehaviour
                 
                 if (hitPlayer.PlayerId != localPlayerId)
                 {
-                    // 3. Send hit packet with SAME tick and direction
                     var hitPacket = new PlayerHitPacket
                     {
                         TargetId = hitPlayer.PlayerId,
-                        ClientTick = shootTick,  // Same tick!
-                        Direction = new Vector3Serializable(direction)  // Same direction!
+                        ClientTick = shootTick,
+                        Direction = new Vector3Serializable(direction)
                     };
                     SendPacket(hitPacket);
                     
@@ -475,8 +474,6 @@ public class Client : MonoBehaviour
         {
             Debug.Log("[SHOOT] No hit detected - raycast missed");
         }
-        
-        // 4. Show local effects immediately (muzzle flash, sound, etc.)
         ShowLocalShootEffects(origin, direction);
     }
 
@@ -487,8 +484,6 @@ public class Client : MonoBehaviour
 
     void ShowLocalShootEffects(Vector3 origin, Vector3 direction)
     {
-        // Implement local visual/audio effects here
-        // This gives immediate feedback while waiting for server validation
         Debug.Log($"Showing local shoot effects from {origin} in direction {direction}");
     }
 
@@ -520,7 +515,6 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        // Проверяем, не превышено ли максимальное количество респавнов
         if (respawnCount >= MAX_RESPAWNS)
         {
             Debug.Log("Превышено максимальное количество респавнов");
@@ -532,11 +526,9 @@ public class Client : MonoBehaviour
             Vector3 spawnPoint = GetRandomSpawnPoint();
             Transform playerTransform = localPlayer.transform.Find("Player");
             
-            // Обновляем позицию и поворот
             playerTransform.position = spawnPoint;
             playerTransform.rotation = Quaternion.identity;
             
-            // Обновляем здоровье и броню
             var playerMovement = playerTransform.GetComponent<PlayerMovement>();
             if (playerMovement != null)
             {
@@ -544,7 +536,6 @@ public class Client : MonoBehaviour
                 playerMovement.SetArmorText(100);
             }
             
-            // Отправляем пакет о перемещении
             var movePacket = new PlayerMovePacket
             {
                 Position = new Vector3Serializable(spawnPoint),
@@ -553,7 +544,6 @@ public class Client : MonoBehaviour
             };
             SendPacket(movePacket);
             
-            // Увеличиваем счетчик респавнов
             respawnCount++;
             Debug.Log($"Игрок респавнется. Количество оставшихся респавнов: {MAX_RESPAWNS - respawnCount}");
         }
@@ -565,14 +555,12 @@ public class Client : MonoBehaviour
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
     {
-        // Don't show effects for own shots (already shown locally)
         if (broadcastPacket.ShooterId == localPlayerId) 
         {
             Debug.Log($"Ignoring own shoot broadcast from server");
             return;
         }
         
-        // Show effects for other players' shots
         if (networkPlayers.TryGetValue(broadcastPacket.ShooterId, out NetworkPlayer shooter))
         {
             Vector3 shootDirection = new Vector3(
