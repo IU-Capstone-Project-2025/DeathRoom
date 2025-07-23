@@ -510,12 +510,9 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        netClient.Stop();
-        Vector3 spawnPoint = GetRandomSpawnPoint();
-        Transform playerTransform = localPlayer.transform.Find("Player");
-        playerTransform.position = spawnPoint;
-        playerTransform.rotation = Quaternion.identity;
-        Debug.Log($"[HEALTH UPDATE] Sent respawn health update: {100} HP, {100} Armor");
+        Destroy(localPlayer);
+        localPlayer = null;
+        SpawnLocalPlayer();
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
