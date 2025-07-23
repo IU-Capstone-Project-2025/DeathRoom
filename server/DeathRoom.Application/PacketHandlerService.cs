@@ -234,17 +234,29 @@ public class PacketHandlerService
     
     private void OnPlayerDeath(Domain.PlayerState deadPlayer, int killerId)
     {
-        _logger.LogInformation("[DEATH] Player {PlayerName} (ID: {PlayerId}) was killed by {KillerId}", 
-            deadPlayer.Username, deadPlayer.Id, killerId);
+        var currentTick = _getCurrentTick();
+        _logger.LogInformation("[DEATH] Player {PlayerName} (ID: {PlayerId}) was killed by {KillerId} at tick {Tick}", 
+            deadPlayer.Username, deadPlayer.Id, killerId, currentTick);
             
         var deathPacket = new PlayerDeathPacket
         {
             PlayerId = deadPlayer.Id,
-            ServerTick = _getCurrentTick(),
+            ServerTick = currentTick,
             KillerId = killerId
         };
         
-        // Broadcast death event to all clients
-        _ = BroadcastPacketToAllClients(deathPacket);
+        _logger.LogInformation("[DEATH] Sending PlayerDeathPacket - Player: {PlayerId}, Killer: {KillerId}, Tick: {Tick}",
+            deathPacket.PlayerId, deathPacket.KillerId, deathPacket.ServerTick);
+            
+        try
+        {
+            // Broadcast death event to all clients
+            _ = BroadcastPacketToAllClients(deathPacket);
+            _logger.LogInformation("[DEATH] Successfully broadcasted death packet for player {PlayerId}", deadPlayer.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[DEATH] Failed to broadcast death packet for player {PlayerId}", deadPlayer.Id);
+        }
     }
 } 
