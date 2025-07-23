@@ -158,10 +158,6 @@ public class Client : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
             RespawnPlayer();
         }
-        finally
-        {
-            isRespawning = false;
-        }
     }
     
     void OnDestroy()
@@ -602,7 +598,6 @@ public class Client : MonoBehaviour
         catch (Exception e)
         {
             Debug.LogError($"Error during respawn: {e}");
-            isRespawning = false; // Ensure flag is reset even if error occurs
         }
     }
 
