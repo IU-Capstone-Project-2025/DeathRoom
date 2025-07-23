@@ -87,23 +87,9 @@ public class GameServer : INetEventListener
                 var data = MessagePack.MessagePackSerializer.Serialize<DeathRoom.Common.Network.IPacket>(packet);
                 _netManager.SendToAll(data, LiteNetLib.DeliveryMethod.ReliableUnordered);
                 
-                _logger.LogDebug("[NETWORK] Successfully sent {PacketType} packet ({DataSize} bytes)", 
+                _logger.LogInformation("[NETWORK] Successfully sent {PacketType} packet ({DataSize} bytes)", 
                     packet.GetType().Name, data.Length);
                 
-                return Task.CompletedTask;
-            }));
-        }
-
-        // Внедряю реальный делегат для рассылки пакетов через PacketHandlerService
-        var packetHandlerType2 = _packetHandlerService.GetType();
-        var broadcastField2 = packetHandlerType2.GetField("_broadcastPacket",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (broadcastField2 != null)
-        {
-            broadcastField2.SetValue(_packetHandlerService, (Func<DeathRoom.Common.Network.IPacket, Task>)(packet =>
-            {
-                var data = MessagePack.MessagePackSerializer.Serialize<DeathRoom.Common.Network.IPacket>(packet);
-                _netManager.SendToAll(data, LiteNetLib.DeliveryMethod.ReliableUnordered);
                 return Task.CompletedTask;
             }));
         }
