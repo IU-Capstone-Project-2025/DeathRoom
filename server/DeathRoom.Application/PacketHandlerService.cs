@@ -232,21 +232,20 @@ public class PacketHandlerService
         await _broadcastPacket(packet);
     }
     
-    private void OnPlayerDeath(Domain.PlayerState deadPlayer, int killerId)
+    private void OnPlayerDeath(Domain.PlayerState deadPlayer)
     {
         var currentTick = _getCurrentTick();
-        _logger.LogInformation("[DEATH] Player {PlayerName} (ID: {PlayerId}) was killed by {KillerId} at tick {Tick}", 
-            deadPlayer.Username, deadPlayer.Id, killerId, currentTick);
+        _logger.LogInformation("[DEATH] Player {PlayerName} (ID: {PlayerId}) died at tick {Tick}", 
+            deadPlayer.Username, deadPlayer.Id, currentTick);
             
         var deathPacket = new PlayerDeathPacket
         {
             PlayerId = deadPlayer.Id,
-            ServerTick = currentTick,
-            KillerId = killerId
+            ServerTick = currentTick
         };
         
-        _logger.LogInformation("[DEATH] Sending PlayerDeathPacket - Player: {PlayerId}, Killer: {KillerId}, Tick: {Tick}",
-            deathPacket.PlayerId, deathPacket.KillerId, deathPacket.ServerTick);
+        _logger.LogInformation("[DEATH] Sending PlayerDeathPacket - Player: {PlayerId}, Tick: {Tick}",
+            deathPacket.PlayerId, deathPacket.ServerTick);
             
         try
         {
