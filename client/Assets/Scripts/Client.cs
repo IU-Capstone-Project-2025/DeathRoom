@@ -283,7 +283,7 @@ public class Client : MonoBehaviour
                             var playerMovement = localPlayer.GetComponentInChildren<PlayerMovement>();
                             playerMovement.SetHealthText(healthUpdate.Health);
                             playerMovement.SetArmorText(healthUpdate.Armor);
-                            if (healthUpdate.health <= 25)
+                            if (healthUpdate.Health <= 25)
                             {
                                 RespawnPlayer();
                             }
