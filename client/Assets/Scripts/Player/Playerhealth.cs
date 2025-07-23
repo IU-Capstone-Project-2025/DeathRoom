@@ -11,7 +11,6 @@ public class Playerhealth : MonoBehaviour
     [SerializeField] public float maxArmor = 100f;
     [SerializeField] public float currentArmor = 100f;
     [SerializeField] private float armorDamageReduction = 0.5f;
-    [SerializeField] private Slider healthBarSlider;
     [SerializeField] private TextMeshProUGUI healthText;
     [SerializeField] private TextMeshProUGUI ArmorText;
 
@@ -118,9 +117,6 @@ public class Playerhealth : MonoBehaviour
 
     private void UpdateHealthUI()
     {
-        if (healthBarSlider != null)
-            healthBarSlider.value = currentHealth / maxHealth;
-
         if (healthText != null)
             healthText.text = $"{currentHealth} / {maxHealth}";
     }

@@ -1142,6 +1142,7 @@ GameObject:
   - component: {fileID: 860462250097851269}
   - component: {fileID: 1917068965964324005}
   - component: {fileID: 2773936159155755854}
+  - component: {fileID: 419790786697728320}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -1267,6 +1268,25 @@ MonoBehaviour:
   spawnPoints: []
   localPlayer: {fileID: 0}
   isConnected: 0
+--- !u!114 &419790786697728320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2451112007903609645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d24d42a59f9321e4a9f61196be6bbaf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  currentHealth: 100
+  maxArmor: 100
+  currentArmor: 100
+  armorDamageReduction: 0.5
+  healthText: {fileID: 3213235135900375332}
+  ArmorText: {fileID: 4187472176633812462}
 --- !u!1 &2625019308077774962
 GameObject:
   m_ObjectHideFlags: 0

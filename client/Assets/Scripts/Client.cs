@@ -211,14 +211,7 @@ public class Client : MonoBehaviour
                     {
                         Debug.Log($"Player in packet: {ps.Username} (ID: {ps.Id}) at position {ps.Position.X}, {ps.Position.Y}, {ps.Position.Z} - Health: {ps.HealthPoint}/{ps.MaxHealthPoint}, Armor: {ps.ArmorPoint}/{ps.MaxArmorPoint}");
                         Debug.LogWarning($"[ARMOR DEBUG] Player {ps.Username} armor values: ArmorPoint={ps.ArmorPoint}, MaxArmorPoint={ps.MaxArmorPoint}");
-                        
-                        if (ps.Id == localPlayerId || (localPlayerId == -1 && ps.Username == playerName))
-                        {
-                            PlayerMovement pm = localPlayer.GetComponentInChildren<PlayerMovement>();
-                            Debug.LogWarning($"[UI UPDATE] Setting armor text to: {ps.ArmorPoint} for local player {ps.Username}");
-                            pm.SetArmorText(ps.ArmorPoint);
-                            pm.SetHealthText(ps.HealthPoint);
-                        }
+                        //point
                         if (ps.Username == playerName && localPlayerId == -1)
                         {
                             localPlayerId = ps.Id;
@@ -278,15 +271,6 @@ public class Client : MonoBehaviour
                                 healthUpdate.Armor,
                                 (int)healthComponent.maxArmor
                             );
-                            
-                            // Update UI elements
-                            var playerMovement = localPlayer.GetComponentInChildren<PlayerMovement>();
-                            playerMovement.SetHealthText(healthUpdate.Health);
-                            playerMovement.SetArmorText(healthUpdate.Armor);
-                            if (healthUpdate.Health <= 25)
-                            {
-                                RespawnPlayer();
-                            }
                             
                             Debug.Log($"[HEALTH UPDATE] Received health update: {healthUpdate.Health} HP, {healthUpdate.Armor} Armor");
                         }
@@ -521,10 +505,6 @@ public class Client : MonoBehaviour
         playerTransform.position = spawnPoint;
         playerTransform.rotation = Quaternion.identity;
             
-        var playerMovement = playerTransform.GetComponent<PlayerMovement>();
-        playerMovement.SetHealthText(100);
-        playerMovement.SetArmorText(100);
-        
         var movePacket = new PlayerMovePacket
         {
             Position = new Vector3Serializable(spawnPoint),
