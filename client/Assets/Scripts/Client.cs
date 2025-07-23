@@ -510,37 +510,11 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        if (respawnCount >= MAX_RESPAWNS)
-        {
-            Debug.Log("Превышено максимальное количество респавнов");
-            return;
-        }
-        
         Vector3 spawnPoint = GetRandomSpawnPoint();
         Transform playerTransform = localPlayer.transform.Find("Player");
-        
         playerTransform.position = spawnPoint;
         playerTransform.rotation = Quaternion.identity;
-            
-        var movePacket = new PlayerMovePacket
-        {
-            Position = new Vector3Serializable(spawnPoint),
-            Rotation = new Vector3Serializable(playerTransform.eulerAngles),
-            ClientTick = GetCurrentClientTick()
-        };
-        SendPacket(movePacket);
-        
-        var healthUpdatePacket = new PlayerHealthUpdatePacket
-        {
-            Health = 100,
-            Armor = 100,
-            ClientTick = GetCurrentClientTick()
-        };
-        SendPacket(healthUpdatePacket);
         Debug.Log($"[HEALTH UPDATE] Sent respawn health update: {100} HP, {100} Armor");
-            
-        respawnCount++;
-        Debug.Log($"Игрок респавнется. Количество оставшихся респавнов: {MAX_RESPAWNS - respawnCount}");
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
