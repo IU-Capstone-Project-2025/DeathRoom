@@ -250,7 +250,7 @@ public class Client : MonoBehaviour
                     break;
                     
                 case PlayerDeathPacket deathPacket:
-                    Debug.Log($"[CLIENT] Received PlayerDeathPacket - Player: {deathPacket.PlayerId}, Killer: {deathPacket.KillerId}, ServerTick: {deathPacket.ServerTick}");
+                    Debug.Log($"[CLIENT] Received PlayerDeathPacket - Player: {deathPacket.PlayerId}, ServerTick: {deathPacket.ServerTick}");
                     
                     // Log network players state for debugging
                     Debug.Log($"[CLIENT] Current local player ID: {localPlayerId}, Network players count: {networkPlayers.Count}");
