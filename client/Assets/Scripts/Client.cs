@@ -538,39 +538,8 @@ public class Client : MonoBehaviour
     {
             Vector3 spawnPoint = GetRandomSpawnPoint();
             Transform playerTransform = localPlayer.transform.Find("Player");
-            
-            if (playerTransform == null)
-            {
-                Debug.LogError("Player transform not found for respawn");
-                return;
-            }
-            
-            // Disable character controller before moving
-            var characterController = playerTransform.GetComponent<CharacterController>();
-            if (characterController != null)
-            {
-                characterController.enabled = false;
-            }
-            
-            // Set position and rotation
             playerTransform.position = spawnPoint;
             playerTransform.rotation = Quaternion.identity;
-            
-            // Reset rigidbody if it exists
-            var rb = playerTransform.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.velocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-            
-            // Re-enable character controller after moving
-            if (characterController != null)
-            {
-                characterController.enabled = true;
-            }
-            
-            // Update health and UI
             var playerMovement = playerTransform.GetComponent<PlayerMovement>();
             if (playerMovement != null)
             {
@@ -578,17 +547,8 @@ public class Client : MonoBehaviour
                 playerMovement.SetArmorText(100);
             }
             
-            // Reset animator
-            var animator = playerTransform.GetComponent<Animator>();
-            if (animator != null)
-            {
-                animator.Rebind();
-                animator.Update(0f);
-            }
-            
             Debug.Log($"Player respawned at position: {spawnPoint}");
             
-            // Notify server about respawn with new position
             var movePacket = new PlayerMovePacket
             {
                 Position = new Vector3Serializable(spawnPoint),
@@ -596,8 +556,6 @@ public class Client : MonoBehaviour
                 ClientTick = GetCurrentClientTick()
             };
             SendPacket(movePacket);
-        isDead = false;
-        isRespawning = false;
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
