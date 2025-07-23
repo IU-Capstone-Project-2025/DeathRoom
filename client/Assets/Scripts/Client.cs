@@ -510,7 +510,7 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        Disconnect();
+        netClient.Stop();
         Vector3 spawnPoint = GetRandomSpawnPoint();
         Transform playerTransform = localPlayer.transform.Find("Player");
         playerTransform.position = spawnPoint;
