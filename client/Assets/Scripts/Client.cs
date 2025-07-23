@@ -520,9 +520,9 @@ public class Client : MonoBehaviour
         playerTransform.position = spawnPoint;
         playerTransform.rotation = Quaternion.identity;
             
-        var playerMovement = playerTransform.GetComponent<PlayerMovement>();
-        playerMovement.SetHealthText(100);
-        playerMovement.SetArmorText(100);
+        // var playerMovement = playerTransform.GetComponent<PlayerMovement>();
+        // playerMovement.SetHealthText(100);
+        // playerMovement.SetArmorText(100);
             
         var movePacket = new PlayerMovePacket
         {
