@@ -86,6 +86,10 @@ public class PacketHandlerService
                 HandlePickUpHealthPacket(peer, pickHealthPacket);
                 break;
                 
+            case PlayerDeathPacket deathPacket:
+                await HandlePlayerDeathPacket(peer, deathPacket);
+                break;
+                
             default:
                 await (_onUnknownPacket?.Invoke(peer.ToString(), packet.GetType().Name) ?? Task.CompletedTask);
                 break;
@@ -219,11 +223,22 @@ public class PacketHandlerService
 
     private void HandlePickUpHealthPacket(object peer, PickUpHealthPacket pickHealthPacket)
     {
-        if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? playerState) && playerState != null)
+        if (_playerSessionService.TryGetSession(peer, out var playerState) && playerState != null)
         {
             _hitRegistrationService.HealPlayer(playerState, pickHealthPacket.HealthAmount);
             _logger.LogInformation("[PICKUP] Игрок {PlayerName} (ID: {PlayerId}) подобрал аптечку: +{HealthAmount} HP", 
                 playerState.Username, playerState.Id, pickHealthPacket.HealthAmount);
+        }
+    }
+    
+    private async Task HandlePlayerDeathPacket(object peer, PlayerDeathPacket deathPacket)
+    {
+        _logger.LogInformation($"[DEATH] Player {deathPacket.PlayerId} has died at tick {deathPacket.ServerTick}");
+        
+        // Broadcast the death packet to all clients
+        if (_broadcastPacket != null)
+        {
+            await _broadcastPacket(deathPacket);
         }
     }
 
