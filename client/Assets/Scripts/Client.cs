@@ -281,10 +281,11 @@ public class Client : MonoBehaviour
                             
                             // Update UI elements
                             var playerMovement = localPlayer.GetComponentInChildren<PlayerMovement>();
-                            if (playerMovement != null)
+                            playerMovement.SetHealthText(healthUpdate.Health);
+                            playerMovement.SetArmorText(healthUpdate.Armor);
+                            if (healthUpdate.health <= 25)
                             {
-                                playerMovement.SetHealthText(healthUpdate.Health);
-                                playerMovement.SetArmorText(healthUpdate.Armor);
+                                RespawnPlayer();
                             }
                             
                             Debug.Log($"[HEALTH UPDATE] Received health update: {healthUpdate.Health} HP, {healthUpdate.Armor} Armor");
