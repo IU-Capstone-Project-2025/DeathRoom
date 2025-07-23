@@ -536,8 +536,6 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
-        try
-        {
             Vector3 spawnPoint = GetRandomSpawnPoint();
             Transform playerTransform = localPlayer.transform.Find("Player");
             
@@ -598,14 +596,8 @@ public class Client : MonoBehaviour
                 ClientTick = GetCurrentClientTick()
             };
             SendPacket(movePacket);
-        }
         isDead = false;
         isRespawning = false;
-        catch (Exception e)
-        {
-            Debug.LogError($"Error during respawn: {e}");
-            isRespawning = false; // Ensure flag is reset even if error occurs
-        }
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
