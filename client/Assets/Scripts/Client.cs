@@ -46,6 +46,7 @@ public class Client : MonoBehaviour
     private long lastServerTick = 0;
     private int localPlayerId = -1;
     private bool isDead = false; // Флаг, что игрок мертв
+    private bool isRespawning = false; // Флаг, что идет процесс респавна
     
     // Client tick synchronization
     private long clientTick = 0;
@@ -148,9 +149,19 @@ public class Client : MonoBehaviour
 
     IEnumerator DelayedRespawn()
     {
-        // Small delay to ensure death state is processed
-        yield return new WaitForSeconds(0.1f);
-        RespawnPlayer();
+        if (isRespawning) yield break; // Если уже идет респавн, выходим
+        
+        isRespawning = true;
+        try
+        {
+            // Small delay to ensure death state is processed
+            yield return new WaitForSeconds(0.1f);
+            RespawnPlayer();
+        }
+        finally
+        {
+            isRespawning = false;
+        }
     }
     
     void OnDestroy()
@@ -526,70 +537,54 @@ public class Client : MonoBehaviour
     public void RespawnPlayer()
     {
         isDead = false;
+        isRespawning = false; // Сбрасываем флаг респавна при успешном респавне
         
         Vector3 spawnPoint = GetRandomSpawnPoint();
         Transform playerTransform = localPlayer.transform.Find("Player");
         
-        if (playerTransform != null)
+        // Reset position and rotation only once
+        playerTransform.position = spawnPoint;
+        playerTransform.rotation = Quaternion.identity;
+            
+        // Reset movement components if they exist
+        var characterController = playerTransform.GetComponent<CharacterController>();
+        if (characterController != null)
         {
-            // Reset position and rotation only once
-            playerTransform.position = spawnPoint;
-            playerTransform.rotation = Quaternion.identity;
-            
-            // Reset movement components if they exist
-            var characterController = playerTransform.GetComponent<CharacterController>();
-            if (characterController != null)
-            {
-                characterController.enabled = false;
-                characterController.transform.position = spawnPoint;
-                characterController.enabled = true;
-            }
-            
-            // Reset rigidbody if it exists
-            var rb = playerTransform.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.velocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
-            
-            // Restore health and armor to 100
-            var healthComponent = playerTransform.GetComponentInChildren<Playerhealth>();
-            if (healthComponent != null)
-            {
-                // Update health and armor values
-                healthComponent.SetHealthAndArmorFromServer(100, 100, 100, 100);
-                
-                // Update UI directly
-                var playerMovement = playerTransform.GetComponent<PlayerMovement>();
-                if (playerMovement != null)
-                {
-                    playerMovement.SetHealthText(100);
-                    playerMovement.SetArmorText(100);
-                }
-                
-                Debug.Log("Health and armor restored to 100");
-            }
-            
-            // Reset animator state if it exists
-            var animator = playerTransform.GetComponent<Animator>();
-            if (animator != null)
-            {
-                animator.Rebind();
-                animator.Update(0f);
-            }
-            
-            Debug.Log($"Player respawned at position: {spawnPoint}");
-            
-            // Notify server about respawn with new position
-            var movePacket = new PlayerMovePacket
-            {
-                Position = new Vector3Serializable(spawnPoint),
-                Rotation = new Vector3Serializable(Vector3.zero),
-                ClientTick = GetCurrentClientTick()
-            };
-            SendPacket(movePacket);
+            characterController.enabled = false;
+            characterController.transform.position = spawnPoint;
+            characterController.enabled = true;
         }
+            
+        // Reset rigidbody if it exists
+        var rb = playerTransform.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+        var playerMovement = playerTransform.GetComponent<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.SetHealthText(100);
+            playerMovement.SetArmorText(100);
+        }
+        var animator = playerTransform.GetComponent<Animator>();
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+        }
+            
+        Debug.Log($"Player respawned at position: {spawnPoint}");
+            
+        // Notify server about respawn with new position
+        var movePacket = new PlayerMovePacket
+        {
+            Position = new Vector3Serializable(spawnPoint),
+            Rotation = new Vector3Serializable(Vector3.zero),
+            ClientTick = GetCurrentClientTick()
+        };
+        SendPacket(movePacket);
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
