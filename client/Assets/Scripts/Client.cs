@@ -17,10 +17,6 @@ public class Client : MonoBehaviour
     public int serverPort = 9050;
     public string playerName = "Player";
 
-    [Header("Respawn Settings")]
-    public float respawnCooldown = 5f; // Cooldown in seconds between respawns
-    private float lastRespawnTime = -999f; // Initialize to a very low value
-
     [Header("Player")]
     public GameObject localPlayerPrefab;
     public GameObject networkPlayerPrefab;
@@ -45,10 +41,8 @@ public class Client : MonoBehaviour
     public bool isConnected = false;
     private long lastServerTick = 0;
     private int localPlayerId = -1;
-    private bool isDead = false; // Флаг, что игрок мертв
-    private bool isRespawning = false; // Флаг, что идет процесс респавна
-    private int respawnCount = 0; // Счетчик респавнов
-    private const int MAX_RESPAWNS = 1; // Максимальное количество респавнов
+    private int respawnCount = 0;
+    private const int MAX_RESPAWNS = 1;
     
     // Client tick synchronization
     private long clientTick = 0;
@@ -264,10 +258,9 @@ public class Client : MonoBehaviour
                     
                 case PlayerDeathPacket deathPacket:
                     Debug.Log($"Player {deathPacket.PlayerId} died. Killer ID: {deathPacket.KillerId}");
-                    if (deathPacket.PlayerId == localPlayerId && !isDead)
+                    if (deathPacket.PlayerId == localPlayerId)
                     {
                         Debug.Log("Local player died. Respawning...");
-                        isDead = true;
                         RespawnPlayer();
                     }
                     break;
@@ -520,37 +513,27 @@ public class Client : MonoBehaviour
             Debug.Log("Превышено максимальное количество респавнов");
             return;
         }
-
-        try
+        
+        Vector3 spawnPoint = GetRandomSpawnPoint();
+        Transform playerTransform = localPlayer.transform.Find("Player");
+        
+        playerTransform.position = spawnPoint;
+        playerTransform.rotation = Quaternion.identity;
+            
+        var playerMovement = playerTransform.GetComponent<PlayerMovement>();
+        playerMovement.SetHealthText(100);
+        playerMovement.SetArmorText(100);
+            
+        var movePacket = new PlayerMovePacket
         {
-            Vector3 spawnPoint = GetRandomSpawnPoint();
-            Transform playerTransform = localPlayer.transform.Find("Player");
+            Position = new Vector3Serializable(spawnPoint),
+            Rotation = new Vector3Serializable(playerTransform.eulerAngles),
+            ClientTick = GetCurrentClientTick()
+        };
+        SendPacket(movePacket);
             
-            playerTransform.position = spawnPoint;
-            playerTransform.rotation = Quaternion.identity;
-            
-            var playerMovement = playerTransform.GetComponent<PlayerMovement>();
-            if (playerMovement != null)
-            {
-                playerMovement.SetHealthText(100);
-                playerMovement.SetArmorText(100);
-            }
-            
-            var movePacket = new PlayerMovePacket
-            {
-                Position = new Vector3Serializable(spawnPoint),
-                Rotation = new Vector3Serializable(playerTransform.eulerAngles),
-                ClientTick = GetCurrentClientTick()
-            };
-            SendPacket(movePacket);
-            
-            respawnCount++;
-            Debug.Log($"Игрок респавнется. Количество оставшихся респавнов: {MAX_RESPAWNS - respawnCount}");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Ошибка при респавне: {e.Message}");
-        }
+        respawnCount++;
+        Debug.Log($"Игрок респавнется. Количество оставшихся респавнов: {MAX_RESPAWNS - respawnCount}");
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
@@ -569,7 +552,6 @@ public class Client : MonoBehaviour
                 broadcastPacket.Direction.Z
             );
             
-            // Check if this is a shotgun shot (you'll need to implement GetCurrentWeaponType in NetworkPlayer)
             bool isShotgun = shooter.GetCurrentWeaponType() == WeaponType.Shotgun;
             
             ShowShootEffectsForPlayer(
