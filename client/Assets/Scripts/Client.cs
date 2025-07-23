@@ -47,6 +47,8 @@ public class Client : MonoBehaviour
     private int localPlayerId = -1;
     private bool isDead = false; // Флаг, что игрок мертв
     private bool isRespawning = false; // Флаг, что идет процесс респавна
+    private int respawnCount = 0; // Счетчик респавнов
+    private const int MAX_RESPAWNS = 1; // Максимальное количество респавнов
     
     // Client tick synchronization
     private long clientTick = 0;
@@ -518,13 +520,31 @@ public class Client : MonoBehaviour
 
     public void RespawnPlayer()
     {
+        // Проверяем, не превышено ли максимальное количество респавнов
+        if (respawnCount >= MAX_RESPAWNS)
+        {
+            Debug.Log("Превышено максимальное количество респавнов");
+            return;
+        }
+
+        try
+        {
             Vector3 spawnPoint = GetRandomSpawnPoint();
             Transform playerTransform = localPlayer.transform.Find("Player");
+            
+            // Обновляем позицию и поворот
             playerTransform.position = spawnPoint;
             playerTransform.rotation = Quaternion.identity;
+            
+            // Обновляем здоровье и броню
             var playerMovement = playerTransform.GetComponent<PlayerMovement>();
-            playerMovement.SetHealthText(100);
-            playerMovement.SetArmorText(100);
+            if (playerMovement != null)
+            {
+                playerMovement.SetHealthText(100);
+                playerMovement.SetArmorText(100);
+            }
+            
+            // Отправляем пакет о перемещении
             var movePacket = new PlayerMovePacket
             {
                 Position = new Vector3Serializable(spawnPoint),
@@ -532,6 +552,15 @@ public class Client : MonoBehaviour
                 ClientTick = GetCurrentClientTick()
             };
             SendPacket(movePacket);
+            
+            // Увеличиваем счетчик респавнов
+            respawnCount++;
+            Debug.Log($"Игрок респавнется. Количество оставшихся респавнов: {MAX_RESPAWNS - respawnCount}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Ошибка при респавне: {e.Message}");
+        }
     }
 
     void OnReceiveShootBroadcast(PlayerShootBroadcastPacket broadcastPacket)
