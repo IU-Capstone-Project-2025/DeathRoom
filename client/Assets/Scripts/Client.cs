@@ -149,15 +149,10 @@ public class Client : MonoBehaviour
 
     IEnumerator DelayedRespawn()
     {
-        if (isRespawning) yield break; // Если уже идет респавн, выходим
-        
+        if (isRespawning) yield break;
         isRespawning = true;
-        try
-        {
-            // Small delay to ensure death state is processed
-            yield return new WaitForSeconds(0.1f);
-            RespawnPlayer();
-        }
+        yield return new WaitForSeconds(0.1f);
+        RespawnPlayer();
     }
     
     void OnDestroy()
