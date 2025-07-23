@@ -17,7 +17,7 @@ public class HitRegistrationService
         _onPlayerDeath = onPlayerDeath;
     }
 
-    public bool RegisterHit(Domain.PlayerState target, int damage, long tick, int? killerId = null)
+    public bool RegisterHit(Domain.PlayerState target, int damage, long tick, int? killerId)
     {
         Console.WriteLine($"[HitRegistration] Registering hit - Target: {target.Id}, Damage: {damage}, Killer: {killerId}, Armor: {target.ArmorPoint}, Health: {target.HealthPoint}");
         bool died = target.TakeDamage(ARMOR_DAMAGE, HEALTH_DAMAGE, tick);
@@ -25,8 +25,8 @@ public class HitRegistrationService
         
         if (died)
         {
-            Console.WriteLine($"[HitRegistration] Player {target.Id} died. Invoking death callback with killer: {killerId ?? -1}");
-            _onPlayerDeath?.Invoke(target, killerId ?? -1);
+            Console.WriteLine($"[HitRegistration] Player {target.Id} died. Invoking death callback with killer: {killerId}");
+            _onPlayerDeath?.Invoke(target, killerId);
         }
         return died;
     }
