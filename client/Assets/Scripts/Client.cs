@@ -250,11 +250,32 @@ public class Client : MonoBehaviour
                     break;
                     
                 case PlayerDeathPacket deathPacket:
-                    Debug.Log($"Player {deathPacket.PlayerId} died. Killer ID: {deathPacket.KillerId}");
+                    Debug.Log($"[CLIENT] Received PlayerDeathPacket - Player: {deathPacket.PlayerId}, Killer: {deathPacket.KillerId}, ServerTick: {deathPacket.ServerTick}");
+                    
+                    // Log network players state for debugging
+                    Debug.Log($"[CLIENT] Current local player ID: {localPlayerId}, Network players count: {networkPlayers.Count}");
+                    
                     if (deathPacket.PlayerId == localPlayerId)
                     {
-                        Debug.Log("Local player died. Respawning...");
-                        RespawnPlayer();
+                        Debug.Log("[CLIENT] Local player died. Starting respawn process...");
+                        try
+                        {
+                            RespawnPlayer();
+                            Debug.Log("[CLIENT] Respawn process completed");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogError($"[CLIENT] Error during respawn: {ex.Message}\n{ex.StackTrace}");
+                        }
+                    }
+                    else if (networkPlayers.TryGetValue(deathPacket.PlayerId, out var deadPlayer))
+                    {
+                        Debug.Log($"[CLIENT] Network player {deathPacket.PlayerId} died. Handling death...");
+                        // Add any death handling for other players here
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[CLIENT] Received death for unknown player ID: {deathPacket.PlayerId}");
                     }
                     break;
                     
