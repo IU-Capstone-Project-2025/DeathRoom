@@ -523,7 +523,7 @@ public class Client : MonoBehaviour
         var playerMovement = playerTransform.GetComponent<PlayerMovement>();
         playerMovement.SetHealthText(100);
         playerMovement.SetArmorText(100);
-            
+        
         var movePacket = new PlayerMovePacket
         {
             Position = new Vector3Serializable(spawnPoint),
@@ -531,6 +531,15 @@ public class Client : MonoBehaviour
             ClientTick = GetCurrentClientTick()
         };
         SendPacket(movePacket);
+        
+        var healthUpdatePacket = new PlayerHealthUpdatePacket
+        {
+            Health = 100,
+            Armor = 100,
+            ClientTick = GetCurrentClientTick()
+        };
+        SendPacket(healthUpdatePacket);
+        Debug.Log($"[HEALTH UPDATE] Sent respawn health update: {100} HP, {100} Armor");
             
         respawnCount++;
         Debug.Log($"Игрок респавнется. Количество оставшихся респавнов: {MAX_RESPAWNS - respawnCount}");
