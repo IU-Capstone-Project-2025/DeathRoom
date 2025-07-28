@@ -482,11 +482,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverAddress: 77.233.222.200
-  serverPort: 9050
+  serverPort: 8050
   playerName: play
   localPlayerPrefab: {fileID: 8647007826477569418, guid: 1767d81102f39404caf39c3f15b54889,
     type: 3}
   networkPlayerPrefab: {fileID: 8647007826477569418, guid: e80a889cc67959541beebb43b9aa4bf9,
+    type: 3}
+  shootTrail: {fileID: 7137980374416181957, guid: 7166acb218336494799644b564316c72,
     type: 3}
   spawnPoints:
   - {fileID: 369769488}

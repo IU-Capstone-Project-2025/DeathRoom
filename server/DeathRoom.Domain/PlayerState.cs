@@ -27,37 +27,49 @@ public class PlayerState
 
     public bool TakeDamage(int armorDamage, int healthDamage, long tick)
     {
-        // Проверяем, не истекла ли броня
-        if (this.ArmorExpirationTick > tick) { this.ArmorPoint = 0; }
+        Console.WriteLine($"[PlayerState] TakeDamage - Player: {Id}, Initial - Armor: {ArmorPoint}, Health: {HealthPoint}, ArmorDmg: {armorDamage}, HealthDmg: {healthDamage}");
         
-        // Сначала наносим урон по броне
-        if (this.ArmorPoint > 0)
+        if (ArmorExpirationTick > tick) 
+        { 
+            Console.WriteLine($"[PlayerState] Armor expired (ExpTick: {ArmorExpirationTick}, Current: {tick}), resetting armor");
+            ArmorPoint = 0; 
+        }
+        
+        if (ArmorPoint > 0)
         {
-            if (this.ArmorPoint >= armorDamage)
+            Console.WriteLine($"[PlayerState] Processing armor damage - Current Armor: {ArmorPoint}, Armor Damage: {armorDamage}");
+            if (ArmorPoint >= armorDamage)
             {
-                this.ArmorPoint -= armorDamage;
+                ArmorPoint -= armorDamage;
+                Console.WriteLine($"[PlayerState] Armor absorbed all damage - New Armor: {ArmorPoint}");
             }
             else
             {
-                // Если брони недостаточно, остаток урона идет на здоровье
-                int remainingDamage = armorDamage - this.ArmorPoint;
-                this.ArmorPoint = 0;
+                int remainingDamage = armorDamage - ArmorPoint;
+                Console.WriteLine($"[PlayerState] Armor partially absorbed damage - Remaining damage: {remainingDamage}");
+                ArmorPoint = 0;
                 healthDamage += remainingDamage;
+                Console.WriteLine($"[PlayerState] Remaining damage added to health damage - New Health Damage: {healthDamage}");
             }
         }
         else
         {
             // Если брони нет, весь урон по броне идет на здоровье
             healthDamage += armorDamage;
+            Console.WriteLine($"[PlayerState] No armor, all damage goes to health - New Health Damage: {healthDamage}");
         }
 
         // Наносим урон по здоровью
         this.HealthPoint -= healthDamage;
+        Console.WriteLine($"[PlayerState] Applied health damage - New Health: {HealthPoint}");
+        
         if (this.HealthPoint <= 0)
         {
-            this.HealthPoint = 0;
+            HealthPoint = 0;
+            Console.WriteLine($"[PlayerState] Player {Id} has died!");
             return true; // Игрок умер
         }
+        Console.WriteLine($"[PlayerState] Player {Id} survived the hit");
         return false; // Игрок жив
     }
 

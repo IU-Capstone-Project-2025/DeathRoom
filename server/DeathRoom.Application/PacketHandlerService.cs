@@ -23,7 +23,6 @@ public class PacketHandlerService
     public PacketHandlerService(
         PlayerSessionService playerSessionService,
         WorldStateService worldStateService,
-        HitRegistrationService hitRegistrationService,
         HitPhysicsService hitPhysicsService,
         Func<string, string, Task> onPlayerLogin,
         Func<string, string, Task> onUnknownPacket,
@@ -36,13 +35,15 @@ public class PacketHandlerService
         _logger.LogInformation("Конструктор вызван");
         _playerSessionService = playerSessionService;
         _worldStateService = worldStateService;
-        _hitRegistrationService = hitRegistrationService;
         _hitPhysicsService = hitPhysicsService;
         _onPlayerLogin = onPlayerLogin;
         _onUnknownPacket = onUnknownPacket;
         _onError = onError;
         _getCurrentTick = getCurrentTick;
         _broadcastPacket = broadcastPacket;
+        
+        // Initialize HitRegistrationService with death callback
+        _hitRegistrationService = new HitRegistrationService(OnPlayerDeath);
     }
 
     public async Task HandlePacket(object peer, byte[] data)
@@ -83,6 +84,10 @@ public class PacketHandlerService
                 
             case PickUpHealthPacket pickHealthPacket:
                 HandlePickUpHealthPacket(peer, pickHealthPacket);
+                break;
+                
+            case PlayerDeathPacket deathPacket:
+                await HandlePlayerDeathPacket(peer, deathPacket);
                 break;
                 
             default:
@@ -171,26 +176,27 @@ public class PacketHandlerService
             var shootDir = new DeathRoom.Domain.Vector3(hitPacket.Direction.X, hitPacket.Direction.Y, hitPacket.Direction.Z);
             var targetPos = new DeathRoom.Domain.Vector3(target.Position.X, target.Position.Y, target.Position.Z);
             
-            // Проверяем валидность попадания с помощью физики
             if (_hitPhysicsService.IsHit(shooterPos, shootDir, targetPos))
             {
                 _logger.LogInformation("[HIT] Попадание подтверждено физикой");
                 
-                // Находим живую цель для применения урона
                 var liveTargetPeer = _playerSessionService.GetPeerById(hitPacket.TargetId);
                 if (liveTargetPeer != null && _playerSessionService.TryGetSession(liveTargetPeer, out DomainPlayerState? liveTarget) && liveTarget != null)
                 {
-                    bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, hitPacket.ClientTick);
-                    _logger.LogInformation("[HIT] Урон применен к игроку {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}", 
+                    _logger.LogInformation("[HIT] BEFORE DAMAGE - Игрок {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}", 
                         liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint);
+                    
+                    bool died = _hitRegistrationService.RegisterHit(liveTarget, 0, hitPacket.ClientTick);
+                    
+                    _logger.LogInformation("[HIT] AFTER DAMAGE - Игрок {PlayerName} (ID: {PlayerId}). HP: {HP}, Armor: {Armor}, Died: {Died}", 
+                        liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint, died);
                     
                     if (died)
                     {
-                        // Вместо отключения игрока - восстанавливаем здоровье и броню
                         liveTarget.HealthPoint = liveTarget.MaxHealthPoint;
-                        liveTarget.ArmorPoint = 0; // Броня сбрасывается при смерти
-                        _logger.LogInformation("[RESPAWN] Игрок {PlayerName} (ID: {PlayerId}) умер и восстановлен", 
-                            liveTarget.Username, liveTarget.Id);
+                        liveTarget.ArmorPoint = 0;
+                        _logger.LogInformation("[RESPAWN] Игрок {PlayerName} (ID: {PlayerId}) умер и восстановлен. HP: {HP}, Armor: {Armor}", 
+                            liveTarget.Username, liveTarget.Id, liveTarget.HealthPoint, liveTarget.ArmorPoint);
                     }
                 }
                 else
@@ -217,16 +223,54 @@ public class PacketHandlerService
 
     private void HandlePickUpHealthPacket(object peer, PickUpHealthPacket pickHealthPacket)
     {
-        if (_playerSessionService.TryGetSession(peer, out DomainPlayerState? playerState) && playerState != null)
+        if (_playerSessionService.TryGetSession(peer, out var playerState) && playerState != null)
         {
             _hitRegistrationService.HealPlayer(playerState, pickHealthPacket.HealthAmount);
             _logger.LogInformation("[PICKUP] Игрок {PlayerName} (ID: {PlayerId}) подобрал аптечку: +{HealthAmount} HP", 
                 playerState.Username, playerState.Id, pickHealthPacket.HealthAmount);
         }
     }
+    
+    private async Task HandlePlayerDeathPacket(object peer, PlayerDeathPacket deathPacket)
+    {
+        _logger.LogInformation($"[DEATH] Player {deathPacket.PlayerId} has died at tick {deathPacket.ServerTick}");
+        
+        // Broadcast the death packet to all clients
+        if (_broadcastPacket != null)
+        {
+            await _broadcastPacket(deathPacket);
+        }
+    }
 
     private async Task BroadcastPacketToAllClients(IPacket packet)
     {
         await _broadcastPacket(packet);
+    }
+    
+    private void OnPlayerDeath(Domain.PlayerState deadPlayer)
+    {
+        var currentTick = _getCurrentTick();
+        _logger.LogInformation("[DEATH] Player {PlayerName} (ID: {PlayerId}) died at tick {Tick}", 
+            deadPlayer.Username, deadPlayer.Id, currentTick);
+            
+        var deathPacket = new PlayerDeathPacket
+        {
+            PlayerId = deadPlayer.Id,
+            ServerTick = currentTick
+        };
+        
+        _logger.LogInformation("[DEATH] Sending PlayerDeathPacket - Player: {PlayerId}, Tick: {Tick}",
+            deathPacket.PlayerId, deathPacket.ServerTick);
+            
+        try
+        {
+            // Broadcast death event to all clients
+            _ = BroadcastPacketToAllClients(deathPacket);
+            _logger.LogInformation("[DEATH] Successfully broadcasted death packet for player {PlayerId}", deadPlayer.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[DEATH] Failed to broadcast death packet for player {PlayerId}", deadPlayer.Id);
+        }
     }
 } 

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Animations.Rigging;
+using TMPro;
 
 public class PlayerMovement : MonoBehaviour
 {
     public RectTransform PauseMenu;
     public RectTransform leaderBoard;
+    public TextMeshProUGUI healthText;
+    public TextMeshProUGUI armorText;
     public Client client;
     [Range(1f, 10f)] public float mouseSensitive = 3;
     [Range(-180f, 180f)] public float minCameraRotY = -60f;
@@ -34,12 +37,16 @@ public class PlayerMovement : MonoBehaviour
 
     private float gravity = Physics.gravity.y;
     private Vector3 oldPos;
+    private Quaternion oldRotation;
     private bool crouch = true;
     private bool freezMovement = false;
     private float radius;
     private float height;
     private bool isReload = false;
     private bool jumpOver = false;
+    private bool isRotatingOnly = false;
+    private float rotationThreshold = 1f;
+    private UnityEngine.Animations.Rigging.RigBuilder rigBuilder;
     public Gun usingGun;
 
     private Dictionary<string, object> animationParams = new Dictionary<string, object>();
@@ -55,6 +62,11 @@ public class PlayerMovement : MonoBehaviour
         radius = controller.radius;
         height = controller.height;
 
+        if (animator != null)
+        {
+            rigBuilder = animator.GetComponent<UnityEngine.Animations.Rigging.RigBuilder>();
+        }
+        
         foreach (AnimatorControllerParameter param in animator.parameters)
         {
             switch (param.type)
@@ -77,6 +89,12 @@ public class PlayerMovement : MonoBehaviour
     {
         speed = walkSpeed;
         oldPos = new Vector3(transform.position.x, 0f, transform.position.z);
+        oldRotation = transform.rotation;
+        
+        if (usingGun != null && client != null)
+        {
+            usingGun.client = client;
+        }
     }
 
     private void Update()
@@ -144,37 +162,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (Input.GetMouseButton(0) && usingGun.CheckAmo() && !isReload)
                 {
-                    Debug.Log("Shooting!");
                     usingGun.Shoot();
-
-                    // Visualize the ray in the editor with longer duration for debugging
-                    Debug.DrawRay(usingGun.shootOut.position, usingGun.shootOut.forward * 100f, Color.red, 2f);
-                    
-                    // Log ray origin and direction for debugging
-                    Debug.Log($"Ray Origin: {usingGun.shootOut.position}, Direction: {usingGun.shootOut.forward}");
-
-                    RaycastHit hit;
-                    int layerMask = ~0; // All layers
-                    if (Physics.Raycast(usingGun.shootOut.position, usingGun.shootOut.forward, out hit, 100f, layerMask))
-                    {
-                        Debug.Log($"Hit: {hit.collider.name} at distance {hit.distance}");
-                        var networkPlayer = hit.collider.GetComponent<NetworkPlayer>();
-                        if (networkPlayer != null)
-                        {
-                            Debug.Log("Hit player: " + networkPlayer.PlayerId);
-                            client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
-                        }
-                        else
-                        {
-                            Debug.Log($"Hit non-player object: {hit.collider.gameObject.layer}");
-                            client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Ray missed! Check if objects have colliders and are in the right layers");
-                        client.PerformShoot(usingGun.shootOut.position, usingGun.shootOut.forward);
-                    }
                 }
             }
         }
@@ -272,6 +260,20 @@ public class PlayerMovement : MonoBehaviour
     void AnimatorSystem()
     {
         Vector3 animMove = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+        
+        // Проверяем поворот без движения
+        float rotationDelta = Quaternion.Angle(oldRotation, transform.rotation);
+        bool isMoving = animMove.magnitude > 0.1f;
+        isRotatingOnly = !isMoving && rotationDelta > rotationThreshold;
+        
+        // Отключаем RigBuilder если только поворачиваемся
+        if (rigBuilder != null)
+        {
+            rigBuilder.enabled = !isRotatingOnly;
+        }
+        
+        oldRotation = transform.rotation;
+        
         if (crouch)
         {
             animMove = new Vector3(animMove.x / 2f, 0f, animMove.z / 2f);

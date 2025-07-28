@@ -7,6 +7,7 @@ TagManager:
   - JumpOver
   - Enemy
   - InvisibleWall
+  - ShootOutRifle
   layers:
   - Default
   - TransparentFX
